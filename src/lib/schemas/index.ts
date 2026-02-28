@@ -27,6 +27,14 @@ export {
 } from './strategy-schema.js'
 export type {CampaignPlan, ContentCalendar, ChannelOptimizationPlan, StrategyInputs, CalendarInputs, OptimizerInputs} from './strategy-schema.js'
 export {
+  redditContentPackageSchema,
+  tiktokContentPackageSchema,
+  contentItemSchema,
+  creationInputsSchema,
+  creationStageOutputSchema,
+} from './creation-schema.js'
+export type {RedditContentPackage, TikTokContentPackage, ContentItem, CreationInputs, CreationStageOutput} from './creation-schema.js'
+export {
   pipelineErrorSchema,
   pipelineRunSchema,
   pipelineRunStatusSchema,

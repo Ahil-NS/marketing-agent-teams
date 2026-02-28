@@ -1,0 +1,102 @@
+{
+  "posts": [
+    {
+      "postId": "post-001",
+      "title": "[Guide] How I Built a Morning Wellness Routine That Actually Sticks — 90 Day Results",
+      "body": "Hey r/selfimprovement,\n\nI've been lurking here for a while and finally wanted to share something that actually worked for me.\n\nAbout 90 days ago, I was struggling with consistency. Tried every app, every system, nothing stuck. Then I simplified everything down to just 3 things:\n\n1. **5 minutes of journaling** — not fancy, just \"what do I want today?\"\n2. **10-minute walk** — no music, no podcast, just walking\n3. **One glass of water before coffee** — this was harder than it sounds\n\nResults after 90 days:\n- Anxiety reduced noticeably (not gone, but manageable)\n- Sleep quality improved (using WellnessApp to track)\n- Actually WANT to do it now vs forcing myself\n\nThe key insight: **make it so easy you can't say no.** The 5-minute journal was the gateway — once I opened it, I usually wrote for 15 minutes.\n\nAnyone else found that simplifying routines works better than complex systems?\n\nTL;DR: Dropped all the complexity, focused on 3 tiny habits, saw real results after 90 days. Simplicity beats complexity for building wellness routines.",
+      "subreddit": "selfimprovement",
+      "flair": "Guide",
+      "postType": "text",
+      "titleVariations": [
+        "90 days of doing 3 simple things every morning — here's what changed",
+        "I finally found a morning routine that works (and it's embarrassingly simple)"
+      ],
+      "firstComment": {
+        "body": "For context — I'm a 28yo software developer who used to think wellness was just for influencers. Happy to answer questions about what specifically worked and what I tried before that didn't. Also curious if anyone has added a 4th habit without breaking the simplicity principle?",
+        "timing": "within-30s",
+        "purpose": "context"
+      },
+      "engagementPlan": {
+        "responseTemplates": [
+          "Great question! For me, the key was [specific answer]. Have you tried [related approach]?",
+          "I actually struggled with that too. What ended up working was [insight]. Took about 2 weeks to adjust.",
+          "That's a really good point — I hadn't thought about it that way. I think [reflection on their suggestion]."
+        ],
+        "followUpTiming": "2h",
+        "crossPostSubreddits": ["mentalhealth", "getdisciplined"]
+      }
+    },
+    {
+      "postId": "post-002",
+      "title": "Mental Health Awareness Month — What small change made the biggest difference for you?",
+      "body": "With Mental Health Awareness Month coming up, I've been reflecting on what's actually moved the needle for me vs what was just noise.\n\nFor me, it was surprisingly simple: **tracking my mood patterns** instead of just \"feeling bad\" generally. Once I could see that Tuesdays and Wednesdays were consistently my worst days, I could actually DO something about it (turned out it was related to my meeting-heavy schedule).\n\nWhat's one small change that made a disproportionately large difference for your mental health?\n\nNo judgment here — could be therapy, meditation, exercise, medication, cutting out social media, changing jobs, whatever worked for YOU.",
+      "subreddit": "mentalhealth",
+      "flair": "Discussion",
+      "postType": "text",
+      "titleVariations": [
+        "What's the smallest change that made the biggest impact on your mental health?",
+        "Mental Health Month reflection — what actually worked vs what was just hype?"
+      ],
+      "firstComment": {
+        "body": "I'll start — beyond mood tracking, the second biggest thing was setting a hard boundary on checking email after 7pm. The constant work anxiety was eating into my recovery time without me realizing it. What boundaries have helped you?",
+        "timing": "within-30s",
+        "purpose": "question"
+      },
+      "engagementPlan": {
+        "responseTemplates": [
+          "That's such a great insight. I've heard similar things from others who [related experience]. Thanks for sharing.",
+          "Really appreciate you opening up about that. It takes courage to [acknowledge their specific share].",
+          "That resonates with me. I think what's important is [reflection]. Have you found that it's been sustainable long-term?"
+        ],
+        "followUpTiming": "4h",
+        "crossPostSubreddits": ["selfimprovement"]
+      }
+    }
+  ],
+  "comments": [
+    {
+      "postId": "post-001",
+      "commentBody": "Update: Just wanted to add some specific data for the skeptics. My sleep score (tracked via wearable) went from averaging 62 to 78 over the 90 days. Not scientific, but the trend was consistent. Morning cortisol also feels way different — I actually wake up calm now instead of immediately anxious.",
+      "timing": "4h",
+      "purpose": "value-add"
+    },
+    {
+      "postId": "post-002",
+      "commentBody": "Really loving all the responses here. For anyone who mentioned therapy — totally agree. I'd add that finding the RIGHT therapist matters more than just going to therapy. Took me 3 tries to find someone who actually clicked.",
+      "timing": "2h",
+      "purpose": "engagement"
+    }
+  ],
+  "variations": [
+    {
+      "postId": "post-001",
+      "altTitle": "I stopped overcomplicating my morning routine — here's the embarrassingly simple version that actually worked",
+      "altBody": "Anyone else spend way too long trying to build the \"perfect\" morning routine? I finally gave up on perfection and tried something stupidly simple instead.\n\nJust 3 things, every morning, no exceptions:\n- Journal for 5 minutes\n- Walk for 10 minutes\n- Water before coffee\n\nThat's it. No cold showers, no 4am alarm, no supplements.\n\n90 days later: better sleep, less anxiety, and I actually look forward to mornings now.\n\nThe counterintuitive lesson: **doing less consistently beats doing more inconsistently.**\n\nWhat's your \"embarrassingly simple\" routine that actually works?",
+      "rationale": "Tests a self-deprecating angle ('embarrassingly simple') which tends to perform well on self-improvement subreddits. Also ends with a question to drive more comments."
+    }
+  ],
+  "metadata": {
+    "targetSubreddits": ["selfimprovement", "mentalhealth", "getdisciplined"],
+    "postingSchedule": [
+      {
+        "postId": "post-001",
+        "date": "2026-04-16",
+        "time": "09:00",
+        "timezone": "EST"
+      },
+      {
+        "postId": "post-002",
+        "date": "2026-04-20",
+        "time": "10:00",
+        "timezone": "EST"
+      }
+    ],
+    "crossPostStrategy": "Stagger cross-posts by 24-48 hours. Post original in primary subreddit first, then cross-post to secondary subreddits with modified titles matching each community's norms. Never cross-post to more than 3 subreddits per piece.",
+    "estimatedEngagement": {
+      "totalReach": 12000,
+      "avgEngagementRate": 0.075
+    }
+  },
+  "generatedBy": "reddit-creator",
+  "campaignId": "plan-2026-03-wellness-spring"
+}

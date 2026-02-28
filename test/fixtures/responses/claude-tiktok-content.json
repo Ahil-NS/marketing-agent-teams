@@ -1,0 +1,110 @@
+{
+  "scripts": [
+    {
+      "scriptId": "script-001",
+      "hook": "I tried this for 30 days and my mornings completely changed",
+      "body": "[Pattern interrupt: zoom to journal] Here's the thing — I didn't add MORE to my morning. I actually removed everything except three things. [Cut to walking shot] Five minutes of journaling, a 10-minute walk, and water before coffee. [Pattern interrupt: text overlay with stats] After 30 days, my sleep score went from 62 to 78. [Cut back to face] But the real change? I actually WANT to wake up now.",
+      "cta": "Follow for more wellness tips that don't require waking up at 4am",
+      "onScreenText": [
+        "[0-2s] I tried this for 30 days...",
+        "[3-8s] 3 simple habits:",
+        "[9-12s] 1. Journal 5 min",
+        "[13-16s] 2. Walk 10 min",
+        "[17-20s] 3. Water before coffee",
+        "[21-25s] Sleep score: 62 → 78",
+        "[26-30s] Follow for more 👆"
+      ],
+      "duration": "30s",
+      "visualDirections": "Open on face close-up, warm morning light. Cut to overhead shot of journal writing. Transition to outdoor walking shot with natural light. Cut to side-by-side comparison graphic. End on face shot with genuine smile."
+    },
+    {
+      "scriptId": "script-002",
+      "hook": "3 things nobody tells you about building healthy habits",
+      "body": "[Cut to list format with text] Number one — you don't need to wake up earlier. Just use the time you're already wasting on your phone. [Pattern interrupt: screen recording of phone usage stats] Number two — tracking your mood is more important than tracking your steps. [Cut to mood tracker app] Number three — the hardest part isn't starting, it's week three. [Pattern interrupt: calendar animation] That's when motivation dies and discipline hasn't formed yet.",
+      "cta": "Save this for when you need a reminder. Link in bio for the full guide.",
+      "onScreenText": [
+        "[0-2s] 3 things about habits 👇",
+        "[3-10s] #1 Don't wake up earlier",
+        "[11-18s] #2 Track mood, not steps",
+        "[19-26s] #3 Week 3 is the hardest",
+        "[27-30s] Save this 💾"
+      ],
+      "duration": "30s",
+      "visualDirections": "Open with bold text on dark background. Transition to split-screen showing phone usage stats. Middle section: app demo footage. End with motivational calendar graphic. Clean, high-contrast visuals throughout."
+    }
+  ],
+  "captions": [
+    {
+      "scriptId": "script-001",
+      "captionText": "Morning routine that actually works — no 4am alarm needed 🌅",
+      "hashtags": ["#morningroutine", "#wellnesstips", "#healthyhabits", "#selfimprovement", "#WellnessApp"],
+      "keywords": ["morning routine", "wellness tips", "healthy habits"]
+    },
+    {
+      "scriptId": "script-002",
+      "captionText": "Healthy habits nobody tells you about — especially #3 😳",
+      "hashtags": ["#healthyhabits", "#wellnesstiktok", "#habitbuilding", "#mentalhealthawareness", "#WellnessApp"],
+      "keywords": ["healthy habits", "habit building", "mental health"]
+    }
+  ],
+  "videoPrompts": [
+    {
+      "scriptId": "script-001",
+      "veo3Prompt": "A young professional in their late 20s sits on a bed in a bright, modern bedroom with natural morning sunlight streaming through sheer curtains. Warm amber color grading, shallow depth of field. Camera starts in close-up on face, then cuts to overhead shot of hands writing in a leather journal on a wooden desk. Transition to outdoor walking shot on a tree-lined street, golden hour lighting, handheld camera feel. Cut to side-by-side infographic showing before/after sleep scores. End on medium shot of person smiling genuinely at camera. 30 seconds, 5 scene transitions. Lo-fi hip hop background music at low volume.",
+      "style": "lo-fi",
+      "duration": "30s",
+      "visualElements": ["morning light", "journal", "outdoor walk", "sleep score graphic", "warm tones"]
+    },
+    {
+      "scriptId": "script-002",
+      "veo3Prompt": "Bold white text on a dark navy background, clean sans-serif font. Quick animated transitions between numbered list items. Cut to screen recording of phone showing screen time stats (7h 23m). Transition to close-up of a wellness tracking app on a phone screen. Calendar animation showing days being checked off, pausing at day 21 with a red highlight. Clean editorial style, high contrast, vibrant accent colors on dark backgrounds. 30 seconds, 6 scene changes. Upbeat electronic background music.",
+      "style": "clean",
+      "duration": "30s",
+      "visualElements": ["bold typography", "phone screen recording", "app UI", "calendar animation", "dark background"]
+    }
+  ],
+  "variations": [
+    {
+      "scriptId": "script-001",
+      "altHook": "Stop doing complicated morning routines — try this instead",
+      "altCta": "Comment 'ROUTINE' and I'll send you the full guide",
+      "rationale": "Tests a contrarian hook ('stop doing X') which challenges conventional wisdom and may drive more engagement. CTA variation drives comments instead of follows."
+    },
+    {
+      "scriptId": "script-002",
+      "altHook": "POV: you just discovered why your habits keep failing",
+      "altCta": "Which one surprised you most? Comment below 👇",
+      "rationale": "Tests the POV format which is native to TikTok. CTA variation drives comment engagement which boosts algorithm distribution."
+    }
+  ],
+  "metadata": {
+    "trendingSounds": [
+      {
+        "name": "Aesthetic morning routine — lofi beats",
+        "relevance": "Matches morning wellness theme, currently trending in lifestyle/wellness niche with 50M+ uses"
+      },
+      {
+        "name": "That one sound — Viral remix 2026",
+        "relevance": "Top trending sound this week, can be adapted to habit-building reveal format"
+      }
+    ],
+    "effects": ["text pop-in animation", "smooth zoom transition", "split-screen comparison"],
+    "postingSchedule": [
+      {
+        "scriptId": "script-001",
+        "date": "2026-04-15",
+        "time": "07:30",
+        "timezone": "EST"
+      },
+      {
+        "scriptId": "script-002",
+        "date": "2026-04-17",
+        "time": "12:00",
+        "timezone": "EST"
+      }
+    ],
+    "hashtagStrategy": "Mix of 1 trending (broad reach) + 2-3 niche (targeted audience in wellness/habits) + 1 brand hashtag (#WellnessApp). Rotate trending hashtags every 48h. Total 4-5 hashtags per post."
+  },
+  "generatedBy": "tiktok-creator",
+  "campaignId": "plan-2026-03-wellness-spring"
+}
