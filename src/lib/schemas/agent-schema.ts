@@ -200,3 +200,78 @@ export const researchInputsSchema = z.object({
 /** Use ResearchInputs from src/lib/agents/types.ts for TypeScript typing.
  * This schema is for runtime validation of agent inputs. */
 export type ResearchInputsData = z.infer<typeof researchInputsSchema>
+
+export const viralPatternReportSchema = z.object({
+  viralPatterns: z.array(z.object({
+    platform: z.string(),
+    pattern: z.string(),
+    description: z.string(),
+    frequency: z.enum(['rare', 'occasional', 'common', 'dominant']),
+    examples: z.array(z.string()).optional(),
+    replicabilityScore: z.number().min(1).max(5),
+  })).min(1),
+  hookAnalysis: z.array(z.object({
+    hookType: z.string(),
+    platform: z.string(),
+    description: z.string(),
+    effectiveness: z.enum(['low', 'medium', 'high', 'very-high']),
+    examples: z.array(z.string()).optional(),
+  })).min(1),
+  captionStyles: z.array(z.object({
+    platform: z.string(),
+    style: z.string(),
+    description: z.string(),
+    languagePatterns: z.array(z.string()),
+    engagementImpact: z.string(),
+  })),
+  hashtagStrategies: z.array(z.object({
+    platform: z.string(),
+    strategy: z.string(),
+    recommendedCount: z.number(),
+    hashtagTypes: z.array(z.string()),
+    examples: z.array(z.string()).optional(),
+  })),
+  timingInsights: z.array(z.object({
+    platform: z.string(),
+    bestDays: z.array(z.string()),
+    bestHours: z.array(z.string()),
+    timezone: z.string(),
+    rationale: z.string(),
+  })),
+  recommendations: z.string(),
+})
+
+export type ViralPatternReport = z.infer<typeof viralPatternReportSchema>
+
+export const platformAlgorithmReportSchema = z.object({
+  platforms: z.array(z.object({
+    name: z.string(),
+    lastUpdated: z.string(),
+    overallStrategy: z.string(),
+  })),
+  algorithmPriorities: z.array(z.object({
+    platform: z.string(),
+    priority: z.string(),
+    weight: z.enum(['low', 'medium', 'high', 'critical']),
+    description: z.string(),
+    recentChanges: z.string().optional(),
+  })).min(1),
+  rankingSignals: z.array(z.object({
+    platform: z.string(),
+    signal: z.string(),
+    impact: z.enum(['negative', 'neutral', 'positive', 'strong-positive']),
+    description: z.string(),
+    actionable: z.boolean(),
+  })).min(1),
+  optimizationStrategies: z.array(z.object({
+    platform: z.string(),
+    strategy: z.string(),
+    description: z.string(),
+    expectedImpact: z.enum(['low', 'medium', 'high']),
+    implementation: z.string(),
+    antiPatterns: z.array(z.string()).optional(),
+  })).min(1),
+  recommendations: z.string(),
+})
+
+export type PlatformAlgorithmReport = z.infer<typeof platformAlgorithmReportSchema>

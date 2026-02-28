@@ -20,8 +20,8 @@ describe('agent-manager', () => {
       expect(Object.keys(CLUSTERS)).toHaveLength(7)
     })
 
-    it('has 26 built-in agents', () => {
-      expect(ALL_AGENTS).toHaveLength(26)
+    it('has 28 built-in agents', () => {
+      expect(ALL_AGENTS).toHaveLength(28)
     })
 
     it('contains known agents', () => {
@@ -29,6 +29,14 @@ describe('agent-manager', () => {
       expect(ALL_AGENTS).toContain('hook-writer')
       expect(ALL_AGENTS).toContain('reddit-publisher')
       expect(ALL_AGENTS).toContain('campaign-coordinator')
+      expect(ALL_AGENTS).toContain('viral-pattern-decoder')
+      expect(ALL_AGENTS).toContain('platform-algorithm')
+    })
+
+    it('intelligence cluster includes viral-pattern-decoder and platform-algorithm', () => {
+      expect(CLUSTERS.intelligence).toContain('viral-pattern-decoder')
+      expect(CLUSTERS.intelligence).toContain('platform-algorithm')
+      expect(CLUSTERS.intelligence).toHaveLength(5)
     })
   })
 
@@ -36,7 +44,7 @@ describe('agent-manager', () => {
     it('returns all agents grouped by cluster', () => {
       const result = listAgentsByCluster(makeConfig())
       expect(Object.keys(result)).toHaveLength(7)
-      expect(result.intelligence).toHaveLength(3)
+      expect(result.intelligence).toHaveLength(5)
       expect(result.creation).toHaveLength(5)
     })
 
@@ -64,6 +72,8 @@ describe('agent-manager', () => {
     it('does not throw for valid agent name', () => {
       expect(() => validateAgentName('trend-scout')).not.toThrow()
       expect(() => validateAgentName('hook-writer')).not.toThrow()
+      expect(() => validateAgentName('viral-pattern-decoder')).not.toThrow()
+      expect(() => validateAgentName('platform-algorithm')).not.toThrow()
     })
 
     it('throws CONFIG_AGENT_NOT_FOUND for unknown agent', () => {

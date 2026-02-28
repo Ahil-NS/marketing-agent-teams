@@ -1,8 +1,8 @@
 import {dirname, join} from 'node:path'
 import {fileURLToPath} from 'node:url'
 
-import {trendBriefSchema, competitorReportSchema} from '../schemas/agent-schema.js'
-import type {TrendBrief, CompetitorReport} from '../schemas/agent-schema.js'
+import {trendBriefSchema, competitorReportSchema, viralPatternReportSchema, platformAlgorithmReportSchema} from '../schemas/agent-schema.js'
+import type {TrendBrief, CompetitorReport, ViralPatternReport, PlatformAlgorithmReport} from '../schemas/agent-schema.js'
 
 import {executeAgent} from './agent-executor.js'
 import {loadSkill} from './skill-loader.js'
@@ -73,6 +73,79 @@ Flag any viral competitor content. Produce a competitor report following your ou
     allowedTools: skill.tools,
     model: skill.model,
     outputSchema: competitorReportSchema,
+    maxTurns: 15,
+  })
+}
+
+/**
+ * Run the Viral Pattern Decoder intelligence agent.
+ * Loads SKILL.md definition, constructs prompt from inputs, executes via Agent SDK,
+ * and validates output against viralPatternReportSchema.
+ */
+export async function runViralPatternDecoder(inputs: ResearchInputs): Promise<AgentResult<ViralPatternReport>> {
+  const timeframe = inputs.trendTimeframeDays ?? 30
+  const skill = await loadSkill(join(agentsRoot(), 'intelligence', 'viral-pattern-decoder'))
+
+  const knowledgeSection = skill.knowledgeContext
+    ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  return executeAgent('viral-pattern-decoder', {
+    prompt: `Analyze viral content patterns for brand "${inputs.brandName}" in domain "${inputs.productDomain}".
+Target audience: ${inputs.audienceType}
+Target platforms: ${inputs.platforms.join(', ')}
+Timeframe: last ${timeframe} days
+
+Research current viral content on each target platform. Reverse-engineer WHY content went viral:
+- Hook patterns (what grabs attention)
+- Caption styles (what language patterns drive engagement)
+- Hashtag strategies (what hashtag combinations amplify reach)
+- Posting timing (when viral content was published)
+- Content format (what formats are currently performing best)
+
+Produce a viral pattern report following your output format specification.`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: viralPatternReportSchema,
+    maxTurns: 15,
+  })
+}
+
+/**
+ * Run the Platform Algorithm intelligence agent.
+ * Loads SKILL.md definition, constructs prompt from inputs, executes via Agent SDK,
+ * and validates output against platformAlgorithmReportSchema.
+ */
+export async function runPlatformAlgorithm(inputs: ResearchInputs): Promise<AgentResult<PlatformAlgorithmReport>> {
+  const timeframe = inputs.trendTimeframeDays ?? 30
+  const skill = await loadSkill(join(agentsRoot(), 'intelligence', 'platform-algorithm'))
+
+  const knowledgeSection = skill.knowledgeContext
+    ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  return executeAgent('platform-algorithm', {
+    prompt: `Research current platform algorithm priorities for brand "${inputs.brandName}".
+Target audience: ${inputs.audienceType}
+Target platforms: ${inputs.platforms.join(', ')}
+Product domain: ${inputs.productDomain}
+Timeframe: last ${timeframe} days
+
+For each target platform, research and report:
+- Current algorithm ranking signals and priorities
+- Recent algorithm changes or announcements
+- Content format preferences (what the algorithm currently favors)
+- Engagement signals that boost distribution
+- Anti-patterns that suppress content reach
+- Specific optimization strategies for the user's product domain
+
+Use web search to find the MOST CURRENT information -- algorithm priorities change frequently.
+Produce an algorithm report following your output format specification.`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: platformAlgorithmReportSchema,
     maxTurns: 15,
   })
 }

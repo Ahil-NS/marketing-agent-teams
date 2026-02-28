@@ -11,10 +11,12 @@ export {
   trendBriefSchema,
   competitorReportSchema,
   researchInputsSchema,
+  viralPatternReportSchema,
+  platformAlgorithmReportSchema,
   VALID_SDK_TOOLS,
   VALID_DATA_SCOPES,
 } from './agent-schema.js'
-export type {AgentDefinition, MemoryEntryValidated, MemoryStateValidated, PermissionsBlock, TrendBrief, CompetitorReport, ResearchInputsData} from './agent-schema.js'
+export type {AgentDefinition, MemoryEntryValidated, MemoryStateValidated, PermissionsBlock, TrendBrief, CompetitorReport, ResearchInputsData, ViralPatternReport, PlatformAlgorithmReport} from './agent-schema.js'
 export {
   pipelineErrorSchema,
   pipelineRunSchema,

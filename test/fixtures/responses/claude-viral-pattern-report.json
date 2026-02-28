@@ -1,0 +1,92 @@
+{
+  "viralPatterns": [
+    {
+      "platform": "tiktok",
+      "pattern": "Hook-in-first-second transformation reveal",
+      "description": "Videos that immediately show a striking visual or bold text statement, then reveal the process or journey. High completion rate due to curiosity gap created in the first second.",
+      "frequency": "common",
+      "examples": ["Product transformation with trending sound", "Before/after workspace setup"],
+      "replicabilityScore": 4
+    },
+    {
+      "platform": "reddit",
+      "pattern": "Data-driven contrarian post",
+      "description": "Posts that challenge common assumptions with original data or analysis. Gets upvoted for novelty and sparks debate in comments.",
+      "frequency": "occasional",
+      "examples": ["I analyzed 1000 posts and found...", "Why the conventional wisdom about X is wrong"],
+      "replicabilityScore": 3
+    }
+  ],
+  "hookAnalysis": [
+    {
+      "hookType": "Curiosity Gap",
+      "platform": "tiktok",
+      "description": "Opening with an intriguing statement or visual that creates an information gap viewers must watch to resolve.",
+      "effectiveness": "very-high",
+      "examples": ["Wait for it...", "Nobody talks about this but..."]
+    },
+    {
+      "hookType": "Contrarian Take",
+      "platform": "reddit",
+      "description": "Opening with a bold opinion that challenges subreddit consensus, compelling readers to engage in debate.",
+      "effectiveness": "high",
+      "examples": ["Hot take: X is overrated because...", "Stop doing X — here's why"]
+    },
+    {
+      "hookType": "Relatable Pain Point",
+      "platform": "instagram",
+      "description": "Opening carousel slide that names a specific frustration the audience relates to immediately.",
+      "effectiveness": "high",
+      "examples": ["POV: You just spent 4 hours on something that takes 10 minutes"]
+    }
+  ],
+  "captionStyles": [
+    {
+      "platform": "instagram",
+      "style": "Micro-storytelling",
+      "description": "Opening with a personal anecdote (2-3 sentences) before delivering the value proposition. Uses first-person voice and conversational tone.",
+      "languagePatterns": ["First person narrative", "Emotional opener", "CTA in final line"],
+      "engagementImpact": "High save rate due to relatable storytelling combined with actionable advice"
+    },
+    {
+      "platform": "tiktok",
+      "style": "Text overlay conversational",
+      "description": "Short, punchy text overlays that drive the narrative. No spoken caption — the text IS the caption.",
+      "languagePatterns": ["Imperative verbs", "Incomplete sentences", "Emoji emphasis"],
+      "engagementImpact": "Increases completion rate because viewers must read each frame"
+    }
+  ],
+  "hashtagStrategies": [
+    {
+      "platform": "instagram",
+      "strategy": "3-5-2 Stack (3 broad + 5 niche + 2 branded)",
+      "recommendedCount": 10,
+      "hashtagTypes": ["broad reach", "niche community", "branded"],
+      "examples": ["#marketing #socialmedia #growthhacking #saasmarketing #contentcreator"]
+    },
+    {
+      "platform": "tiktok",
+      "strategy": "Trending + niche discovery",
+      "recommendedCount": 5,
+      "hashtagTypes": ["trending", "niche", "descriptive"],
+      "examples": ["#fyp #techtok #productivityhack #saas"]
+    }
+  ],
+  "timingInsights": [
+    {
+      "platform": "tiktok",
+      "bestDays": ["Tuesday", "Thursday", "Friday"],
+      "bestHours": ["7:00 AM - 9:00 AM", "7:00 PM - 11:00 PM"],
+      "timezone": "US Eastern (ET)",
+      "rationale": "TikTok engagement peaks during morning scroll and evening entertainment windows. Tuesday and Thursday show highest FYP distribution rates."
+    },
+    {
+      "platform": "reddit",
+      "bestDays": ["Tuesday", "Wednesday", "Thursday"],
+      "bestHours": ["6:00 AM - 9:00 AM"],
+      "timezone": "US Eastern (ET)",
+      "rationale": "Reddit's Hot algorithm rewards early engagement velocity. Morning posts have more hours to accumulate upvotes before evening decline."
+    }
+  ],
+  "recommendations": "Focus on hook-driven short-form video content on TikTok with transformation reveals and curiosity gaps. For Reddit, invest in data-driven original analysis posts that spark debate. On Instagram, use carousel format with micro-storytelling captions and the 3-5-2 hashtag stack. Post TikTok content Tuesday/Thursday evenings and Reddit content Tuesday-Thursday mornings ET."
+}

@@ -2,7 +2,7 @@ import type {Config} from '../schemas/index.js'
 import {MATError} from '../utils/errors.js'
 
 const CLUSTERS: Record<string, string[]> = {
-  intelligence: ['trend-scout', 'audience-researcher', 'competitor-analyst'],
+  intelligence: ['trend-scout', 'audience-researcher', 'competitor-analyst', 'viral-pattern-decoder', 'platform-algorithm'],
   strategy: ['content-strategist', 'campaign-planner', 'channel-optimizer'],
   creation: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'hook-writer'],
   optimization: ['seo-optimizer', 'ab-test-designer', 'timing-optimizer', 'hashtag-strategist'],

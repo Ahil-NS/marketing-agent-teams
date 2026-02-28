@@ -3,7 +3,7 @@ import {join} from 'node:path'
 
 import {describe, it, expect} from 'vitest'
 
-import {agentDefinitionSchema, trendBriefSchema, competitorReportSchema, researchInputsSchema} from '../../../src/lib/schemas/agent-schema.js'
+import {agentDefinitionSchema, trendBriefSchema, competitorReportSchema, researchInputsSchema, viralPatternReportSchema, platformAlgorithmReportSchema} from '../../../src/lib/schemas/agent-schema.js'
 
 describe('agentDefinitionSchema', () => {
   it('validates a complete agent definition', () => {
@@ -630,5 +630,354 @@ describe('fixture validation', () => {
     const fixture = JSON.parse(readFileSync(join(fixturesDir, 'claude-competitor-report.json'), 'utf-8'))
     const result = competitorReportSchema.safeParse(fixture)
     expect(result.success).toBe(true)
+  })
+
+  it('claude-viral-pattern-report.json fixture validates against viralPatternReportSchema', () => {
+    const fixture = JSON.parse(readFileSync(join(fixturesDir, 'claude-viral-pattern-report.json'), 'utf-8'))
+    const result = viralPatternReportSchema.safeParse(fixture)
+    expect(result.success).toBe(true)
+  })
+
+  it('claude-algorithm-report.json fixture validates against platformAlgorithmReportSchema', () => {
+    const fixture = JSON.parse(readFileSync(join(fixturesDir, 'claude-algorithm-report.json'), 'utf-8'))
+    const result = platformAlgorithmReportSchema.safeParse(fixture)
+    expect(result.success).toBe(true)
+  })
+})
+
+describe('viralPatternReportSchema', () => {
+  const validReport = {
+    viralPatterns: [
+      {
+        platform: 'tiktok',
+        pattern: 'Hook-in-first-second',
+        description: 'Videos with immediate visual hook',
+        frequency: 'common' as const,
+        examples: ['Example 1'],
+        replicabilityScore: 4,
+      },
+    ],
+    hookAnalysis: [
+      {
+        hookType: 'Curiosity Gap',
+        platform: 'tiktok',
+        description: 'Creates information gap',
+        effectiveness: 'very-high' as const,
+        examples: ['Wait for it...'],
+      },
+    ],
+    captionStyles: [
+      {
+        platform: 'instagram',
+        style: 'Micro-storytelling',
+        description: 'Short personal anecdotes',
+        languagePatterns: ['First person', 'Emotional opener'],
+        engagementImpact: 'High save rate',
+      },
+    ],
+    hashtagStrategies: [
+      {
+        platform: 'instagram',
+        strategy: '3-5-2 Stack',
+        recommendedCount: 10,
+        hashtagTypes: ['broad', 'niche', 'branded'],
+        examples: ['#marketing #saas'],
+      },
+    ],
+    timingInsights: [
+      {
+        platform: 'tiktok',
+        bestDays: ['Tuesday', 'Thursday'],
+        bestHours: ['7:00 AM - 9:00 AM'],
+        timezone: 'US Eastern (ET)',
+        rationale: 'Morning scroll window',
+      },
+    ],
+    recommendations: 'Focus on short-form video.',
+  }
+
+  it('validates a complete viral pattern report', () => {
+    const result = viralPatternReportSchema.safeParse(validReport)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts report without optional examples', () => {
+    const report = {
+      ...validReport,
+      viralPatterns: [{
+        platform: 'reddit',
+        pattern: 'Data post',
+        description: 'Original data analysis',
+        frequency: 'occasional' as const,
+        replicabilityScore: 3,
+      }],
+    }
+    const result = viralPatternReportSchema.safeParse(report)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects invalid frequency value', () => {
+    const report = {
+      ...validReport,
+      viralPatterns: [{
+        platform: 'tiktok',
+        pattern: 'test',
+        description: 'test',
+        frequency: 'always',
+        replicabilityScore: 3,
+      }],
+    }
+    const result = viralPatternReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid effectiveness value', () => {
+    const report = {
+      ...validReport,
+      hookAnalysis: [{
+        hookType: 'test',
+        platform: 'tiktok',
+        description: 'test',
+        effectiveness: 'super-high',
+      }],
+    }
+    const result = viralPatternReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects replicabilityScore below 1', () => {
+    const report = {
+      ...validReport,
+      viralPatterns: [{
+        platform: 'tiktok',
+        pattern: 'test',
+        description: 'test',
+        frequency: 'common' as const,
+        replicabilityScore: 0,
+      }],
+    }
+    const result = viralPatternReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects replicabilityScore above 5', () => {
+    const report = {
+      ...validReport,
+      viralPatterns: [{
+        platform: 'tiktok',
+        pattern: 'test',
+        description: 'test',
+        frequency: 'common' as const,
+        replicabilityScore: 6,
+      }],
+    }
+    const result = viralPatternReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty critical arrays (viralPatterns, hookAnalysis)', () => {
+    const report = {
+      viralPatterns: [],
+      hookAnalysis: [],
+      captionStyles: [],
+      hashtagStrategies: [],
+      timingInsights: [],
+      recommendations: '',
+    }
+    const result = viralPatternReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts empty optional arrays when critical arrays are populated', () => {
+    const report = {
+      viralPatterns: [{
+        platform: 'tiktok',
+        pattern: 'test',
+        description: 'test',
+        frequency: 'common' as const,
+        replicabilityScore: 3,
+      }],
+      hookAnalysis: [{
+        hookType: 'test',
+        platform: 'tiktok',
+        description: 'test',
+        effectiveness: 'high' as const,
+      }],
+      captionStyles: [],
+      hashtagStrategies: [],
+      timingInsights: [],
+      recommendations: '',
+    }
+    const result = viralPatternReportSchema.safeParse(report)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects missing required fields', () => {
+    expect(viralPatternReportSchema.safeParse({}).success).toBe(false)
+    expect(viralPatternReportSchema.safeParse({viralPatterns: []}).success).toBe(false)
+    expect(viralPatternReportSchema.safeParse({viralPatterns: [], hookAnalysis: []}).success).toBe(false)
+    expect(viralPatternReportSchema.safeParse({viralPatterns: [], hookAnalysis: [], captionStyles: []}).success).toBe(false)
+    expect(viralPatternReportSchema.safeParse({viralPatterns: [], hookAnalysis: [], captionStyles: [], hashtagStrategies: []}).success).toBe(false)
+    expect(viralPatternReportSchema.safeParse({viralPatterns: [], hookAnalysis: [], captionStyles: [], hashtagStrategies: [], timingInsights: []}).success).toBe(false)
+  })
+})
+
+describe('platformAlgorithmReportSchema', () => {
+  const validReport = {
+    platforms: [
+      {
+        name: 'tiktok',
+        lastUpdated: '2026-02-28',
+        overallStrategy: 'Focus on completion rate.',
+      },
+    ],
+    algorithmPriorities: [
+      {
+        platform: 'tiktok',
+        priority: 'Completion rate',
+        weight: 'critical' as const,
+        description: 'Videos watched to completion get more distribution.',
+        recentChanges: 'Longer videos now viable.',
+      },
+    ],
+    rankingSignals: [
+      {
+        platform: 'tiktok',
+        signal: 'Completion rate',
+        impact: 'strong-positive' as const,
+        description: 'Most important metric for FYP distribution.',
+        actionable: true,
+      },
+    ],
+    optimizationStrategies: [
+      {
+        platform: 'tiktok',
+        strategy: 'Front-load the hook',
+        description: 'Immediate visual impact in first 0.5s.',
+        expectedImpact: 'high' as const,
+        implementation: 'Open with bold text overlay.',
+        antiPatterns: ['Logo animations', 'Slow pans'],
+      },
+    ],
+    recommendations: 'Prioritize completion rate optimization.',
+  }
+
+  it('validates a complete platform algorithm report', () => {
+    const result = platformAlgorithmReportSchema.safeParse(validReport)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts report without optional fields', () => {
+    const report = {
+      ...validReport,
+      algorithmPriorities: [{
+        platform: 'reddit',
+        priority: 'Upvote velocity',
+        weight: 'high' as const,
+        description: 'Early upvotes matter most.',
+      }],
+      optimizationStrategies: [{
+        platform: 'reddit',
+        strategy: 'Post at 6-8 AM ET',
+        description: 'Maximize engagement runway.',
+        expectedImpact: 'high' as const,
+        implementation: 'Schedule posts early morning.',
+      }],
+    }
+    const result = platformAlgorithmReportSchema.safeParse(report)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects invalid weight value', () => {
+    const report = {
+      ...validReport,
+      algorithmPriorities: [{
+        platform: 'tiktok',
+        priority: 'test',
+        weight: 'extreme',
+        description: 'test',
+      }],
+    }
+    const result = platformAlgorithmReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid impact value', () => {
+    const report = {
+      ...validReport,
+      rankingSignals: [{
+        platform: 'tiktok',
+        signal: 'test',
+        impact: 'very-positive',
+        description: 'test',
+        actionable: true,
+      }],
+    }
+    const result = platformAlgorithmReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid expectedImpact value', () => {
+    const report = {
+      ...validReport,
+      optimizationStrategies: [{
+        platform: 'tiktok',
+        strategy: 'test',
+        description: 'test',
+        expectedImpact: 'extreme',
+        implementation: 'test',
+      }],
+    }
+    const result = platformAlgorithmReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty critical arrays (algorithmPriorities, rankingSignals, optimizationStrategies)', () => {
+    const report = {
+      platforms: [],
+      algorithmPriorities: [],
+      rankingSignals: [],
+      optimizationStrategies: [],
+      recommendations: '',
+    }
+    const result = platformAlgorithmReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts empty platforms array when critical arrays are populated', () => {
+    const report = {
+      platforms: [],
+      algorithmPriorities: [{
+        platform: 'tiktok',
+        priority: 'Completion rate',
+        weight: 'high' as const,
+        description: 'test',
+      }],
+      rankingSignals: [{
+        platform: 'tiktok',
+        signal: 'Completion rate',
+        impact: 'positive' as const,
+        description: 'test',
+        actionable: true,
+      }],
+      optimizationStrategies: [{
+        platform: 'tiktok',
+        strategy: 'Front-load hook',
+        description: 'test',
+        expectedImpact: 'high' as const,
+        implementation: 'test',
+      }],
+      recommendations: '',
+    }
+    const result = platformAlgorithmReportSchema.safeParse(report)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects missing required fields', () => {
+    expect(platformAlgorithmReportSchema.safeParse({}).success).toBe(false)
+    expect(platformAlgorithmReportSchema.safeParse({platforms: []}).success).toBe(false)
+    expect(platformAlgorithmReportSchema.safeParse({platforms: [], algorithmPriorities: []}).success).toBe(false)
+    expect(platformAlgorithmReportSchema.safeParse({platforms: [], algorithmPriorities: [], rankingSignals: []}).success).toBe(false)
+    expect(platformAlgorithmReportSchema.safeParse({platforms: [], algorithmPriorities: [], rankingSignals: [], optimizationStrategies: []}).success).toBe(false)
   })
 })

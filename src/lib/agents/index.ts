@@ -1,6 +1,6 @@
 export {executeAgent} from './agent-executor.js'
 export type {AgentExecuteOptions} from './agent-executor.js'
-export {runTrendScout, runCompetitorAnalyst} from './intelligence.js'
+export {runTrendScout, runCompetitorAnalyst, runViralPatternDecoder, runPlatformAlgorithm} from './intelligence.js'
 export {AgentMemoryStore} from './memory-store.js'
 export {PermissionEnforcer} from './permission-enforcer.js'
 export {validateSkillMdSafety} from './sandbox-validator.js'

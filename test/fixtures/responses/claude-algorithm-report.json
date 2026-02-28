@@ -1,0 +1,112 @@
+{
+  "platforms": [
+    {
+      "name": "tiktok",
+      "lastUpdated": "2026-02-28",
+      "overallStrategy": "Focus on completion rate optimization and trending audio usage. TikTok's batch testing model rewards content that retains viewers above platform-average completion rates."
+    },
+    {
+      "name": "reddit",
+      "lastUpdated": "2026-02-28",
+      "overallStrategy": "Prioritize early engagement velocity with value-driven content. Reddit's Hot algorithm heavily weights the first 1-2 hours of engagement, making timing and subreddit selection critical."
+    }
+  ],
+  "algorithmPriorities": [
+    {
+      "platform": "tiktok",
+      "priority": "Video completion rate",
+      "weight": "critical",
+      "description": "TikTok's #1 ranking signal. Videos watched to completion get exponentially more distribution through the batch testing model.",
+      "recentChanges": "As of Q1 2026, longer videos (2-3 min) are now viable as TikTok has adjusted completion rate expectations by video length."
+    },
+    {
+      "platform": "tiktok",
+      "priority": "Share rate",
+      "weight": "high",
+      "description": "Shares to friends, other platforms, or DMs indicate content worth spreading. Shares have become increasingly important as TikTok expands its social features.",
+      "recentChanges": "TikTok now tracks share context (DM vs. external) and rewards in-app shares more."
+    },
+    {
+      "platform": "reddit",
+      "priority": "Early upvote velocity",
+      "weight": "critical",
+      "description": "Reddit's Hot algorithm uses logarithmic time decay — the first 10 upvotes matter more than the next 100. Content must gain engagement in the first 1-2 hours or it dies."
+    },
+    {
+      "platform": "reddit",
+      "priority": "Comment engagement depth",
+      "weight": "high",
+      "description": "Posts with deep comment threads (replies to replies) signal genuine community engagement and get boosted in Hot and Best sorts."
+    }
+  ],
+  "rankingSignals": [
+    {
+      "platform": "tiktok",
+      "signal": "Completion rate",
+      "impact": "strong-positive",
+      "description": "Percentage of viewers who watch the video to the end. The single most important metric for FYP distribution.",
+      "actionable": true
+    },
+    {
+      "platform": "tiktok",
+      "signal": "Rewatch rate",
+      "impact": "strong-positive",
+      "description": "How many viewers watch the video more than once. Indicates highly engaging or informative content.",
+      "actionable": true
+    },
+    {
+      "platform": "tiktok",
+      "signal": "TikTok watermark on other platforms",
+      "impact": "negative",
+      "description": "Content watermarked from other platforms (Instagram Reels logo) gets suppressed distribution.",
+      "actionable": true
+    },
+    {
+      "platform": "reddit",
+      "signal": "Upvote velocity (first 2 hours)",
+      "impact": "strong-positive",
+      "description": "Speed of upvote accumulation in the first 1-2 hours after posting. Logarithmic time decay means early votes count exponentially more.",
+      "actionable": true
+    },
+    {
+      "platform": "reddit",
+      "signal": "Comment-to-view ratio",
+      "impact": "positive",
+      "description": "Posts with high comment engagement relative to views signal quality discussion content.",
+      "actionable": true
+    }
+  ],
+  "optimizationStrategies": [
+    {
+      "platform": "tiktok",
+      "strategy": "Front-load the hook in first 0.5-1 second",
+      "description": "Create an immediate visual or audio impact within the first half-second to maximize retention and prevent scroll-past.",
+      "expectedImpact": "high",
+      "implementation": "Open with a bold text overlay, surprising visual, or compelling audio hook. Avoid intros, logos, or slow builds.",
+      "antiPatterns": ["Starting with 'Hey guys'", "Logo animations", "Slow pans"]
+    },
+    {
+      "platform": "tiktok",
+      "strategy": "Use trending audio within first 48 hours of trend",
+      "description": "Leverage trending sounds early in their lifecycle for maximum algorithmic boost before saturation.",
+      "expectedImpact": "medium",
+      "implementation": "Monitor TikTok Creative Center daily for emerging sounds. Create content using trending audio within 24-48 hours of the sound beginning to trend."
+    },
+    {
+      "platform": "reddit",
+      "strategy": "Post during US morning hours (6-9 AM ET) on weekdays",
+      "description": "Maximize the engagement runway by posting when US audiences are waking up, giving the post maximum hours to accumulate upvotes.",
+      "expectedImpact": "high",
+      "implementation": "Schedule or manually post at 6-8 AM ET on Tuesday-Thursday. Avoid late Friday, Saturday, and holiday posting."
+    },
+    {
+      "platform": "reddit",
+      "strategy": "Use data-driven or original analysis titles",
+      "description": "Reddit audiences reward original thinking and data. Posts framed as original analysis consistently outperform opinion-only posts.",
+      "expectedImpact": "medium",
+      "implementation": "Include specific numbers, data points, or 'I analyzed X' framing in post titles. Back claims with sources in the post body.",
+      "antiPatterns": ["Vague titles", "Clickbait without delivery", "Self-promotion without value"]
+    }
+  ],
+  "recommendations": "For TikTok: Prioritize completion rate by keeping videos short (15-30s) and front-loading hooks. Use trending audio within 48 hours of trend emergence. Avoid content that doesn't deliver on its hook promise. For Reddit: Post original analysis content at 6-8 AM ET on Tuesday-Thursday. Focus on sparking discussion through contrarian or data-driven angles. Build community credibility through consistent valuable comments before posting original content."
+}
