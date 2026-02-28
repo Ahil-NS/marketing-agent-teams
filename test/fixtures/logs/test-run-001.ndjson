@@ -1,0 +1,8 @@
+{"timestamp": "2026-02-28T10:00:00.000Z", "level": "info", "component": "orchestrator", "runId": "test-run-001", "message": "Pipeline started"}
+{"timestamp": "2026-02-28T10:00:01.000Z", "level": "info", "component": "stage-runner", "runId": "test-run-001", "message": "Starting research stage"}
+{"timestamp": "2026-02-28T10:00:02.000Z", "level": "debug", "component": "agent-executor", "runId": "test-run-001", "message": "Executing agent trend-scout", "context": {"agentName": "trend-scout", "stage": "research"}}
+{"timestamp": "2026-02-28T10:00:03.000Z", "level": "info", "component": "agent-executor", "runId": "test-run-001", "message": "Agent trend-scout completed", "context": {"duration": 4200, "cost": 0.003}}
+{"timestamp": "2026-02-28T10:00:04.000Z", "level": "warn", "component": "budget-tracker", "runId": "test-run-001", "message": "Budget usage at 75 percent", "context": {"spent": 3.75, "limit": 5.0}}
+{"timestamp": "2026-02-28T10:00:05.000Z", "level": "error", "component": "agent-executor", "runId": "test-run-001", "message": "Agent competitor-analyst failed", "context": {"error": "API timeout", "agentName": "competitor-analyst"}}
+{"timestamp": "2026-02-28T10:00:06.000Z", "level": "info", "component": "orchestrator", "runId": "test-run-001", "message": "Research stage completed with partial results"}
+{"timestamp": "2026-02-28T10:00:07.000Z", "level": "info", "component": "orchestrator", "runId": "test-run-001", "message": "Pipeline completed"}

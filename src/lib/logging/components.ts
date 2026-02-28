@@ -1,0 +1,8 @@
+export const ORCHESTRATOR = 'orchestrator'
+export const STAGE_RUNNER = 'stage-runner'
+export const AGENT_EXECUTOR = 'agent-executor'
+export const BUDGET_TRACKER = 'budget-tracker'
+export const STATE_MANAGER = 'state-manager'
+export const STATUS_COMMAND = 'command:status'
+export const LOGS_COMMAND = 'command:logs'
+export const RUN_COMMAND = 'command:run'
