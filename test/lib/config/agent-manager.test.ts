@@ -38,6 +38,12 @@ describe('agent-manager', () => {
       expect(CLUSTERS.intelligence).toContain('platform-algorithm')
       expect(CLUSTERS.intelligence).toHaveLength(5)
     })
+
+    it('strategy cluster includes content-strategist, campaign-planner, and channel-optimizer', () => {
+      expect(CLUSTERS.strategy).toContain('content-strategist')
+      expect(CLUSTERS.strategy).toContain('campaign-planner')
+      expect(CLUSTERS.strategy).toContain('channel-optimizer')
+    })
   })
 
   describe('listAgentsByCluster', () => {

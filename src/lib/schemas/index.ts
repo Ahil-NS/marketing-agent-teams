@@ -18,6 +18,15 @@ export {
 } from './agent-schema.js'
 export type {AgentDefinition, MemoryEntryValidated, MemoryStateValidated, PermissionsBlock, TrendBrief, CompetitorReport, ResearchInputsData, ViralPatternReport, PlatformAlgorithmReport} from './agent-schema.js'
 export {
+  campaignPlanSchema,
+  contentCalendarSchema,
+  channelOptimizationPlanSchema,
+  strategyInputsSchema,
+  calendarInputsSchema,
+  optimizerInputsSchema,
+} from './strategy-schema.js'
+export type {CampaignPlan, ContentCalendar, ChannelOptimizationPlan, StrategyInputs, CalendarInputs, OptimizerInputs} from './strategy-schema.js'
+export {
   pipelineErrorSchema,
   pipelineRunSchema,
   pipelineRunStatusSchema,

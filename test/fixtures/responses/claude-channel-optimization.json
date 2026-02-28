@@ -1,0 +1,263 @@
+{
+  "planId": "opt-2026-04-wellness",
+  "campaignId": "plan-2026-03-wellness-spring",
+  "perPlatformRecommendations": [
+    {
+      "platform": "reddit",
+      "optimalPostingTimes": [
+        {
+          "day": "Monday",
+          "hours": ["08:00", "09:00"],
+          "timezone": "EST",
+          "rationale": "Reddit sees highest activity Monday mornings as users start their week; r/mentalhealth peaks at 9 AM EST"
+        },
+        {
+          "day": "Wednesday",
+          "hours": ["12:00", "13:00"],
+          "timezone": "EST",
+          "rationale": "Midweek lunch break drives engagement; educational/discussion content performs best during lunch hours"
+        },
+        {
+          "day": "Sunday",
+          "hours": ["10:00", "11:00"],
+          "timezone": "EST",
+          "rationale": "Sunday mornings see high engagement on wellness and self-improvement subreddits after weekend reflection"
+        }
+      ],
+      "contentFormatPreferences": [
+        {
+          "format": "Long-form text post with data",
+          "algorithmBoost": "strong",
+          "recommendation": "Lead with a compelling question or surprising statistic. Reddit's algorithm favors posts that generate discussion threads."
+        },
+        {
+          "format": "AMA format",
+          "algorithmBoost": "strong",
+          "recommendation": "Schedule AMAs 24-48 hours in advance and promote in relevant subreddits. High comment count signals quality to algorithm."
+        },
+        {
+          "format": "Link post without context",
+          "algorithmBoost": "penalized",
+          "recommendation": "Avoid bare link posts — always add substantial commentary. Reddit users and mods penalize low-effort link drops."
+        }
+      ],
+      "antiPatterns": [
+        {
+          "pattern": "Cross-posting same content across 3+ subreddits simultaneously",
+          "risk": "Triggers spam detection and can result in shadow-banning. Community members notice and call it out.",
+          "avoidance": "Post in maximum 2 relevant subreddits with adapted titles. Space cross-posts by at least 2 hours."
+        },
+        {
+          "pattern": "Using corporate marketing language",
+          "risk": "Immediate downvotes and negative comments. Reddit strongly rejects overtly promotional content.",
+          "avoidance": "Write in authentic, conversational tone. Lead with value, not brand mentions. Use personal stories over marketing copy."
+        },
+        {
+          "pattern": "Ignoring comment replies on your posts",
+          "risk": "Community perceives post as promotional dump. Future posts get less engagement.",
+          "avoidance": "Set aside 2 hours after posting to actively engage with every comment. Thank helpful responses."
+        }
+      ],
+      "optimizationNotes": "Reddit rewards authenticity and depth. Strategy agents should produce long-form, value-driven content for Reddit. Build karma through genuine community participation before promotional posts."
+    },
+    {
+      "platform": "tiktok",
+      "optimalPostingTimes": [
+        {
+          "day": "Tuesday",
+          "hours": ["07:00", "12:00", "19:00"],
+          "timezone": "EST",
+          "rationale": "TikTok engagement peaks at 7 AM (morning scroll), noon (lunch break), and 7 PM (evening wind-down)"
+        },
+        {
+          "day": "Thursday",
+          "hours": ["12:00", "15:00", "20:00"],
+          "timezone": "EST",
+          "rationale": "Thursday sees high entertainment consumption; mid-afternoon and evening slots capture peak attention"
+        },
+        {
+          "day": "Saturday",
+          "hours": ["09:00", "11:00"],
+          "timezone": "EST",
+          "rationale": "Weekend mornings are ideal for lifestyle and wellness content; lower competition from business content"
+        }
+      ],
+      "contentFormatPreferences": [
+        {
+          "format": "15-30 second vertical video with trending sound",
+          "algorithmBoost": "strong",
+          "recommendation": "Use trending sounds within 48 hours of emergence. Front-load hook in first 3 seconds. Add text overlays for silent viewing."
+        },
+        {
+          "format": "Duet/Stitch with relevant creators",
+          "algorithmBoost": "moderate",
+          "recommendation": "Duet wellness influencer content to add expert perspective. Algorithm distributes duets to both audiences."
+        },
+        {
+          "format": "Multi-part series",
+          "algorithmBoost": "moderate",
+          "recommendation": "Series format drives follow-for-Part-2 behavior. Keep each part under 60 seconds with clear cliffhanger."
+        }
+      ],
+      "antiPatterns": [
+        {
+          "pattern": "Posting polished, ad-like content",
+          "risk": "TikTok algorithm deprioritizes content that looks like traditional advertising. Users scroll past polished content.",
+          "avoidance": "Embrace raw, authentic filming. Use phone camera, natural lighting. Personality-driven content consistently outperforms."
+        },
+        {
+          "pattern": "Not using text overlays",
+          "risk": "85%+ of TikTok is watched without sound. Content without text loses most viewers.",
+          "avoidance": "Always add text overlays summarizing key points. Use auto-captions as a baseline, then enhance."
+        }
+      ],
+      "optimizationNotes": "TikTok rewards consistency and trend-awareness. Post at least once daily during campaign. Monitor trending sounds weekly. Each video gets independent distribution — past performance doesn't limit future reach."
+    },
+    {
+      "platform": "facebook",
+      "optimalPostingTimes": [
+        {
+          "day": "Wednesday",
+          "hours": ["09:00", "10:00"],
+          "timezone": "EST",
+          "rationale": "Wednesday mornings consistently show highest Facebook engagement; users are settled into their workweek"
+        },
+        {
+          "day": "Thursday",
+          "hours": ["13:00", "14:00"],
+          "timezone": "EST",
+          "rationale": "Thursday afternoon sees high Community Group activity and discussion engagement"
+        },
+        {
+          "day": "Saturday",
+          "hours": ["10:00", "11:00"],
+          "timezone": "EST",
+          "rationale": "Weekend mornings are prime for lifestyle and community content; Facebook Live performs exceptionally well"
+        }
+      ],
+      "contentFormatPreferences": [
+        {
+          "format": "Native video with captions (1-3 minutes)",
+          "algorithmBoost": "strong",
+          "recommendation": "Upload video directly to Facebook — YouTube links get significantly less reach. Always include captions."
+        },
+        {
+          "format": "Facebook Live",
+          "algorithmBoost": "strong",
+          "recommendation": "Live generates 6x more engagement. Schedule in advance and promote 24 hours before. Aim for 15-30 minute sessions."
+        },
+        {
+          "format": "Engagement bait posts (Like if you agree!)",
+          "algorithmBoost": "penalized",
+          "recommendation": "Facebook actively demotes engagement bait. Ask genuine questions that prompt meaningful discussion instead."
+        }
+      ],
+      "antiPatterns": [
+        {
+          "pattern": "Posting more than 2 times per day on Page",
+          "risk": "Per-post reach decreases when posting frequency is too high. Algorithm throttles over-posting Pages.",
+          "avoidance": "Maximum 2 Page posts per day. Use Groups for additional content distribution."
+        },
+        {
+          "pattern": "Sharing YouTube links instead of native video",
+          "risk": "Facebook deprioritizes external video links to keep users on-platform. YouTube links get 10x less reach.",
+          "avoidance": "Always upload video natively to Facebook. Save YouTube for cross-platform linking in descriptions."
+        }
+      ],
+      "optimizationNotes": "Facebook rewards meaningful interactions — long comments and comment threads. Focus on conversation-starting content. Use Groups for community building and deeper engagement than Page posts allow."
+    },
+    {
+      "platform": "instagram",
+      "optimalPostingTimes": [
+        {
+          "day": "Monday",
+          "hours": ["06:00", "07:00", "12:00"],
+          "timezone": "EST",
+          "rationale": "Monday mornings see high Instagram activity; users check feeds during morning routine. Noon captures lunch break scrolling."
+        },
+        {
+          "day": "Wednesday",
+          "hours": ["07:00", "19:00"],
+          "timezone": "EST",
+          "rationale": "Midweek mornings and evenings show consistent engagement peaks across demographics"
+        },
+        {
+          "day": "Sunday",
+          "hours": ["09:00", "10:00", "20:00"],
+          "timezone": "EST",
+          "rationale": "Sunday mornings ideal for wellness/planning content; Sunday evenings for week-ahead inspiration"
+        }
+      ],
+      "contentFormatPreferences": [
+        {
+          "format": "Reels (15-60 seconds)",
+          "algorithmBoost": "strong",
+          "recommendation": "Reels get widest distribution — Explore page, Reels tab, feed. Use trending audio for 50% of Reels. Hook within 1 second."
+        },
+        {
+          "format": "Carousel posts (5-10 slides)",
+          "algorithmBoost": "strong",
+          "recommendation": "Highest save rate of any format. Educational carousels drive saves, which is a strong algorithm signal. End with CTA slide."
+        },
+        {
+          "format": "Single-image feed posts",
+          "algorithmBoost": "neutral",
+          "recommendation": "Still valuable for branded aesthetic and announcements but don't expect viral reach. Use carousels or Reels for reach goals."
+        }
+      ],
+      "antiPatterns": [
+        {
+          "pattern": "Posting without hashtags",
+          "risk": "Missing discoverability. Hashtags are a primary discovery mechanism for non-followers.",
+          "avoidance": "Use 5-15 relevant hashtags per post. Mix broad and niche hashtags. Research hashtag competition before using."
+        },
+        {
+          "pattern": "Inconsistent posting cadence",
+          "risk": "Algorithm rewards consistency. Irregular posting reduces profile visibility in followers' feeds.",
+          "avoidance": "Maintain minimum 3-5 feed posts per week. Use scheduling tools to maintain consistency during campaign."
+        }
+      ],
+      "optimizationNotes": "Instagram prioritizes Reels for reach and carousels for saves. Stories maintain daily connection with followers. Early engagement (first 30 minutes) critically influences distribution — post when audience is most active."
+    }
+  ],
+  "seasonalOpportunities": [
+    {
+      "date": "2026-04-22",
+      "eventName": "Earth Day",
+      "relevantThemes": ["Morning Routine Transformation", "30-Day Wellness Challenge"],
+      "suggestedContentTypes": ["engagement", "community", "behind-the-scenes"],
+      "platformRecommendations": ["instagram", "tiktok", "facebook"],
+      "estimatedImpact": "medium"
+    },
+    {
+      "date": "2026-05-01",
+      "eventName": "Mental Health Awareness Month Kickoff",
+      "relevantThemes": ["Mental Health Awareness Stories", "Expert Wellness Q&A"],
+      "suggestedContentTypes": ["educational", "thought-leadership", "community"],
+      "platformRecommendations": ["reddit", "instagram", "facebook", "tiktok"],
+      "estimatedImpact": "high"
+    }
+  ],
+  "crossPlatformStrategies": [
+    {
+      "strategy": "Content Cascade",
+      "description": "Publish cornerstone wellness content on Reddit first (builds credibility), then adapt key insights into TikTok short-form video, Instagram carousels, and Facebook discussion posts. Stagger by 24-48 hours per platform.",
+      "platforms": ["reddit", "tiktok", "instagram", "facebook"],
+      "expectedImpact": "high"
+    },
+    {
+      "strategy": "Challenge Cross-Pollination",
+      "description": "Launch the 30-Day Challenge on TikTok for maximum viral potential, then create Instagram carousel templates for daily tracking, Facebook Group for community accountability, and Reddit check-in threads.",
+      "platforms": ["tiktok", "instagram", "facebook", "reddit"],
+      "expectedImpact": "high"
+    },
+    {
+      "strategy": "Expert Content Repurposing",
+      "description": "Host Reddit AMA as primary expert content, then extract top Q&A pairs into TikTok tip videos, Instagram Reels with key quotes, and Facebook post series.",
+      "platforms": ["reddit", "tiktok", "instagram"],
+      "expectedImpact": "medium"
+    }
+  ],
+  "recommendations": "Prioritize TikTok and Instagram Reels for reach, Reddit for depth and community authority, and Facebook for community engagement. Align the campaign's intensity increase with Mental Health Awareness Month in May. Use the 14-day pre-campaign period to establish consistent posting cadence and build Community Group membership before the main push.",
+  "generatedAt": "2026-03-01T11:00:00.000Z"
+}

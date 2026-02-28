@@ -1,23 +1,12 @@
-import {dirname, join} from 'node:path'
-import {fileURLToPath} from 'node:url'
+import {join} from 'node:path'
 
 import {trendBriefSchema, competitorReportSchema, viralPatternReportSchema, platformAlgorithmReportSchema} from '../schemas/agent-schema.js'
 import type {TrendBrief, CompetitorReport, ViralPatternReport, PlatformAlgorithmReport} from '../schemas/agent-schema.js'
 
 import {executeAgent} from './agent-executor.js'
+import {agentsRoot} from './paths.js'
 import {loadSkill} from './skill-loader.js'
 import type {AgentResult, ResearchInputs} from './types.js'
-
-/**
- * Resolve the agents root directory.
- * Agents live in src/agents/ relative to the project root.
- */
-function agentsRoot(): string {
-  // __dirname equivalent: this file is at src/lib/agents/intelligence.ts
-  // agents root is at src/agents/
-  const __dirname = dirname(fileURLToPath(import.meta.url))
-  return join(__dirname, '..', '..', 'agents')
-}
 
 /**
  * Run the Trend Scout intelligence agent.

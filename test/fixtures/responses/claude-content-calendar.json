@@ -1,0 +1,143 @@
+{
+  "calendarId": "cal-2026-04-wellness",
+  "campaignId": "plan-2026-03-wellness-spring",
+  "period": {
+    "startDate": "2026-04-15",
+    "endDate": "2026-04-28",
+    "duration": "14-day"
+  },
+  "entries": [
+    {
+      "date": "2026-04-15",
+      "platform": "tiktok",
+      "contentType": "educational",
+      "theme": "Morning Routine Transformation",
+      "contentDescription": "Quick 30-second morning routine tip video with trending sound — 'One small habit that changed my mornings'",
+      "estimatedEngagement": {
+        "reach": 15000,
+        "engagementRate": 0.045
+      },
+      "hashtags": ["#MorningRoutine", "#WellnessTikTok", "#HealthyHabits"],
+      "callToAction": "Follow for daily wellness tips",
+      "notes": "Post at 7:30 AM local time for morning audience"
+    },
+    {
+      "date": "2026-04-15",
+      "platform": "instagram",
+      "contentType": "behind-the-scenes",
+      "theme": "Morning Routine Transformation",
+      "contentDescription": "Carousel showing 5 steps of a team member's actual morning routine with before/after wellness metrics",
+      "estimatedEngagement": {
+        "reach": 8000,
+        "engagementRate": 0.06
+      },
+      "hashtags": ["#MorningRoutine", "#WellnessJourney", "#SelfCare"],
+      "callToAction": "Save this routine to try tomorrow morning"
+    },
+    {
+      "date": "2026-04-16",
+      "platform": "reddit",
+      "contentType": "community",
+      "theme": "Mental Health Awareness Stories",
+      "contentDescription": "In-depth text post sharing personal mental health journey and how wellness practices helped — posted in r/mentalhealth and r/selfimprovement",
+      "estimatedEngagement": {
+        "reach": 5000,
+        "engagementRate": 0.08
+      },
+      "notes": "Post at 9:00 AM EST for maximum visibility"
+    },
+    {
+      "date": "2026-04-17",
+      "platform": "facebook",
+      "contentType": "engagement",
+      "theme": "30-Day Wellness Challenge",
+      "contentDescription": "Launch the 30-Day Wellness Challenge with a Facebook Live kickoff — explain the challenge, demonstrate Day 1 activity, answer audience questions",
+      "estimatedEngagement": {
+        "reach": 3000,
+        "engagementRate": 0.12
+      },
+      "callToAction": "Join the challenge — comment 'I'm in!' to get daily reminders"
+    },
+    {
+      "date": "2026-04-18",
+      "platform": "tiktok",
+      "contentType": "engagement",
+      "theme": "30-Day Wellness Challenge",
+      "contentDescription": "Day 1 challenge video — simple wellness activity with trending sound, encouraging duets and stitches",
+      "estimatedEngagement": {
+        "reach": 20000,
+        "engagementRate": 0.05
+      },
+      "hashtags": ["#WellnessChallenge", "#30DayChallenge", "#FYP"]
+    },
+    {
+      "date": "2026-04-19",
+      "platform": "instagram",
+      "contentType": "thought-leadership",
+      "theme": "Expert Wellness Q&A",
+      "contentDescription": "Reel featuring a quick expert tip on managing stress, with Stories Q&A sticker for audience questions",
+      "estimatedEngagement": {
+        "reach": 10000,
+        "engagementRate": 0.04
+      },
+      "hashtags": ["#WellnessExpert", "#StressManagement", "#MentalHealth"]
+    },
+    {
+      "date": "2026-04-20",
+      "platform": "reddit",
+      "contentType": "thought-leadership",
+      "theme": "Expert Wellness Q&A",
+      "contentDescription": "AMA-style post in r/AskScience or r/IAmA — wellness expert answers community questions about evidence-based wellness practices",
+      "estimatedEngagement": {
+        "reach": 12000,
+        "engagementRate": 0.1
+      },
+      "notes": "Schedule for Sunday morning for maximum Reddit traffic"
+    },
+    {
+      "date": "2026-04-21",
+      "platform": "facebook",
+      "contentType": "educational",
+      "theme": "Morning Routine Transformation",
+      "contentDescription": "Native video: '3 Morning Habits Backed by Science' — 3-minute educational video with captions",
+      "estimatedEngagement": {
+        "reach": 4000,
+        "engagementRate": 0.07
+      },
+      "callToAction": "Share your morning routine in the comments"
+    }
+  ],
+  "platformBalance": {
+    "reddit": 0.25,
+    "tiktok": 0.25,
+    "facebook": 0.25,
+    "instagram": 0.25
+  },
+  "contentTypeBalance": {
+    "educational": 0.25,
+    "behind-the-scenes": 0.125,
+    "community": 0.125,
+    "engagement": 0.25,
+    "thought-leadership": 0.25
+  },
+  "seasonalEvents": [
+    {
+      "date": "2026-04-22",
+      "eventName": "Earth Day",
+      "relevantThemes": ["Morning Routine Transformation", "30-Day Wellness Challenge"],
+      "suggestedContentTypes": ["engagement", "community"],
+      "platformRecommendations": ["instagram", "tiktok"],
+      "estimatedImpact": "medium"
+    },
+    {
+      "date": "2026-04-26",
+      "eventName": "Stress Awareness Month Wrap-up",
+      "relevantThemes": ["Mental Health Awareness Stories", "Expert Wellness Q&A"],
+      "suggestedContentTypes": ["educational", "thought-leadership"],
+      "platformRecommendations": ["reddit", "facebook"],
+      "estimatedImpact": "high"
+    }
+  ],
+  "notes": "This 14-day calendar establishes the campaign rhythm before Mental Health Awareness Month in May. Content is balanced across platforms with heavier educational content on Reddit/Facebook and engagement-driven content on TikTok/Instagram.",
+  "lastUpdated": "2026-03-01T10:30:00.000Z"
+}

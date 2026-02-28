@@ -1,0 +1,96 @@
+{
+  "planId": "plan-2026-03-wellness-spring",
+  "campaignName": "Spring Wellness Reset Campaign",
+  "objective": "Increase brand awareness and drive sign-ups for the wellness platform through seasonal content aligned with Mental Health Awareness Month and spring renewal themes",
+  "targetAudience": "Health-conscious millennials and Gen Z adults aged 22-38 interested in mental wellness, fitness, and self-improvement",
+  "contentThemes": [
+    {
+      "theme": "Morning Routine Transformation",
+      "rationale": "TrendBrief shows 'morning routine' content trending across TikTok and Instagram with engagement rates 3x higher than average. CompetitorReport reveals gap in competitors' morning wellness content. Algorithm data shows short-form video with sound trends performs best.",
+      "contentTypes": ["educational", "behind-the-scenes", "engagement"],
+      "platformFit": {
+        "tiktok": 0.9,
+        "instagram": 0.85,
+        "facebook": 0.5,
+        "reddit": 0.3
+      }
+    },
+    {
+      "theme": "Mental Health Awareness Stories",
+      "rationale": "May is Mental Health Awareness Month — ViralPatternReport shows personal story content goes viral with 'vulnerability + practical advice' format. Reddit AMA format underutilized by competitors per CompetitorReport.",
+      "contentTypes": ["community", "thought-leadership", "engagement"],
+      "platformFit": {
+        "reddit": 0.95,
+        "facebook": 0.8,
+        "instagram": 0.7,
+        "tiktok": 0.6
+      }
+    },
+    {
+      "theme": "30-Day Wellness Challenge",
+      "rationale": "ViralPatternReport identifies community challenges as highest-engagement format across all platforms. PlatformAlgorithmReport shows TikTok and Instagram boost challenge content with dedicated hashtag pages.",
+      "contentTypes": ["engagement", "promotional", "community"],
+      "platformFit": {
+        "tiktok": 0.95,
+        "instagram": 0.9,
+        "facebook": 0.75,
+        "reddit": 0.4
+      }
+    },
+    {
+      "theme": "Expert Wellness Q&A",
+      "rationale": "CompetitorReport shows competitors lack expert-driven content. Reddit AMA format has high engagement in wellness subreddits. Facebook Live Q&A generates 6x engagement per algorithm data.",
+      "contentTypes": ["educational", "thought-leadership", "engagement"],
+      "platformFit": {
+        "reddit": 0.9,
+        "facebook": 0.85,
+        "instagram": 0.6,
+        "tiktok": 0.5
+      }
+    }
+  ],
+  "timeline": {
+    "startDate": "2026-04-15",
+    "endDate": "2026-05-31"
+  },
+  "successMetrics": [
+    {
+      "metric": "Total content reach",
+      "target": 500000
+    },
+    {
+      "metric": "Average engagement rate",
+      "target": 4.5,
+      "platform": "tiktok"
+    },
+    {
+      "metric": "Reddit post upvotes average",
+      "target": 200,
+      "platform": "reddit"
+    },
+    {
+      "metric": "Instagram carousel save rate",
+      "target": 8,
+      "platform": "instagram"
+    },
+    {
+      "metric": "New followers across platforms",
+      "target": 5000
+    }
+  ],
+  "budget": {
+    "estimatedCost": 2500,
+    "optimizations": [
+      "Repurpose long-form Reddit content into TikTok scripts to reduce production costs",
+      "Use community challenge UGC to supplement branded content",
+      "Batch-produce video content for TikTok and Reels in single sessions"
+    ]
+  },
+  "researchInsights": {
+    "trendSummary": "Short-form video wellness content is trending with 3x higher engagement. Morning routine and challenge formats dominate TikTok and Instagram. Reddit wellness communities show strong appetite for authentic, expert-driven discussions.",
+    "competitorInsights": "Primary competitors lack Reddit presence entirely and rely heavily on polished Instagram content. Gap exists in authentic storytelling and community-driven wellness content. No competitor is running AMA-style expert engagement.",
+    "opportunityStatement": "By combining the trending morning routine format with Mental Health Awareness Month timing and an underserved Reddit community strategy, this campaign can establish brand authority in the wellness space while competitors focus on Instagram-only approaches."
+  },
+  "createdAt": "2026-03-01T10:00:00.000Z",
+  "createdBy": "content-strategist"
+}
