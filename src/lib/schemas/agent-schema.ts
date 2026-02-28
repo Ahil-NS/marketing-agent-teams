@@ -5,6 +5,16 @@ export const exampleInputsSchema = z.object({
   inputs: z.record(z.string(), z.unknown()),
 })
 
+export const skillPermissionsSchema = z.object({
+  credentials: z.array(z.string()).default([]),
+  dataScopes: z.array(z.string()).default([]),
+  toolScopes: z.array(z.string()).default([]),
+}).default({
+  credentials: [],
+  dataScopes: [],
+  toolScopes: [],
+})
+
 export const agentDefinitionSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
@@ -20,6 +30,7 @@ export const agentDefinitionSchema = z.object({
   model: z.enum(['haiku', 'sonnet']).default('haiku'),
   tools: z.array(z.string()).default([]),
   trustTier: z.enum(['builtin', 'reviewed', 'unreviewed']).default('builtin'),
+  permissions: skillPermissionsSchema,
   examples: z.array(exampleInputsSchema).optional(),
 })
 

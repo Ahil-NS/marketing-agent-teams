@@ -9,6 +9,14 @@ tools:
   - WebSearch
   - Read
 trustTier: builtin
+permissions:
+  credentials: []
+  dataScopes:
+    - brand-config
+    - trend-data
+  toolScopes:
+    - WebSearch
+    - Read
 ---
 
 # Valid Test Agent

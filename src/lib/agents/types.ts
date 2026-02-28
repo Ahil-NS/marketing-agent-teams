@@ -1,5 +1,15 @@
 import type {MATError} from '../utils/errors.js'
 
+/** Permission boundaries for agent execution — extracted from SKILL.md YAML front matter */
+export interface SkillPermissions {
+  /** Credential keys this agent may access (e.g., ['reddit-oauth']) */
+  credentials: string[]
+  /** Data scopes this agent may read (e.g., ['brand-config', 'trend-data']) */
+  dataScopes: string[]
+  /** Tool scopes this agent may invoke (e.g., ['WebSearch', 'WebFetch']) */
+  toolScopes: string[]
+}
+
 export interface AgentResult<T = unknown> {
   agentName: string
   runId: string
@@ -39,6 +49,8 @@ export interface SkillDefinition {
   tools: string[]
   /** Trust tier — determines credential access and publishing capability */
   trustTier: 'builtin' | 'reviewed' | 'unreviewed'
+  /** Permission boundaries — credentials, data scopes, tool scopes */
+  permissions: SkillPermissions
   /** Full SKILL.md content (YAML front matter stripped) used as system prompt */
   systemPrompt: string
   /** Concatenated knowledge/ file contents — injected into system prompt */

@@ -21,6 +21,7 @@ function createSkillDef(overrides?: Partial<SkillDefinition>): SkillDefinition {
     model: 'haiku',
     tools: ['WebSearch'],
     trustTier: 'builtin',
+    permissions: {credentials: [], dataScopes: [], toolScopes: []},
     systemPrompt: 'You are a test agent.',
     knowledgeContext: '',
     templates: {},

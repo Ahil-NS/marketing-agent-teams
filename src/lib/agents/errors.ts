@@ -66,3 +66,39 @@ export class MemoryCorruptionError extends MATError {
     super(message, code, reason, resolution, source, severity)
   }
 }
+
+/**
+ * Error thrown when loading or validating a SKILL.md agent definition.
+ *
+ * Error codes:
+ * - SKILL_NOT_FOUND — SKILL.md file does not exist at expected path
+ * - SKILL_PARSE_FAILED — YAML front matter is malformed
+ * - SKILL_VALIDATION_FAILED — Front matter does not match agentDefinitionSchema
+ * - SKILL_KNOWLEDGE_READ_FAILED — A file in knowledge/ cannot be read
+ * - SKILL_TEMPLATE_READ_FAILED — A file in templates/ cannot be read
+ *
+ * Each error includes NFR27 three-part message: what happened, why, and how to fix.
+ */
+export class SkillLoadError extends MATError {
+  constructor(
+    /** Path to the agent directory or file that caused the error */
+    public readonly agentPath: string,
+    /** Which field or component failed */
+    public readonly field: string,
+    /** Error code */
+    code: string,
+    /** Why the error happened */
+    reason: string,
+    /** How to fix it */
+    resolution: string,
+  ) {
+    super(
+      `Failed to load agent skill at "${agentPath}": ${reason}`,
+      code,
+      reason,
+      resolution,
+      `skill-loader:${field}`,
+      'permanent' as ErrorSeverity,
+    )
+  }
+}

@@ -145,6 +145,92 @@ describe('agentDefinitionSchema', () => {
     const result = agentDefinitionSchema.safeParse(invalid)
     expect(result.success).toBe(false)
   })
+
+  it('applies default permissions when not provided', () => {
+    const minimal = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'creation',
+    }
+    const result = agentDefinitionSchema.safeParse(minimal)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.permissions).toEqual({
+        credentials: [],
+        dataScopes: [],
+        toolScopes: [],
+      })
+    }
+  })
+
+  it('accepts full permissions object', () => {
+    const withPermissions = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'intelligence',
+      permissions: {
+        credentials: ['reddit-oauth'],
+        dataScopes: ['brand-config', 'trend-data'],
+        toolScopes: ['WebSearch', 'WebFetch'],
+      },
+    }
+    const result = agentDefinitionSchema.safeParse(withPermissions)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.permissions.credentials).toEqual(['reddit-oauth'])
+      expect(result.data.permissions.dataScopes).toContain('brand-config')
+      expect(result.data.permissions.toolScopes).toHaveLength(2)
+    }
+  })
+
+  it('applies defaults for partial permissions object', () => {
+    const partial = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'intelligence',
+      permissions: {
+        credentials: ['my-key'],
+      },
+    }
+    const result = agentDefinitionSchema.safeParse(partial)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.permissions.credentials).toEqual(['my-key'])
+      expect(result.data.permissions.dataScopes).toEqual([])
+      expect(result.data.permissions.toolScopes).toEqual([])
+    }
+  })
+
+  it('accepts empty permissions object', () => {
+    const empty = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'intelligence',
+      permissions: {},
+    }
+    const result = agentDefinitionSchema.safeParse(empty)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.permissions).toEqual({
+        credentials: [],
+        dataScopes: [],
+        toolScopes: [],
+      })
+    }
+  })
+
+  it('rejects permissions.credentials as non-array', () => {
+    const invalid = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'intelligence',
+      permissions: {
+        credentials: 'not-an-array',
+      },
+    }
+    const result = agentDefinitionSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
 })
 
 describe('trendBriefSchema', () => {
