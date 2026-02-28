@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+oclif.manifest.json
+
+# Project data directory
+.mat/
+
+_bmad/
+_bmad-output/
+.claude/commands/bmad-*
+
+# Claude Code local settings
+.claude/settings.local.json
