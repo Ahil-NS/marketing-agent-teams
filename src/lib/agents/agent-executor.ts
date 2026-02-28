@@ -1,7 +1,7 @@
 import type {z} from 'zod'
 
 import {createAgentExecutor} from '../agent-executor/index.js'
-import {AgentValidationError as NewAgentValidationError} from '../agent-executor/errors.js'
+import {AgentNoResultError} from '../agent-executor/errors.js'
 
 import type {AgentResult} from './types.js'
 import {AgentValidationError} from './errors.js'
@@ -73,7 +73,7 @@ export async function executeAgent<T>(
   }
 
   // Should not reach here — ClaudeAgentExecutor throws on all error paths
-  throw new NewAgentValidationError(
+  throw new AgentNoResultError(
     `Agent '${agentName}' completed without result`,
     'AGENT_NO_RESULT',
     `Agent '${agentName}' completed without result — this should not happen`,

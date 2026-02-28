@@ -26,7 +26,7 @@ export class ClaudeAgentExecutor implements AgentExecutor {
       permissionMode: 'bypassPermissions',
     }
 
-    if (options.budget?.maxCostUsd !== undefined) {
+    if (options.budget?.maxCostUsd !== undefined && Number.isFinite(options.budget.maxCostUsd)) {
       queryOptions.maxBudgetUsd = options.budget.maxCostUsd
     }
 

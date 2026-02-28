@@ -1,5 +1,3 @@
-import type {z} from 'zod'
-
 export interface AgentInput {
   /** The user prompt to send to the agent */
   prompt: string
@@ -27,11 +25,10 @@ export interface AgentExecuteOptions {
   allowedTools?: string[]
   /** Per-agent budget limit */
   budget?: BudgetConstraint
-  /** Zod schema for output validation */
-  outputSchema?: z.ZodType
 }
 
 export interface AgentMessage {
+  /** Message type. 'progress' is reserved for future streaming support (MVP only yields 'result'). */
   type: 'progress' | 'result'
   subtype?: 'success' | 'error_max_turns' | 'error_max_budget_usd' | 'error_during_execution'
   /** Final text output (only on result messages) */
@@ -47,8 +44,8 @@ export interface AgentMessage {
   numTurns?: number
   /** Wall time in milliseconds */
   durationMs?: number
-  /** Error details (only on error result messages) */
-  errors?: Array<{message: string}>
+  /** Error details (only on error result messages). Matches SDK string[] format. */
+  errors?: string[]
 }
 
 export interface CostEstimate {

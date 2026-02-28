@@ -73,7 +73,7 @@ describe('agent-executor type contracts', () => {
     const msg: AgentMessage = {
       type: 'result',
       subtype: 'error_max_turns',
-      errors: [{message: 'exceeded limit'}],
+      errors: ['exceeded limit'],
     }
     expect(msg.subtype).toBe('error_max_turns')
   })
