@@ -1,5 +1,10 @@
 import {z} from 'zod'
 
+export const exampleInputsSchema = z.object({
+  description: z.string().min(1),
+  inputs: z.record(z.string(), z.unknown()),
+})
+
 export const agentDefinitionSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
@@ -15,6 +20,7 @@ export const agentDefinitionSchema = z.object({
   model: z.enum(['haiku', 'sonnet']).default('haiku'),
   tools: z.array(z.string()).default([]),
   trustTier: z.enum(['builtin', 'reviewed', 'unreviewed']).default('builtin'),
+  examples: z.array(exampleInputsSchema).optional(),
 })
 
 export type AgentDefinition = z.infer<typeof agentDefinitionSchema>

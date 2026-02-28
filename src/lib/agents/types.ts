@@ -45,6 +45,16 @@ export interface SkillDefinition {
   knowledgeContext: string
   /** Template name -> template content map from templates/ directory */
   templates: Record<string, string>
+  /** Optional example inputs for isolated agent testing */
+  examples?: ExampleInputs[]
+}
+
+/** Example inputs for testing an agent in isolation */
+export interface ExampleInputs {
+  /** Human-readable description of the test scenario */
+  description: string
+  /** Key-value inputs to pass to the agent */
+  inputs: Record<string, unknown>
 }
 
 /** A single memory entry stored by the agent memory system */

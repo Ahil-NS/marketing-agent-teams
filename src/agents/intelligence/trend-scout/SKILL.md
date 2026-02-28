@@ -12,6 +12,20 @@ tools:
   - Read
   - Glob
 trustTier: builtin
+examples:
+  - description: "SaaS product trend research"
+    inputs:
+      brandName: "TestBrand"
+      productDomain: "SaaS"
+      audienceType: "developers"
+      platforms: ["reddit", "tiktok"]
+  - description: "E-commerce seasonal trends"
+    inputs:
+      brandName: "ShopExample"
+      productDomain: "E-commerce"
+      audienceType: "consumers"
+      platforms: ["facebook", "instagram"]
+      trendTimeframeDays: 30
 ---
 
 # Trend Scout Agent

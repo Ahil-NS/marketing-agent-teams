@@ -98,6 +98,53 @@ describe('agentDefinitionSchema', () => {
     const result = agentDefinitionSchema.safeParse(invalid)
     expect(result.success).toBe(false)
   })
+
+  it('accepts optional examples field with valid entries', () => {
+    const withExamples = {
+      name: 'trend-scout',
+      description: 'Researches trends',
+      cluster: 'intelligence',
+      examples: [
+        {
+          description: 'SaaS product trend research',
+          inputs: {brandName: 'TestBrand', productDomain: 'SaaS'},
+        },
+      ],
+    }
+    const result = agentDefinitionSchema.safeParse(withExamples)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.examples).toHaveLength(1)
+      expect(result.data.examples![0].description).toBe('SaaS product trend research')
+      expect(result.data.examples![0].inputs).toEqual({brandName: 'TestBrand', productDomain: 'SaaS'})
+    }
+  })
+
+  it('accepts agent definition without examples field', () => {
+    const withoutExamples = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'creation',
+    }
+    const result = agentDefinitionSchema.safeParse(withoutExamples)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.examples).toBeUndefined()
+    }
+  })
+
+  it('rejects examples with empty description', () => {
+    const invalid = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'intelligence',
+      examples: [
+        {description: '', inputs: {key: 'value'}},
+      ],
+    }
+    const result = agentDefinitionSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
 })
 
 describe('trendBriefSchema', () => {
