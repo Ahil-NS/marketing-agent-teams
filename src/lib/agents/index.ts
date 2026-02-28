@@ -1,5 +1,6 @@
 export {executeAgent} from './agent-executor.js'
 export type {AgentExecuteOptions} from './agent-executor.js'
 export {runTrendScout} from './intelligence.js'
-export type {AgentResult, AgentInputs, ResearchInputs} from './types.js'
-export {AgentExecutionError, AgentTimeoutError, AgentValidationError} from './errors.js'
+export {AgentMemoryStore} from './memory-store.js'
+export type {AgentResult, AgentInputs, ResearchInputs, SkillDefinition, MemoryEntry, AgentMemoryState, AgentMemoryOptions} from './types.js'
+export {AgentExecutionError, AgentTimeoutError, AgentValidationError, MemoryStoreError, MemoryCorruptionError} from './errors.js'

@@ -1,4 +1,5 @@
 import {MATError} from '../utils/errors.js'
+import type {ErrorSeverity} from '../utils/errors.js'
 
 export class AgentExecutionError extends MATError {
   constructor(agentName: string, code: string, message: string) {
@@ -37,5 +38,31 @@ export class AgentValidationError extends MATError {
       `agents/${agentName}`,
       'permanent',
     )
+  }
+}
+
+export class MemoryStoreError extends MATError {
+  constructor(
+    message: string,
+    code: string,
+    reason: string,
+    resolution: string,
+    source: string,
+    severity: ErrorSeverity,
+  ) {
+    super(message, code, reason, resolution, source, severity)
+  }
+}
+
+export class MemoryCorruptionError extends MATError {
+  constructor(
+    message: string,
+    code: string,
+    reason: string,
+    resolution: string,
+    source: string,
+    severity: ErrorSeverity,
+  ) {
+    super(message, code, reason, resolution, source, severity)
   }
 }

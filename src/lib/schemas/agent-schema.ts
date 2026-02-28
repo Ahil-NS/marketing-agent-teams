@@ -19,6 +19,28 @@ export const agentDefinitionSchema = z.object({
 
 export type AgentDefinition = z.infer<typeof agentDefinitionSchema>
 
+export const memoryEntrySchema = z.object({
+  id: z.string().uuid(),
+  runId: z.string().min(1),
+  timestamp: z.string().datetime(),
+  type: z.enum(['learning', 'rejection', 'pattern', 'preference']),
+  content: z.string().min(1),
+  source: z.string().min(1),
+  confidence: z.number().min(0).max(1),
+})
+
+export type MemoryEntryValidated = z.infer<typeof memoryEntrySchema>
+
+export const memoryStateSchema = z.object({
+  agentName: z.string().min(1),
+  lastRunId: z.string().nullable(),
+  lastRunAt: z.string().datetime().nullable(),
+  entries: z.array(memoryEntrySchema),
+  metadata: z.record(z.string(), z.any()),
+})
+
+export type MemoryStateValidated = z.infer<typeof memoryStateSchema>
+
 export const trendBriefSchema = z.object({
   trends: z.array(
     z.object({
