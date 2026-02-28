@@ -1,6 +1,9 @@
+import {readFileSync} from 'node:fs'
+import {join} from 'node:path'
+
 import {describe, it, expect} from 'vitest'
 
-import {agentDefinitionSchema, trendBriefSchema} from '../../../src/lib/schemas/agent-schema.js'
+import {agentDefinitionSchema, trendBriefSchema, competitorReportSchema, researchInputsSchema} from '../../../src/lib/schemas/agent-schema.js'
 
 describe('agentDefinitionSchema', () => {
   it('validates a complete agent definition', () => {
@@ -267,25 +270,42 @@ describe('trendBriefSchema', () => {
     trends: [
       {
         name: 'Test Trend',
+        platform: 'tiktok',
         description: 'A trending topic',
-        relevance: 0.85,
-        source: 'https://example.com',
+        engagementMetrics: {
+          source: 'TikTok Creative Center',
+          recency: '2026-02-28',
+          volume: 100000,
+        },
+        trajectory: 'emerging' as const,
+        relevanceScore: 4,
       },
     ],
     viralPatterns: [
       {
         pattern: 'Hook pattern',
-        platform: 'tiktok',
+        platforms: ['tiktok', 'instagram'],
+        format: 'short-form video',
         examples: ['Example 1'],
       },
     ],
     opportunities: [
       {
         description: 'Marketing opportunity',
-        platform: 'reddit',
-        priority: 'high' as const,
+        relevanceScore: 5,
+        timelinessScore: 4,
+        platforms: ['reddit', 'tiktok'],
+        suggestedAngle: 'Behind-the-scenes content format',
       },
     ],
+    risks: [
+      {
+        description: 'Trend may peak soon',
+        severity: 'medium' as const,
+        mitigation: 'Publish within 5 days',
+      },
+    ],
+    recommendations: 'Focus on short-form video content.',
   }
 
   it('validates a complete trend brief', () => {
@@ -293,10 +313,17 @@ describe('trendBriefSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('accepts brief without optional source field', () => {
+  it('accepts brief without optional volume field', () => {
     const brief = {
       ...validBrief,
-      trends: [{name: 'No Source', description: 'test', relevance: 0.5}],
+      trends: [{
+        name: 'No Volume',
+        platform: 'reddit',
+        description: 'test',
+        engagementMetrics: {source: 'Reddit', recency: '2026-02-28'},
+        trajectory: 'peaking' as const,
+        relevanceScore: 3,
+      }],
     }
     const result = trendBriefSchema.safeParse(brief)
     expect(result.success).toBe(true)
@@ -305,34 +332,64 @@ describe('trendBriefSchema', () => {
   it('accepts brief without optional examples field', () => {
     const brief = {
       ...validBrief,
-      viralPatterns: [{pattern: 'test', platform: 'reddit'}],
+      viralPatterns: [{pattern: 'test', platforms: ['reddit'], format: 'text post'}],
     }
     const result = trendBriefSchema.safeParse(brief)
     expect(result.success).toBe(true)
   })
 
-  it('rejects relevance below 0', () => {
+  it('rejects relevanceScore below 1', () => {
     const brief = {
       ...validBrief,
-      trends: [{name: 'test', description: 'test', relevance: -0.1}],
+      trends: [{
+        name: 'test',
+        platform: 'tiktok',
+        description: 'test',
+        engagementMetrics: {source: 'test', recency: 'today'},
+        trajectory: 'emerging' as const,
+        relevanceScore: 0,
+      }],
     }
     const result = trendBriefSchema.safeParse(brief)
     expect(result.success).toBe(false)
   })
 
-  it('rejects relevance above 1', () => {
+  it('rejects relevanceScore above 5', () => {
     const brief = {
       ...validBrief,
-      trends: [{name: 'test', description: 'test', relevance: 1.1}],
+      trends: [{
+        name: 'test',
+        platform: 'tiktok',
+        description: 'test',
+        engagementMetrics: {source: 'test', recency: 'today'},
+        trajectory: 'emerging' as const,
+        relevanceScore: 6,
+      }],
     }
     const result = trendBriefSchema.safeParse(brief)
     expect(result.success).toBe(false)
   })
 
-  it('rejects invalid priority', () => {
+  it('rejects invalid trajectory', () => {
     const brief = {
       ...validBrief,
-      opportunities: [{description: 'test', platform: 'reddit', priority: 'critical'}],
+      trends: [{
+        name: 'test',
+        platform: 'tiktok',
+        description: 'test',
+        engagementMetrics: {source: 'test', recency: 'today'},
+        trajectory: 'growing',
+        relevanceScore: 3,
+      }],
+    }
+    const result = trendBriefSchema.safeParse(brief)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid risk severity', () => {
+    const brief = {
+      ...validBrief,
+      risks: [{description: 'test', severity: 'critical', mitigation: 'test'}],
     }
     const result = trendBriefSchema.safeParse(brief)
     expect(result.success).toBe(false)
@@ -343,6 +400,8 @@ describe('trendBriefSchema', () => {
       trends: [],
       viralPatterns: [],
       opportunities: [],
+      risks: [],
+      recommendations: '',
     }
     const result = trendBriefSchema.safeParse(brief)
     expect(result.success).toBe(true)
@@ -352,5 +411,224 @@ describe('trendBriefSchema', () => {
     expect(trendBriefSchema.safeParse({}).success).toBe(false)
     expect(trendBriefSchema.safeParse({trends: []}).success).toBe(false)
     expect(trendBriefSchema.safeParse({trends: [], viralPatterns: []}).success).toBe(false)
+    expect(trendBriefSchema.safeParse({trends: [], viralPatterns: [], opportunities: []}).success).toBe(false)
+    expect(trendBriefSchema.safeParse({trends: [], viralPatterns: [], opportunities: [], risks: []}).success).toBe(false)
+  })
+})
+
+describe('competitorReportSchema', () => {
+  const validReport = {
+    competitors: [
+      {
+        name: 'CompetitorCo',
+        platforms: [
+          {
+            platform: 'tiktok',
+            handle: '@competitorco',
+            followerCount: 50000,
+            postingFrequency: '3 times/week',
+            engagementRate: '4.5%',
+            contentTypes: ['tutorials', 'product demos'],
+          },
+        ],
+      },
+    ],
+    contentAnalysis: [
+      {
+        competitor: 'CompetitorCo',
+        topPerformingContent: [
+          {
+            platform: 'tiktok',
+            description: 'Product comparison video',
+            engagementSignals: '50K views, 5K likes',
+            format: 'short-form video',
+          },
+        ],
+      },
+    ],
+    viralContent: [
+      {
+        competitor: 'CompetitorCo',
+        platform: 'tiktok',
+        description: 'Behind-the-scenes video',
+        whyViral: 'Authentic tone with trending sound',
+        replicabilityScore: 4,
+      },
+    ],
+    gaps: [
+      {
+        area: 'Reddit presence',
+        description: 'No Reddit strategy despite active audience',
+        opportunity: 'Establish community presence via AMA',
+      },
+    ],
+    recommendations: 'Target Reddit as uncontested channel.',
+  }
+
+  it('validates a complete competitor report', () => {
+    const result = competitorReportSchema.safeParse(validReport)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts platforms without optional handle and followerCount', () => {
+    const report = {
+      ...validReport,
+      competitors: [{
+        name: 'Test',
+        platforms: [{
+          platform: 'reddit',
+          postingFrequency: 'daily',
+          engagementRate: '2%',
+          contentTypes: ['text posts'],
+        }],
+      }],
+    }
+    const result = competitorReportSchema.safeParse(report)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects replicabilityScore below 1', () => {
+    const report = {
+      ...validReport,
+      viralContent: [{
+        competitor: 'Test',
+        platform: 'tiktok',
+        description: 'test',
+        whyViral: 'test',
+        replicabilityScore: 0,
+      }],
+    }
+    const result = competitorReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects replicabilityScore above 5', () => {
+    const report = {
+      ...validReport,
+      viralContent: [{
+        competitor: 'Test',
+        platform: 'tiktok',
+        description: 'test',
+        whyViral: 'test',
+        replicabilityScore: 6,
+      }],
+    }
+    const result = competitorReportSchema.safeParse(report)
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts empty arrays', () => {
+    const report = {
+      competitors: [],
+      contentAnalysis: [],
+      viralContent: [],
+      gaps: [],
+      recommendations: '',
+    }
+    const result = competitorReportSchema.safeParse(report)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects missing required fields', () => {
+    expect(competitorReportSchema.safeParse({}).success).toBe(false)
+    expect(competitorReportSchema.safeParse({competitors: []}).success).toBe(false)
+    expect(competitorReportSchema.safeParse({competitors: [], contentAnalysis: []}).success).toBe(false)
+    expect(competitorReportSchema.safeParse({competitors: [], contentAnalysis: [], viralContent: []}).success).toBe(false)
+    expect(competitorReportSchema.safeParse({competitors: [], contentAnalysis: [], viralContent: [], gaps: []}).success).toBe(false)
+  })
+})
+
+describe('researchInputsSchema', () => {
+  it('validates correct inputs', () => {
+    const valid = {
+      brandName: 'TestBrand',
+      productDomain: 'SaaS',
+      audienceType: 'developers',
+      platforms: ['reddit', 'tiktok'],
+    }
+    const result = researchInputsSchema.safeParse(valid)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts optional trendTimeframeDays', () => {
+    const valid = {
+      brandName: 'TestBrand',
+      productDomain: 'SaaS',
+      audienceType: 'developers',
+      platforms: ['reddit'],
+      trendTimeframeDays: 14,
+    }
+    const result = researchInputsSchema.safeParse(valid)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.trendTimeframeDays).toBe(14)
+    }
+  })
+
+  it('rejects empty brandName', () => {
+    const invalid = {
+      brandName: '',
+      productDomain: 'SaaS',
+      audienceType: 'developers',
+      platforms: ['reddit'],
+    }
+    const result = researchInputsSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty platforms array', () => {
+    const invalid = {
+      brandName: 'Test',
+      productDomain: 'SaaS',
+      audienceType: 'developers',
+      platforms: [],
+    }
+    const result = researchInputsSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing required fields', () => {
+    expect(researchInputsSchema.safeParse({}).success).toBe(false)
+    expect(researchInputsSchema.safeParse({brandName: 'test'}).success).toBe(false)
+  })
+
+  it('rejects negative trendTimeframeDays', () => {
+    const invalid = {
+      brandName: 'Test',
+      productDomain: 'SaaS',
+      audienceType: 'developers',
+      platforms: ['reddit'],
+      trendTimeframeDays: -5,
+    }
+    const result = researchInputsSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects non-integer trendTimeframeDays', () => {
+    const invalid = {
+      brandName: 'Test',
+      productDomain: 'SaaS',
+      audienceType: 'developers',
+      platforms: ['reddit'],
+      trendTimeframeDays: 14.5,
+    }
+    const result = researchInputsSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('fixture validation', () => {
+  const fixturesDir = join(import.meta.dirname, '../../fixtures/responses')
+
+  it('claude-trend-brief.json fixture validates against trendBriefSchema', () => {
+    const fixture = JSON.parse(readFileSync(join(fixturesDir, 'claude-trend-brief.json'), 'utf-8'))
+    const result = trendBriefSchema.safeParse(fixture)
+    expect(result.success).toBe(true)
+  })
+
+  it('claude-competitor-report.json fixture validates against competitorReportSchema', () => {
+    const fixture = JSON.parse(readFileSync(join(fixturesDir, 'claude-competitor-report.json'), 'utf-8'))
+    const result = competitorReportSchema.safeParse(fixture)
+    expect(result.success).toBe(true)
   })
 })

@@ -1,66 +1,78 @@
-import {trendBriefSchema} from '../schemas/agent-schema.js'
-import type {TrendBrief} from '../schemas/agent-schema.js'
+import {dirname, join} from 'node:path'
+import {fileURLToPath} from 'node:url'
+
+import {trendBriefSchema, competitorReportSchema} from '../schemas/agent-schema.js'
+import type {TrendBrief, CompetitorReport} from '../schemas/agent-schema.js'
 
 import {executeAgent} from './agent-executor.js'
-import type {ResearchInputs} from './types.js'
+import {loadSkill} from './skill-loader.js'
+import type {AgentResult, ResearchInputs} from './types.js'
 
-const TREND_SCOUT_SYSTEM_PROMPT = `You are the Trend Scout agent for a marketing automation platform.
-
-Your role is to research current trends, viral patterns, and marketing opportunities for a given brand and audience.
-
-## Output Format
-
-You MUST respond with ONLY a valid JSON object matching this exact structure:
-
-{
-  "trends": [
-    {
-      "name": "trend name",
-      "description": "what this trend is about",
-      "relevance": 0.0-1.0,
-      "source": "optional source URL or reference"
-    }
-  ],
-  "viralPatterns": [
-    {
-      "pattern": "description of the viral pattern",
-      "platform": "platform name (e.g., tiktok, reddit, instagram)",
-      "examples": ["optional example 1", "optional example 2"]
-    }
-  ],
-  "opportunities": [
-    {
-      "description": "marketing opportunity description",
-      "platform": "target platform",
-      "priority": "high|medium|low"
-    }
-  ]
+/**
+ * Resolve the agents root directory.
+ * Agents live in src/agents/ relative to the project root.
+ */
+function agentsRoot(): string {
+  // __dirname equivalent: this file is at src/lib/agents/intelligence.ts
+  // agents root is at src/agents/
+  const __dirname = dirname(fileURLToPath(import.meta.url))
+  return join(__dirname, '..', '..', 'agents')
 }
 
-## Rules
-
-- Research current, real-time trends using web search
-- Focus on actionable marketing opportunities
-- Score relevance from 0.0 (not relevant) to 1.0 (highly relevant)
-- Prioritize opportunities based on potential impact and feasibility
-- Return ONLY the JSON object — no markdown, no explanation, no code fences`
-
-export async function runTrendScout(inputs: ResearchInputs): Promise<TrendBrief> {
+/**
+ * Run the Trend Scout intelligence agent.
+ * Loads SKILL.md definition, constructs prompt from inputs, executes via Agent SDK,
+ * and validates output against trendBriefSchema.
+ */
+export async function runTrendScout(inputs: ResearchInputs): Promise<AgentResult<TrendBrief>> {
   const timeframe = inputs.trendTimeframeDays ?? 30
+  const skill = await loadSkill(join(agentsRoot(), 'intelligence', 'trend-scout'))
 
-  const result = await executeAgent('trend-scout', {
-    prompt: `Research current trends for "${inputs.brandName}".
-Product domain: ${inputs.productDomain}
+  const knowledgeSection = skill.knowledgeContext
+    ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  return executeAgent('trend-scout', {
+    prompt: `Research current trends for brand "${inputs.brandName}" in domain "${inputs.productDomain}".
 Target audience: ${inputs.audienceType}
 Target platforms: ${inputs.platforms.join(', ')}
 Timeframe: last ${timeframe} days
 
-Output a JSON trend brief.`,
-    systemPrompt: TREND_SCOUT_SYSTEM_PROMPT,
-    allowedTools: ['WebSearch', 'WebFetch'],
-    model: 'haiku',
+Use your web search and research tools to find real, current trends.
+Produce a trend brief following your output format specification.`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    allowedTools: skill.tools,
+    model: skill.model,
     outputSchema: trendBriefSchema,
+    maxTurns: 15,
   })
+}
 
-  return result.outputs
+/**
+ * Run the Competitor Analyst intelligence agent.
+ * Loads SKILL.md definition, constructs prompt from inputs, executes via Agent SDK,
+ * and validates output against competitorReportSchema.
+ */
+export async function runCompetitorAnalyst(inputs: ResearchInputs): Promise<AgentResult<CompetitorReport>> {
+  const timeframe = inputs.trendTimeframeDays ?? 30
+  const skill = await loadSkill(join(agentsRoot(), 'intelligence', 'competitor-analyst'))
+
+  const knowledgeSection = skill.knowledgeContext
+    ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  return executeAgent('competitor-analyst', {
+    prompt: `Analyze competitor marketing strategies for brand "${inputs.brandName}" in domain "${inputs.productDomain}".
+Target audience: ${inputs.audienceType}
+Target platforms: ${inputs.platforms.join(', ')}
+Timeframe: last ${timeframe} days
+
+Research competitor social media presence, posting frequency, engagement rates, and content types.
+Flag any viral competitor content. Produce a competitor report following your output format specification.`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: competitorReportSchema,
+    maxTurns: 15,
+  })
 }

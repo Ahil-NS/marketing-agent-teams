@@ -99,25 +99,104 @@ export const trendBriefSchema = z.object({
   trends: z.array(
     z.object({
       name: z.string(),
+      platform: z.string(),
       description: z.string(),
-      relevance: z.number().min(0).max(1),
-      source: z.string().optional(),
+      engagementMetrics: z.object({
+        source: z.string(),
+        recency: z.string(),
+        volume: z.number().optional(),
+      }),
+      trajectory: z.enum(['emerging', 'peaking', 'declining']),
+      relevanceScore: z.number().min(1).max(5),
     }),
   ),
   viralPatterns: z.array(
     z.object({
       pattern: z.string(),
-      platform: z.string(),
+      platforms: z.array(z.string()),
+      format: z.string(),
       examples: z.array(z.string()).optional(),
     }),
   ),
   opportunities: z.array(
     z.object({
       description: z.string(),
-      platform: z.string(),
-      priority: z.enum(['high', 'medium', 'low']),
+      relevanceScore: z.number().min(1).max(5),
+      timelinessScore: z.number().min(1).max(5),
+      platforms: z.array(z.string()),
+      suggestedAngle: z.string(),
     }),
   ),
+  risks: z.array(
+    z.object({
+      description: z.string(),
+      severity: z.enum(['low', 'medium', 'high']),
+      mitigation: z.string(),
+    }),
+  ),
+  recommendations: z.string(),
 })
 
 export type TrendBrief = z.infer<typeof trendBriefSchema>
+
+export const competitorReportSchema = z.object({
+  competitors: z.array(
+    z.object({
+      name: z.string(),
+      platforms: z.array(
+        z.object({
+          platform: z.string(),
+          handle: z.string().optional(),
+          followerCount: z.number().optional(),
+          postingFrequency: z.string(),
+          engagementRate: z.string(),
+          contentTypes: z.array(z.string()),
+        }),
+      ),
+    }),
+  ),
+  contentAnalysis: z.array(
+    z.object({
+      competitor: z.string(),
+      topPerformingContent: z.array(
+        z.object({
+          platform: z.string(),
+          description: z.string(),
+          engagementSignals: z.string(),
+          format: z.string(),
+        }),
+      ),
+    }),
+  ),
+  viralContent: z.array(
+    z.object({
+      competitor: z.string(),
+      platform: z.string(),
+      description: z.string(),
+      whyViral: z.string(),
+      replicabilityScore: z.number().min(1).max(5),
+    }),
+  ),
+  gaps: z.array(
+    z.object({
+      area: z.string(),
+      description: z.string(),
+      opportunity: z.string(),
+    }),
+  ),
+  recommendations: z.string(),
+})
+
+export type CompetitorReport = z.infer<typeof competitorReportSchema>
+
+export const researchInputsSchema = z.object({
+  brandName: z.string().min(1),
+  productDomain: z.string().min(1),
+  audienceType: z.string().min(1),
+  platforms: z.array(z.string().min(1)).min(1),
+  trendTimeframeDays: z.number().int().positive().optional(),
+})
+
+/** Use ResearchInputs from src/lib/agents/types.ts for TypeScript typing.
+ * This schema is for runtime validation of agent inputs. */
+export type ResearchInputsData = z.infer<typeof researchInputsSchema>

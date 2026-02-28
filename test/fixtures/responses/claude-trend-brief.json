@@ -1,0 +1,71 @@
+{
+  "trends": [
+    {
+      "name": "Short-form video product demos",
+      "platform": "tiktok",
+      "description": "Brands using 15-30 second product demos with trending sounds see 3x higher engagement than traditional ads",
+      "engagementMetrics": {
+        "source": "TikTok Creative Center",
+        "recency": "2026-02-28",
+        "volume": 1500000
+      },
+      "trajectory": "emerging",
+      "relevanceScore": 4
+    },
+    {
+      "name": "Reddit AMA marketing",
+      "platform": "reddit",
+      "description": "Founder AMAs in niche subreddits generating authentic brand awareness",
+      "engagementMetrics": {
+        "source": "Reddit trending analysis",
+        "recency": "2026-02-25",
+        "volume": 50000
+      },
+      "trajectory": "peaking",
+      "relevanceScore": 3
+    }
+  ],
+  "viralPatterns": [
+    {
+      "pattern": "Hook-in-first-3-seconds",
+      "platforms": ["tiktok", "instagram"],
+      "format": "short-form video",
+      "examples": ["Wait for it...", "POV: You just discovered..."]
+    },
+    {
+      "pattern": "Before-and-after transformation",
+      "platforms": ["instagram", "tiktok"],
+      "format": "carousel or video",
+      "examples": ["My workflow before vs after using [product]"]
+    }
+  ],
+  "opportunities": [
+    {
+      "description": "Create behind-the-scenes product development content",
+      "relevanceScore": 5,
+      "timelinessScore": 4,
+      "platforms": ["tiktok", "instagram"],
+      "suggestedAngle": "Day-in-the-life format showing the team building features users requested"
+    },
+    {
+      "description": "Launch a subreddit-specific educational series",
+      "relevanceScore": 4,
+      "timelinessScore": 3,
+      "platforms": ["reddit"],
+      "suggestedAngle": "Weekly tips post in r/productivity with genuine value-first approach"
+    }
+  ],
+  "risks": [
+    {
+      "description": "Short-form video trend may saturate within 3 weeks as major brands increase output",
+      "severity": "medium",
+      "mitigation": "Differentiate with authentic, unpolished style rather than high-production approach"
+    },
+    {
+      "description": "Reddit community may reject overtly promotional content",
+      "severity": "high",
+      "mitigation": "Lead with value, disclose brand affiliation, engage genuinely in comments"
+    }
+  ],
+  "recommendations": "1. Prioritize TikTok short-form video content using the hook-in-first-3-seconds pattern. 2. Establish authentic Reddit presence through value-first posts in r/productivity. 3. Cross-post successful TikTok content to Instagram Reels with platform-native adaptations."
+}

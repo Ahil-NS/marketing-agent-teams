@@ -27,6 +27,12 @@ export class AgentTimeoutError extends MATError {
   }
 }
 
+/**
+ * Thrown when agent output fails Zod schema validation.
+ * Story 3.1 references this error code as AGENT_OUTPUT_INVALID — the canonical
+ * code is AGENT_VALIDATION_FAILED, which carries the same semantics.
+ * Severity is transient because retrying may produce valid output.
+ */
 export class AgentValidationError extends MATError {
   constructor(agentName: string, zodError: unknown) {
     const detail = zodError instanceof Error ? zodError.message : String(zodError)
@@ -36,7 +42,7 @@ export class AgentValidationError extends MATError {
       `Agent '${agentName}' returned output that doesn't match the expected schema`,
       'Review the agent system prompt to ensure it produces valid JSON matching the output schema.',
       `agents/${agentName}`,
-      'permanent',
+      'transient',
     )
   }
 }

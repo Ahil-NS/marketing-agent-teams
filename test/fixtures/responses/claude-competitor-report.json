@@ -1,0 +1,102 @@
+{
+  "competitors": [
+    {
+      "name": "CompetitorCo",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "handle": "@competitorco",
+          "followerCount": 50000,
+          "postingFrequency": "3 times/week",
+          "engagementRate": "4.5%",
+          "contentTypes": ["tutorials", "product demos", "behind-the-scenes"]
+        },
+        {
+          "platform": "reddit",
+          "handle": "u/CompetitorCoOfficial",
+          "followerCount": 5000,
+          "postingFrequency": "2 times/week",
+          "engagementRate": "2.1%",
+          "contentTypes": ["text posts", "AMAs"]
+        }
+      ]
+    },
+    {
+      "name": "RivalBrand",
+      "platforms": [
+        {
+          "platform": "tiktok",
+          "handle": "@rivalbrand",
+          "followerCount": 120000,
+          "postingFrequency": "daily",
+          "engagementRate": "6.2%",
+          "contentTypes": ["challenges", "user stories", "product reveals"]
+        }
+      ]
+    }
+  ],
+  "contentAnalysis": [
+    {
+      "competitor": "CompetitorCo",
+      "topPerformingContent": [
+        {
+          "platform": "tiktok",
+          "description": "Product comparison video with trending sound — side-by-side demo format",
+          "engagementSignals": "50K views, 5K likes, 200 comments in 48 hours",
+          "format": "short-form video"
+        },
+        {
+          "platform": "reddit",
+          "description": "Founder AMA in r/productivity with detailed product roadmap discussion",
+          "engagementSignals": "800 upvotes, 150 comments, 3 awards",
+          "format": "text post (AMA)"
+        }
+      ]
+    },
+    {
+      "competitor": "RivalBrand",
+      "topPerformingContent": [
+        {
+          "platform": "tiktok",
+          "description": "User transformation story featuring real customer workflow improvement",
+          "engagementSignals": "200K views, 25K likes, 500 comments, 2K shares",
+          "format": "short-form video"
+        }
+      ]
+    }
+  ],
+  "viralContent": [
+    {
+      "competitor": "RivalBrand",
+      "platform": "tiktok",
+      "description": "Behind-the-scenes manufacturing video showing product assembly with satisfying ASMR audio",
+      "whyViral": "Authentic tone combined with trending ASMR sound and visually satisfying process footage — tapped into the 'oddly satisfying' content niche",
+      "replicabilityScore": 4
+    },
+    {
+      "competitor": "CompetitorCo",
+      "platform": "reddit",
+      "description": "Transparent post about a product failure and how the team fixed it within 24 hours",
+      "whyViral": "Radical transparency resonated with Reddit's authenticity-first culture — generated trust and positive sentiment",
+      "replicabilityScore": 3
+    }
+  ],
+  "gaps": [
+    {
+      "area": "Instagram presence",
+      "description": "Neither competitor has a strong Instagram Reels strategy despite audience overlap with TikTok",
+      "opportunity": "Establish Instagram Reels presence by adapting TikTok-style content with carousel educational supplements"
+    },
+    {
+      "area": "Community-driven content",
+      "description": "Competitors focus on brand-created content; no UGC campaigns or community challenges observed",
+      "opportunity": "Launch a UGC challenge encouraging users to share their workflow transformations"
+    },
+    {
+      "area": "Educational long-form",
+      "description": "No competitor produces in-depth tutorial or thought leadership content",
+      "opportunity": "Create weekly educational threads on Reddit and LinkedIn covering industry best practices"
+    }
+  ],
+  "recommendations": "1. Target Instagram Reels as an uncontested channel by adapting TikTok-proven formats. 2. Launch a UGC challenge to differentiate from competitor brand-only content strategies. 3. Leverage radical transparency content (lessons learned, behind-the-scenes) which performs well on both Reddit and TikTok."
+}

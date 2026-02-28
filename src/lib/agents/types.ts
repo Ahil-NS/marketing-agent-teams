@@ -1,6 +1,6 @@
 import type {MATError} from '../utils/errors.js'
 import type {TrustTier} from '../credentials/types.js'
-import type {PermissionsBlock} from '../schemas/agent-schema.js'
+import type {PermissionsBlock, ResearchInputsData} from '../schemas/agent-schema.js'
 
 /**
  * Permission boundaries for agent execution — extracted from SKILL.md YAML front matter.
@@ -27,11 +27,11 @@ export interface AgentInputs {
   productDomain: string
 }
 
-export interface ResearchInputs extends AgentInputs {
-  audienceType: string
-  platforms: string[]
-  trendTimeframeDays?: number
-}
+/**
+ * Research-stage inputs — derived from researchInputsSchema to prevent type divergence.
+ * Use researchInputsSchema from src/lib/schemas/agent-schema.ts for runtime validation.
+ */
+export type ResearchInputs = ResearchInputsData
 
 /** Parsed SKILL.md definition — returned by skill-loader (Story 2.9) */
 export interface SkillDefinition {

@@ -9,10 +9,12 @@ export {
   memoryEntrySchema,
   memoryStateSchema,
   trendBriefSchema,
+  competitorReportSchema,
+  researchInputsSchema,
   VALID_SDK_TOOLS,
   VALID_DATA_SCOPES,
 } from './agent-schema.js'
-export type {AgentDefinition, MemoryEntryValidated, MemoryStateValidated, PermissionsBlock, TrendBrief} from './agent-schema.js'
+export type {AgentDefinition, MemoryEntryValidated, MemoryStateValidated, PermissionsBlock, TrendBrief, CompetitorReport, ResearchInputsData} from './agent-schema.js'
 export {
   pipelineErrorSchema,
   pipelineRunSchema,
