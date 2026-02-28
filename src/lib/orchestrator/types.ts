@@ -1,7 +1,9 @@
 import type {AgentResult} from '../agents/types.js'
 import type {MATError} from '../utils/errors.js'
 
-// --- Pipeline Stage Types ---
+// ============================================================
+// Pipeline Stage Types (shared across orchestrator layer)
+// ============================================================
 
 export type PipelineStage =
   | 'research'
@@ -12,7 +14,11 @@ export type PipelineStage =
   | 'review'
   | 'distribution'
 
-export const PIPELINE_STAGES: readonly PipelineStage[] = Object.freeze([
+/**
+ * Ordered pipeline stages. The pipeline executes these sequentially.
+ * The 'review' stage triggers an automatic pause for human review.
+ */
+export const PIPELINE_STAGES = Object.freeze([
   'research',
   'strategy',
   'creation',
@@ -21,6 +27,8 @@ export const PIPELINE_STAGES: readonly PipelineStage[] = Object.freeze([
   'review',
   'distribution',
 ] as const)
+
+export const REVIEW_STAGE: PipelineStage = 'review'
 
 /**
  * Maps each pipeline stage to the agent names that execute within it.
@@ -37,9 +45,11 @@ export const STAGE_AGENT_MAP: Record<PipelineStage, readonly string[]> = {
   distribution: ['reddit-publisher', 'tiktok-publisher', 'facebook-publisher', 'instagram-publisher'],
 } as const
 
-// --- Stage Result Types ---
+// ============================================================
+// Stage Execution Types (used by StageRunner — Story 2.2)
+// ============================================================
 
-export type StageStatus = 'pending' | 'running' | 'completed' | 'partial' | 'failed' | 'skipped'
+export type StageExecutionStatus = 'pending' | 'running' | 'completed' | 'partial' | 'failed' | 'skipped'
 
 export interface StageAgentResult {
   agentName: string
@@ -49,35 +59,24 @@ export interface StageAgentResult {
   duration: number // milliseconds
 }
 
-export interface StageResult {
+export interface StageExecutionResult {
   stage: PipelineStage
-  status: StageStatus
+  status: StageExecutionStatus
   agentResults: Record<string, StageAgentResult>
   startedAt: string // ISO 8601
   completedAt: string // ISO 8601
   errors: MATError[]
 }
 
-// --- Pipeline Run Types (minimal contract for stage runner — full impl in Story 2.4) ---
+// --- Stage Runner Context (what the StageRunner needs from the pipeline) ---
 
-export interface PipelineRun {
-  id: string
-  status: 'running' | 'paused' | 'completed' | 'failed' | 'cancelled'
-  currentStage: PipelineStage
-  stageResults: Partial<Record<PipelineStage, StageResult>>
+export interface StageRunnerContext {
   config: {
     platforms: string[]
     dryRun: boolean
     enabledAgents?: string[] // Subset of agents to run (FR49)
   }
-  budget: {
-    spent: number
-    limit: number
-    currency: 'USD'
-  }
-  startedAt: string
-  updatedAt: string
-  errors: MATError[]
+  stageResults: Partial<Record<PipelineStage, StageExecutionResult>>
 }
 
 // --- Agent Assignment Types ---
@@ -111,4 +110,61 @@ export interface StageConfig {
   stage: PipelineStage
   agents: readonly string[]
   options?: StageRunnerOptions
+}
+
+// ============================================================
+// Pipeline State Machine Types (Story 2.4)
+// ============================================================
+
+export type StageStatus = 'pending' | 'running' | 'completed' | 'failed' | 'paused'
+
+export type PipelineRunStatus = 'running' | 'paused' | 'completed' | 'failed' | 'cancelled'
+
+export interface StageResult {
+  status: StageStatus
+  agentResults: Record<string, unknown> // Typed per-agent in Story 2.2
+  startedAt?: string // ISO 8601
+  completedAt?: string // ISO 8601
+  error?: PipelineError
+}
+
+export interface PipelineError {
+  stage: PipelineStage
+  code: string
+  message: string
+  reason: string
+  resolution: string
+  severity: 'transient' | 'permanent'
+  timestamp: string // ISO 8601
+}
+
+export interface PipelineRun {
+  id: string
+  status: PipelineRunStatus
+  currentStage: PipelineStage
+  stages: Record<PipelineStage, StageResult>
+  budget: {
+    spent: number
+    limit: number
+    currency: 'USD'
+  }
+  config: {
+    platforms: string[]
+    dryRun: boolean
+  }
+  errors: PipelineError[]
+  startedAt: string // ISO 8601
+  updatedAt: string // ISO 8601
+  completedAt?: string // ISO 8601
+}
+
+/**
+ * Represents a state transition event for logging/auditing.
+ */
+export interface StageTransition {
+  from: PipelineStage
+  to: PipelineStage
+  fromStatus: StageStatus
+  toStatus: StageStatus
+  timestamp: string // ISO 8601
 }

@@ -101,4 +101,108 @@ describe('orchestrator/errors', () => {
       expect(error.name).toBe('StageInputResolutionError')
     })
   })
+
+  // ============================================================
+  // Pipeline State Machine Errors (Story 2.4)
+  // ============================================================
+
+  describe('PipelineStateError', () => {
+    it('extends MATError', async () => {
+      const {PipelineStateError} = await import('../../../src/lib/orchestrator/errors.js')
+      const error = new PipelineStateError('run-123', 'Pipeline is completed')
+      expect(error).toBeInstanceOf(MATError)
+      expect(error).toBeInstanceOf(Error)
+    })
+
+    it('sets correct code, source, and severity', async () => {
+      const {PipelineStateError, PIPELINE_STATE_INVALID} = await import('../../../src/lib/orchestrator/errors.js')
+      const error = new PipelineStateError('run-123', 'Pipeline is completed — cannot resume')
+      expect(error.code).toBe(PIPELINE_STATE_INVALID)
+      expect(error.source).toBe('orchestrator/pipeline-state')
+      expect(error.severity).toBe('permanent')
+      expect(error.name).toBe('PipelineStateError')
+      expect(error.message).toContain('run-123')
+      expect(error.reason).toBe('Pipeline is completed — cannot resume')
+      expect(error.resolution).toContain('mat status')
+    })
+  })
+
+  describe('PipelineTransitionError', () => {
+    it('extends MATError', async () => {
+      const {PipelineTransitionError} = await import('../../../src/lib/orchestrator/errors.js')
+      const error = new PipelineTransitionError('run-123', 'research', 'pending', 'completed', 'Must be running first')
+      expect(error).toBeInstanceOf(MATError)
+    })
+
+    it('sets correct code and includes stage info in message', async () => {
+      const {PipelineTransitionError, PIPELINE_TRANSITION_INVALID} = await import('../../../src/lib/orchestrator/errors.js')
+      const error = new PipelineTransitionError('run-456', 'creation', 'pending', 'completed', 'Stage must be running')
+      expect(error.code).toBe(PIPELINE_TRANSITION_INVALID)
+      expect(error.message).toContain('run-456')
+      expect(error.message).toContain('creation')
+      expect(error.message).toContain('pending')
+      expect(error.message).toContain('completed')
+      expect(error.source).toBe('orchestrator/pipeline-state')
+      expect(error.severity).toBe('permanent')
+      expect(error.name).toBe('PipelineTransitionError')
+    })
+  })
+
+  describe('PipelineNotFoundError', () => {
+    it('extends MATError', async () => {
+      const {PipelineNotFoundError} = await import('../../../src/lib/orchestrator/errors.js')
+      const error = new PipelineNotFoundError('run-999')
+      expect(error).toBeInstanceOf(MATError)
+    })
+
+    it('sets correct code and actionable resolution', async () => {
+      const {PipelineNotFoundError, PIPELINE_NOT_FOUND} = await import('../../../src/lib/orchestrator/errors.js')
+      const error = new PipelineNotFoundError('run-999')
+      expect(error.code).toBe(PIPELINE_NOT_FOUND)
+      expect(error.message).toContain('run-999')
+      expect(error.reason).toContain('run-999')
+      expect(error.resolution).toContain('mat status')
+      expect(error.source).toBe('orchestrator/state-serializer')
+      expect(error.severity).toBe('permanent')
+      expect(error.name).toBe('PipelineNotFoundError')
+    })
+  })
+
+  describe('PipelineCorruptedError', () => {
+    it('extends MATError', async () => {
+      const {PipelineCorruptedError} = await import('../../../src/lib/orchestrator/errors.js')
+      const error = new PipelineCorruptedError('run-bad', 'Invalid JSON at position 42')
+      expect(error).toBeInstanceOf(MATError)
+    })
+
+    it('sets correct code and includes detail in reason', async () => {
+      const {PipelineCorruptedError, PIPELINE_CORRUPTED} = await import('../../../src/lib/orchestrator/errors.js')
+      const error = new PipelineCorruptedError('run-bad', 'Schema validation failed')
+      expect(error.code).toBe(PIPELINE_CORRUPTED)
+      expect(error.message).toContain('run-bad')
+      expect(error.reason).toContain('Schema validation failed')
+      expect(error.resolution).toContain('Delete the corrupted state file')
+      expect(error.source).toBe('orchestrator/state-serializer')
+      expect(error.severity).toBe('permanent')
+      expect(error.name).toBe('PipelineCorruptedError')
+    })
+  })
+
+  describe('PipelineSerializeError', () => {
+    it('extends MATError', async () => {
+      const {PipelineSerializeError} = await import('../../../src/lib/orchestrator/errors.js')
+      const error = new PipelineSerializeError('run-123', 'ENOSPC: no space left on device')
+      expect(error).toBeInstanceOf(MATError)
+    })
+
+    it('sets transient severity (can be retried)', async () => {
+      const {PipelineSerializeError, PIPELINE_SERIALIZE_FAILED} = await import('../../../src/lib/orchestrator/errors.js')
+      const error = new PipelineSerializeError('run-123', 'EACCES: permission denied')
+      expect(error.code).toBe(PIPELINE_SERIALIZE_FAILED)
+      expect(error.severity).toBe('transient')
+      expect(error.source).toBe('orchestrator/state-serializer')
+      expect(error.resolution).toContain('writable')
+      expect(error.name).toBe('PipelineSerializeError')
+    })
+  })
 })

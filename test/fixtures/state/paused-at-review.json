@@ -1,0 +1,57 @@
+{
+  "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+  "status": "paused",
+  "currentStage": "review",
+  "stages": {
+    "research": {
+      "status": "completed",
+      "agentResults": {
+        "trend-scout": { "trends": ["wellness"] }
+      },
+      "startedAt": "2026-02-28T10:00:00.000Z",
+      "completedAt": "2026-02-28T10:03:00.000Z"
+    },
+    "strategy": {
+      "status": "completed",
+      "agentResults": {
+        "content-strategist": { "plan": "awareness" }
+      },
+      "startedAt": "2026-02-28T10:03:01.000Z",
+      "completedAt": "2026-02-28T10:06:00.000Z"
+    },
+    "creation": {
+      "status": "completed",
+      "agentResults": {
+        "reddit-creator": { "post": "test content" }
+      },
+      "startedAt": "2026-02-28T10:06:01.000Z",
+      "completedAt": "2026-02-28T10:10:00.000Z"
+    },
+    "optimization": {
+      "status": "completed",
+      "agentResults": {
+        "seo-optimizer": { "keywords": ["health"] }
+      },
+      "startedAt": "2026-02-28T10:10:01.000Z",
+      "completedAt": "2026-02-28T10:13:00.000Z"
+    },
+    "quality": {
+      "status": "completed",
+      "agentResults": {
+        "brand-guardian": { "score": 0.95 }
+      },
+      "startedAt": "2026-02-28T10:13:01.000Z",
+      "completedAt": "2026-02-28T10:16:00.000Z"
+    },
+    "review": {
+      "status": "paused",
+      "agentResults": {}
+    },
+    "distribution": { "status": "pending", "agentResults": {} }
+  },
+  "budget": { "spent": 1.85, "limit": 10.00, "currency": "USD" },
+  "config": { "platforms": ["reddit"], "dryRun": false },
+  "errors": [],
+  "startedAt": "2026-02-28T10:00:00.000Z",
+  "updatedAt": "2026-02-28T10:16:01.000Z"
+}

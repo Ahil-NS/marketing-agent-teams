@@ -1,0 +1,56 @@
+{
+  "id": "c3d4e5f6-a7b8-4012-bcde-f12345678901",
+  "status": "failed",
+  "currentStage": "creation",
+  "stages": {
+    "research": {
+      "status": "completed",
+      "agentResults": {
+        "trend-scout": { "trends": ["tech"] }
+      },
+      "startedAt": "2026-02-28T10:00:00.000Z",
+      "completedAt": "2026-02-28T10:04:00.000Z"
+    },
+    "strategy": {
+      "status": "completed",
+      "agentResults": {
+        "content-strategist": { "plan": "engagement" }
+      },
+      "startedAt": "2026-02-28T10:04:01.000Z",
+      "completedAt": "2026-02-28T10:07:00.000Z"
+    },
+    "creation": {
+      "status": "failed",
+      "agentResults": {},
+      "startedAt": "2026-02-28T10:07:01.000Z",
+      "error": {
+        "stage": "creation",
+        "code": "AGENT_EXECUTION_FAILED",
+        "message": "All creation agents failed",
+        "reason": "API rate limit exceeded for all content creation agents",
+        "resolution": "Wait for rate limit reset and retry the pipeline with `mat run --resume <id>`",
+        "severity": "transient",
+        "timestamp": "2026-02-28T10:07:30.000Z"
+      }
+    },
+    "optimization": { "status": "pending", "agentResults": {} },
+    "quality": { "status": "pending", "agentResults": {} },
+    "review": { "status": "pending", "agentResults": {} },
+    "distribution": { "status": "pending", "agentResults": {} }
+  },
+  "budget": { "spent": 0.35, "limit": 10.00, "currency": "USD" },
+  "config": { "platforms": ["reddit", "tiktok"], "dryRun": false },
+  "errors": [
+    {
+      "stage": "creation",
+      "code": "AGENT_EXECUTION_FAILED",
+      "message": "All creation agents failed",
+      "reason": "API rate limit exceeded for all content creation agents",
+      "resolution": "Wait for rate limit reset and retry the pipeline with `mat run --resume <id>`",
+      "severity": "transient",
+      "timestamp": "2026-02-28T10:07:30.000Z"
+    }
+  ],
+  "startedAt": "2026-02-28T10:00:00.000Z",
+  "updatedAt": "2026-02-28T10:07:30.000Z"
+}

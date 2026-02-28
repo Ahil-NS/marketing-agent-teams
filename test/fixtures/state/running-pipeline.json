@@ -1,0 +1,38 @@
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "running",
+  "currentStage": "creation",
+  "stages": {
+    "research": {
+      "status": "completed",
+      "agentResults": {
+        "trend-scout": { "trends": ["ai-marketing"] },
+        "audience-researcher": { "segments": ["young-adults"] }
+      },
+      "startedAt": "2026-02-28T10:00:00.000Z",
+      "completedAt": "2026-02-28T10:05:32.000Z"
+    },
+    "strategy": {
+      "status": "completed",
+      "agentResults": {
+        "content-strategist": { "plan": "growth-focused" }
+      },
+      "startedAt": "2026-02-28T10:05:33.000Z",
+      "completedAt": "2026-02-28T10:08:15.000Z"
+    },
+    "creation": {
+      "status": "running",
+      "agentResults": {},
+      "startedAt": "2026-02-28T10:08:16.000Z"
+    },
+    "optimization": { "status": "pending", "agentResults": {} },
+    "quality": { "status": "pending", "agentResults": {} },
+    "review": { "status": "pending", "agentResults": {} },
+    "distribution": { "status": "pending", "agentResults": {} }
+  },
+  "budget": { "spent": 0.42, "limit": 10.00, "currency": "USD" },
+  "config": { "platforms": ["reddit", "tiktok"], "dryRun": false },
+  "errors": [],
+  "startedAt": "2026-02-28T10:00:00.000Z",
+  "updatedAt": "2026-02-28T10:08:16.000Z"
+}

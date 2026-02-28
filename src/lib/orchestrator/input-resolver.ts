@@ -1,5 +1,5 @@
 import {StageInputResolutionError} from './errors.js'
-import type {PipelineStage, StageResult} from './types.js'
+import type {PipelineStage, StageExecutionResult} from './types.js'
 import {PIPELINE_STAGES} from './types.js'
 
 /**
@@ -31,7 +31,7 @@ const STAGE_INPUT_DEPENDENCIES: Record<PipelineStage, readonly PipelineStage[]> 
  */
 export function resolveInputs(
   stage: PipelineStage,
-  stageResults: Partial<Record<PipelineStage, StageResult>>,
+  stageResults: Partial<Record<PipelineStage, StageExecutionResult>>,
 ): Record<string, unknown> {
   const dependencies = STAGE_INPUT_DEPENDENCIES[stage]
 

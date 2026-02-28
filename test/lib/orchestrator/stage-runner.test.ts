@@ -1,6 +1,6 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 
-import type {PipelineRun, StageResult} from '../../../src/lib/orchestrator/types.js'
+import type {StageExecutionResult, StageRunnerContext} from '../../../src/lib/orchestrator/types.js'
 import {createMockAgentResult} from '../../helpers/mock-agent-executor.js'
 
 // Hoist mock at module level so stage-runner.ts gets the mock
@@ -19,24 +19,13 @@ import {StageRunner} from '../../../src/lib/orchestrator/stage-runner.js'
 
 const mockExecuteAgent = vi.mocked(executeAgent)
 
-function makePipelineRun(overrides?: Partial<PipelineRun>): PipelineRun {
+function makePipelineRun(overrides?: Partial<StageRunnerContext>): StageRunnerContext {
   return {
-    id: 'run-test-001',
-    status: 'running',
-    currentStage: 'research',
-    stageResults: {},
     config: {
       platforms: ['reddit', 'tiktok'],
       dryRun: false,
     },
-    budget: {
-      spent: 0,
-      limit: 5.0,
-      currency: 'USD',
-    },
-    startedAt: '2026-02-28T10:00:00.000Z',
-    updatedAt: '2026-02-28T10:00:00.000Z',
-    errors: [],
+    stageResults: {},
     ...overrides,
   }
 }
@@ -58,7 +47,7 @@ describe('StageRunner', () => {
       )
 
       const runner = new StageRunner()
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('research', pipelineRun)
       await vi.advanceTimersByTimeAsync(0)
       const result = await resultPromise
@@ -77,7 +66,7 @@ describe('StageRunner', () => {
       )
 
       const runner = new StageRunner()
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('research', pipelineRun)
       await vi.advanceTimersByTimeAsync(0)
       const result = await resultPromise
@@ -96,7 +85,7 @@ describe('StageRunner', () => {
       })
 
       const runner = new StageRunner()
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('research', pipelineRun)
       await vi.advanceTimersByTimeAsync(0)
       const result = await resultPromise
@@ -116,7 +105,7 @@ describe('StageRunner', () => {
       })
 
       const runner = new StageRunner()
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('research', pipelineRun)
       await vi.advanceTimersByTimeAsync(0)
       const result = await resultPromise
@@ -132,7 +121,7 @@ describe('StageRunner', () => {
   describe('runStage — empty stage (review)', () => {
     it('returns skipped status for stage with no agents', async () => {
       const runner = new StageRunner()
-      const pipelineRun = makePipelineRun({currentStage: 'review'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('review', pipelineRun)
       await vi.advanceTimersByTimeAsync(0)
       const result = await resultPromise
@@ -151,7 +140,6 @@ describe('StageRunner', () => {
 
       const runner = new StageRunner()
       const pipelineRun = makePipelineRun({
-        currentStage: 'research',
         config: {
           platforms: ['reddit'],
           dryRun: false,
@@ -171,7 +159,6 @@ describe('StageRunner', () => {
     it('skips stage when no enabled agents match stage agents', async () => {
       const runner = new StageRunner()
       const pipelineRun = makePipelineRun({
-        currentStage: 'research',
         config: {
           platforms: ['reddit'],
           dryRun: false,
@@ -197,7 +184,7 @@ describe('StageRunner', () => {
       })
 
       const runner = new StageRunner({agentTimeoutMs: 1000})
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('research', pipelineRun)
 
       await vi.advanceTimersByTimeAsync(1500)
@@ -216,7 +203,7 @@ describe('StageRunner', () => {
       )
 
       const runner = new StageRunner()
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('research', pipelineRun)
       await vi.advanceTimersByTimeAsync(0)
       const result = await resultPromise
@@ -237,7 +224,7 @@ describe('StageRunner', () => {
       })
 
       const runner = new StageRunner()
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const startTime = Date.now()
       const result = await runner.runStage('research', pipelineRun)
       const elapsed = Date.now() - startTime
@@ -255,7 +242,7 @@ describe('StageRunner', () => {
         createMockAgentResult(agentName),
       )
 
-      const researchResult: StageResult = {
+      const researchResult: StageExecutionResult = {
         stage: 'research',
         status: 'completed',
         agentResults: {
@@ -274,7 +261,6 @@ describe('StageRunner', () => {
 
       const runner = new StageRunner()
       const pipelineRun = makePipelineRun({
-        currentStage: 'strategy',
         stageResults: {research: researchResult},
       })
 
@@ -298,7 +284,7 @@ describe('StageRunner', () => {
       })
 
       const runner = new StageRunner({continueOnFailure: false})
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('research', pipelineRun)
       await vi.advanceTimersByTimeAsync(0)
       const result = await resultPromise
@@ -317,7 +303,7 @@ describe('StageRunner', () => {
       )
 
       const runner = new StageRunner({continueOnFailure: false})
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('research', pipelineRun)
       await vi.advanceTimersByTimeAsync(0)
       const result = await resultPromise
@@ -333,7 +319,7 @@ describe('StageRunner', () => {
       )
 
       const runner = new StageRunner({concurrencyLimit: 2})
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('research', pipelineRun)
       await vi.advanceTimersByTimeAsync(0)
       const result = await resultPromise
@@ -349,7 +335,7 @@ describe('StageRunner', () => {
       )
 
       const runner = new StageRunner({concurrencyLimit: 1})
-      const pipelineRun = makePipelineRun({currentStage: 'research'})
+      const pipelineRun = makePipelineRun()
       const resultPromise = runner.runStage('research', pipelineRun)
       await vi.advanceTimersByTimeAsync(0)
       const result = await resultPromise

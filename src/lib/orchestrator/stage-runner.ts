@@ -5,10 +5,10 @@ import type {MATError} from '../utils/errors.js'
 import {resolveInputs} from './input-resolver.js'
 import type {
   AgentAssignment,
-  PipelineRun,
   PipelineStage,
   StageAgentResult,
-  StageResult,
+  StageExecutionResult,
+  StageRunnerContext,
   StageRunnerOptions,
 } from './types.js'
 import {
@@ -32,8 +32,8 @@ export class StageRunner {
    */
   async runStage(
     stage: PipelineStage,
-    pipelineRun: PipelineRun,
-  ): Promise<StageResult> {
+    pipelineRun: StageRunnerContext,
+  ): Promise<StageExecutionResult> {
     const startedAt = new Date().toISOString()
     const agentNames = this.getAgentsForStage(stage, pipelineRun)
 
@@ -77,7 +77,7 @@ export class StageRunner {
    */
   private getAgentsForStage(
     stage: PipelineStage,
-    pipelineRun: PipelineRun,
+    pipelineRun: StageRunnerContext,
   ): string[] {
     const allAgents = [...STAGE_AGENT_MAP[stage]]
     const enabledAgents = pipelineRun.config.enabledAgents
@@ -95,7 +95,7 @@ export class StageRunner {
   private buildAssignments(
     stage: PipelineStage,
     agentNames: string[],
-    pipelineRun: PipelineRun,
+    pipelineRun: StageRunnerContext,
   ): AgentAssignment[] {
     const resolvedInputs = resolveInputs(stage, pipelineRun.stageResults)
 

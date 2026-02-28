@@ -1,12 +1,12 @@
 import {beforeAll, describe, expect, it} from 'vitest'
 
 import {StageInputResolutionError} from '../../../src/lib/orchestrator/errors.js'
-import type {PipelineStage, StageResult} from '../../../src/lib/orchestrator/types.js'
+import type {PipelineStage, StageExecutionResult} from '../../../src/lib/orchestrator/types.js'
 
 function makeStageResult(
   stage: PipelineStage,
-  overrides?: Partial<StageResult>,
-): StageResult {
+  overrides?: Partial<StageExecutionResult>,
+): StageExecutionResult {
   return {
     stage,
     status: 'completed',
@@ -28,19 +28,19 @@ describe('resolveInputs', () => {
   })
 
   it('returns empty object for research stage (no upstream dependencies)', () => {
-    const stageResults: Partial<Record<PipelineStage, StageResult>> = {}
+    const stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {}
     const result = resolveInputs('research', stageResults)
     expect(result).toEqual({})
   })
 
   it('returns empty object for distribution stage (no upstream dependencies)', () => {
-    const stageResults: Partial<Record<PipelineStage, StageResult>> = {}
+    const stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {}
     const result = resolveInputs('distribution', stageResults)
     expect(result).toEqual({})
   })
 
   it('resolves strategy inputs from completed research stage', () => {
-    const stageResults: Partial<Record<PipelineStage, StageResult>> = {
+    const stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {
       research: makeStageResult('research', {
         agentResults: {
           'trend-scout': {
@@ -81,7 +81,7 @@ describe('resolveInputs', () => {
   })
 
   it('handles degraded mode — failed agent outputs are null', () => {
-    const stageResults: Partial<Record<PipelineStage, StageResult>> = {
+    const stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {
       research: makeStageResult('research', {
         status: 'partial',
         agentResults: {
@@ -116,13 +116,13 @@ describe('resolveInputs', () => {
   })
 
   it('throws StageInputResolutionError when required upstream has not executed', () => {
-    const stageResults: Partial<Record<PipelineStage, StageResult>> = {}
+    const stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {}
 
     expect(() => resolveInputs('strategy', stageResults)).toThrow(StageInputResolutionError)
   })
 
   it('throws StageInputResolutionError when upstream stage is still pending', () => {
-    const stageResults: Partial<Record<PipelineStage, StageResult>> = {
+    const stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {
       research: makeStageResult('research', {status: 'pending'}),
     }
 
@@ -130,7 +130,7 @@ describe('resolveInputs', () => {
   })
 
   it('resolves creation inputs from both research and strategy stages', () => {
-    const stageResults: Partial<Record<PipelineStage, StageResult>> = {
+    const stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {
       research: makeStageResult('research', {
         agentResults: {
           'trend-scout': {
