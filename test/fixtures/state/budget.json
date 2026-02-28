@@ -1,0 +1,21 @@
+{
+  "date": "2026-02-28",
+  "spent": 2.4513,
+  "entries": [
+    {
+      "agentName": "trend-scout",
+      "cost": 0.0234,
+      "timestamp": "2026-02-28T10:15:30.000Z"
+    },
+    {
+      "agentName": "competitor-analyst",
+      "cost": 0.0456,
+      "timestamp": "2026-02-28T10:16:45.000Z"
+    },
+    {
+      "agentName": "campaign-strategist",
+      "cost": 0.1823,
+      "timestamp": "2026-02-28T10:18:12.000Z"
+    }
+  ]
+}

@@ -30,7 +30,7 @@
     "review": { "status": "pending", "agentResults": {} },
     "distribution": { "status": "pending", "agentResults": {} }
   },
-  "budget": { "spent": 0.42, "limit": 10.00, "currency": "USD" },
+  "budget": { "spent": 0.42, "limit": 10.00, "currency": "USD", "dailySpent": 0.42, "dailyLimit": 10.00 },
   "config": { "platforms": ["reddit", "tiktok"], "dryRun": false },
   "errors": [],
   "startedAt": "2026-02-28T10:00:00.000Z",

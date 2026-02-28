@@ -53,6 +53,8 @@ export const pipelineRunSchema = z.object({
     spent: z.number().min(0),
     limit: z.number().min(0),
     currency: z.literal('USD'),
+    dailySpent: z.number().min(0),
+    dailyLimit: z.number().min(0),
   }),
   config: z.object({
     platforms: z.array(z.string().min(1)),

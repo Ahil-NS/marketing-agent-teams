@@ -9,8 +9,16 @@ export {
   pipelineRunExists,
   savePipelineRun,
 } from './state-serializer.js'
+export {BudgetTracker} from './budget-tracker.js'
 export {
   AllAgentsFailedError,
+  BUDGET_STATE_CORRUPT,
+  BudgetStateCorruptError,
+  BUDGET_VALIDATION_ERROR,
+  BudgetValidationError,
+  DAILY_BUDGET_EXCEEDED,
+  PIPELINE_BUDGET_EXCEEDED,
+  PipelineBudgetExceeded,
   PipelineCorruptedError,
   PipelineExecutionError,
   PipelineNotFoundError,
@@ -28,6 +36,11 @@ export {
 } from './errors.js'
 export type {
   AgentAssignment,
+  BudgetCheckResult,
+  BudgetConfig,
+  BudgetState,
+  DailyBudgetEntry,
+  DailyBudgetState,
   OrchestratorConfig,
   OrchestratorEvents,
   PipelineError,

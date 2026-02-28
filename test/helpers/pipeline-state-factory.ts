@@ -16,7 +16,7 @@ export function createTestPipelineRun(overrides?: Partial<PipelineRun>): Pipelin
     status: 'running',
     currentStage: 'research',
     stages,
-    budget: {spent: 0, limit: 10, currency: 'USD'},
+    budget: {spent: 0, limit: 10, currency: 'USD', dailySpent: 0, dailyLimit: 10},
     config: {platforms: ['reddit'], dryRun: false},
     errors: [],
     startedAt: '2026-02-28T10:00:00.000Z',

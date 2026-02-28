@@ -147,6 +147,8 @@ export interface PipelineRun {
     spent: number
     limit: number
     currency: 'USD'
+    dailySpent: number
+    dailyLimit: number
   }
   config: {
     platforms: string[]
@@ -186,4 +188,58 @@ export interface OrchestratorEvents {
   onStageComplete?: (stage: PipelineStage, result: StageExecutionResult) => void
   onAgentFailed?: (agentName: string, error: Error) => void
   onPipelinePaused?: (stage: PipelineStage) => void
+}
+
+// ============================================================
+// Budget Tracking Types (Story 2.6)
+// ============================================================
+
+/** Budget configuration from .mat/config.yaml or pipeline options. */
+export interface BudgetConfig {
+  /** Max USD to spend per pipeline run. null = no limit. */
+  perRunLimit?: number | null
+  /** Max USD to spend per calendar day across all runs. null = no limit. */
+  perDayLimit?: number | null
+}
+
+/** Serializable budget state for PipelineRun.budget. */
+export interface BudgetState {
+  spent: number
+  limit: number
+  currency: 'USD'
+  dailySpent: number
+  dailyLimit: number
+}
+
+/** Result of a budget check after recording cost. */
+export interface BudgetCheckResult {
+  exceeded: boolean
+  type: 'per-run' | 'per-day' | null
+  /**
+   * The spend amount scoped to whichever `type` was exceeded.
+   * When `type === 'per-run'`, this is the run spend.
+   * When `type === 'per-day'`, this is the daily spend.
+   * When `type === null` (not exceeded), this is the run spend.
+   */
+  spent: number
+  /**
+   * The limit that was exceeded (matches scope of `spent`).
+   * When `type === null`, falls back to perRunLimit, perDayLimit, or null.
+   */
+  limit: number | null
+  remaining: number | null
+}
+
+/** Daily budget state persisted to .mat/state/budget.json. */
+export interface DailyBudgetState {
+  date: string // ISO date: '2026-02-28'
+  spent: number
+  entries: DailyBudgetEntry[]
+}
+
+/** Individual cost entry in the daily budget ledger. */
+export interface DailyBudgetEntry {
+  agentName: string
+  cost: number
+  timestamp: string // ISO datetime
 }

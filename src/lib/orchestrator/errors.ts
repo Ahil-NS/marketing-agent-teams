@@ -170,3 +170,53 @@ export class AllAgentsFailedError extends MATError {
     super(message, code, reason, resolution, source, severity)
   }
 }
+
+// ============================================================
+// Budget Tracking Errors (Story 2.6)
+// ============================================================
+
+export const PIPELINE_BUDGET_EXCEEDED = 'PIPELINE_BUDGET_EXCEEDED'
+export const DAILY_BUDGET_EXCEEDED = 'DAILY_BUDGET_EXCEEDED'
+export const BUDGET_STATE_CORRUPT = 'BUDGET_STATE_CORRUPT'
+
+export class PipelineBudgetExceeded extends MATError {
+  constructor(type: 'per-run' | 'per-day', spent: number, limit: number) {
+    const typeLabel = type === 'per-run' ? 'Per-run' : 'Daily'
+    super(
+      `${typeLabel} budget limit exceeded: $${spent.toFixed(4)} spent of $${limit.toFixed(2)} limit`,
+      type === 'per-run' ? PIPELINE_BUDGET_EXCEEDED : DAILY_BUDGET_EXCEEDED,
+      `Pipeline halted because the ${typeLabel.toLowerCase()} budget limit of $${limit.toFixed(2)} was reached. Total spent: $${spent.toFixed(4)}.`,
+      `Increase the budget limit in .mat/config.yaml (agents.budgetLimit for daily, or pass --budget to mat run for per-run) or wait until tomorrow for the daily limit to reset.`,
+      'orchestrator',
+      'permanent',
+    )
+  }
+}
+
+export class BudgetStateCorruptError extends MATError {
+  constructor(filePath: string, detail: string) {
+    super(
+      `Budget state file is corrupt: ${filePath}`,
+      BUDGET_STATE_CORRUPT,
+      `Failed to parse .mat/state/budget.json: ${detail}`,
+      'Delete the file and re-run. Daily budget tracking will reset to zero.',
+      'orchestrator',
+      'transient',
+    )
+  }
+}
+
+export const BUDGET_VALIDATION_ERROR = 'BUDGET_VALIDATION_ERROR'
+
+export class BudgetValidationError extends MATError {
+  constructor(detail: string) {
+    super(
+      `Budget tracking validation error: ${detail}`,
+      BUDGET_VALIDATION_ERROR,
+      detail,
+      'Fix the invalid input and retry the operation.',
+      'orchestrator',
+      'permanent',
+    )
+  }
+}

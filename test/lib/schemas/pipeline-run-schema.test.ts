@@ -175,12 +175,12 @@ describe('pipeline-run-schema', () => {
     })
 
     it('rejects negative budget values', () => {
-      const invalid = {...runningFixture, budget: {spent: -1, limit: 10, currency: 'USD'}}
+      const invalid = {...runningFixture, budget: {spent: -1, limit: 10, currency: 'USD', dailySpent: 0, dailyLimit: 10}}
       expect(pipelineRunSchema.safeParse(invalid).success).toBe(false)
     })
 
     it('rejects invalid currency', () => {
-      const invalid = {...runningFixture, budget: {spent: 0, limit: 10, currency: 'EUR'}}
+      const invalid = {...runningFixture, budget: {spent: 0, limit: 10, currency: 'EUR', dailySpent: 0, dailyLimit: 10}}
       expect(pipelineRunSchema.safeParse(invalid).success).toBe(false)
     })
 

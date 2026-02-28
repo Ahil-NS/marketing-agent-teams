@@ -62,7 +62,9 @@
   "budget": {
     "spent": 0.0075,
     "limit": 5.00,
-    "currency": "USD"
+    "currency": "USD",
+    "dailySpent": 0.0075,
+    "dailyLimit": 5.00
   },
   "startedAt": "2026-02-28T10:00:00.000Z",
   "updatedAt": "2026-02-28T10:00:04.200Z",

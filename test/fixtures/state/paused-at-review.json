@@ -49,7 +49,7 @@
     },
     "distribution": { "status": "pending", "agentResults": {} }
   },
-  "budget": { "spent": 1.85, "limit": 10.00, "currency": "USD" },
+  "budget": { "spent": 1.85, "limit": 10.00, "currency": "USD", "dailySpent": 1.85, "dailyLimit": 10.00 },
   "config": { "platforms": ["reddit"], "dryRun": false },
   "errors": [],
   "startedAt": "2026-02-28T10:00:00.000Z",

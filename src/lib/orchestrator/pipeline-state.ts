@@ -52,7 +52,7 @@ export class PipelineStateMachine {
    */
   static async create(
     config: {platforms: string[]; dryRun: boolean},
-    budget: {limit: number},
+    budget: {limit: number; dailyLimit?: number},
     projectDir: string = process.cwd(),
   ): Promise<PipelineStateMachine> {
     const now = new Date().toISOString()
@@ -65,6 +65,8 @@ export class PipelineStateMachine {
         spent: 0,
         limit: budget.limit,
         currency: 'USD',
+        dailySpent: 0,
+        dailyLimit: budget.dailyLimit ?? 0,
       },
       config,
       errors: [],
