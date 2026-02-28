@@ -27,6 +27,7 @@
     "dirname": "mat",
     "commands": "./dist/commands",
     "hooks": {
+      "init": "./dist/hooks/init",
       "command_not_found": "./dist/hooks/command-not-found"
     },
     "topics": {
@@ -53,7 +54,10 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@oclif/core": "^4.8.1"
+    "@inquirer/prompts": "^8.3.0",
+    "@oclif/core": "^4.8.1",
+    "yaml": "^2.8.2",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@oclif/test": "^4.1.16",

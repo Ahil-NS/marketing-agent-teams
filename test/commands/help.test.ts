@@ -21,7 +21,7 @@ describe('mat --help', () => {
   })
 
   it('each command stub logs not-yet-implemented', async () => {
-    const commands = ['install', 'run', 'review', 'status', 'config', 'agents:list', 'logs']
+    const commands = ['run', 'review', 'status', 'config', 'agents:list', 'logs']
 
     for (const cmd of commands) {
       const {stdout} = await runCommand([cmd], {root: import.meta.url})
