@@ -1,0 +1,12 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "result": "{\"trends\":[{\"name\":\"Short-form vertical video\",\"description\":\"Brands using 15-60 second vertical videos see 3x engagement\",\"relevance\":0.9,\"source\":\"https://example.com/trends\"},{\"name\":\"AI-generated content backlash\",\"description\":\"Audiences increasingly prefer authentic, human-created content\",\"relevance\":0.7}],\"viralPatterns\":[{\"pattern\":\"Hook-in-first-3-seconds\",\"platform\":\"tiktok\",\"examples\":[\"Wait for it...\",\"POV: you just discovered...\"]},{\"pattern\":\"Controversial hot take\",\"platform\":\"reddit\",\"examples\":[\"Unpopular opinion thread\"]}],\"opportunities\":[{\"description\":\"Create behind-the-scenes content showing product development\",\"platform\":\"tiktok\",\"priority\":\"high\"},{\"description\":\"Launch AMA series on product subreddit\",\"platform\":\"reddit\",\"priority\":\"medium\"}]}",
+  "total_cost_usd": 0.0025,
+  "usage": {
+    "input_tokens": 450,
+    "output_tokens": 380
+  },
+  "num_turns": 3,
+  "duration_ms": 4500
+}

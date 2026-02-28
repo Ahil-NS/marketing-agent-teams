@@ -2,3 +2,5 @@ export {agentToggleSchema, agentTogglesSchema, brandVoiceSchema, configSchema} f
 export type {AgentToggles, BrandVoiceConfig, Config} from './config-schema.js'
 export {platformCredentialSchema, platformsMetadataSchema} from './platform-schema.js'
 export type {PlatformCredentialMetadata, PlatformsMetadata} from './platform-schema.js'
+export {agentDefinitionSchema, trendBriefSchema} from './agent-schema.js'
+export type {AgentDefinition, TrendBrief} from './agent-schema.js'

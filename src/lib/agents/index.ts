@@ -1,0 +1,5 @@
+export {executeAgent} from './agent-executor.js'
+export type {AgentExecuteOptions} from './agent-executor.js'
+export {runTrendScout} from './intelligence.js'
+export type {AgentResult, AgentInputs, ResearchInputs} from './types.js'
+export {AgentExecutionError, AgentTimeoutError, AgentValidationError} from './errors.js'
