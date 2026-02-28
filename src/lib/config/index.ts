@@ -1,2 +1,5 @@
-export {readConfig, writeConfig} from './config-manager.js'
+export {ALL_AGENTS, CLUSTERS, listAgentsByCluster, setAgentToggle, validateAgentName} from './agent-manager.js'
+export type {AgentStatus} from './agent-manager.js'
+export {getConfigPath, readConfig, writeConfig} from './config-manager.js'
 export type {ConfigResult} from './config-manager.js'
+export {ConfigReadError, ConfigValidationError, ConfigWriteError} from './errors.js'

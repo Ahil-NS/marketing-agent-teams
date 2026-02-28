@@ -16,12 +16,25 @@ export const brandVoiceSchema = z.object({
 
 export type BrandVoiceConfig = z.infer<typeof brandVoiceSchema>
 
+export const agentToggleSchema = z.object({
+  enabled: z.boolean().default(true),
+})
+
+export const agentTogglesSchema = z.record(
+  z.string(),
+  agentToggleSchema,
+).default({})
+
+export type AgentToggles = z.infer<typeof agentTogglesSchema>
+
 const agentsSchema = z.object({
   defaultModel: z.string().default('sonnet'),
   budgetLimit: z.number().min(0).default(10),
+  toggles: agentTogglesSchema,
 }).default({
   defaultModel: 'sonnet',
   budgetLimit: 10,
+  toggles: {},
 })
 
 export const configSchema = z.object({

@@ -11,4 +11,5 @@ export const DEFAULT_BRAND_VOICE = {
 export const DEFAULT_AGENTS = {
   defaultModel: 'sonnet',
   budgetLimit: 10,
+  toggles: {} as Record<string, {enabled: boolean}>,
 } as const

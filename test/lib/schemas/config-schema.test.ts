@@ -191,9 +191,86 @@ describe('brandVoiceSchema', () => {
   })
 })
 
+describe('agentTogglesSchema', () => {
+  const baseConfig = {
+    productName: 'TestProduct',
+    platforms: ['reddit'],
+    skillLevel: 'intermediate',
+  }
+
+  it('defaults agents.toggles to empty record when omitted', () => {
+    const result = configSchema.safeParse(baseConfig)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.agents.toggles).toEqual({})
+    }
+  })
+
+  it('accepts agent toggles with enabled boolean', () => {
+    const config = {
+      ...baseConfig,
+      agents: {
+        defaultModel: 'sonnet',
+        budgetLimit: 10,
+        toggles: {
+          'trend-scout': {enabled: false},
+          'hook-writer': {enabled: true},
+        },
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.agents.toggles['trend-scout'].enabled).toBe(false)
+      expect(result.data.agents.toggles['hook-writer'].enabled).toBe(true)
+    }
+  })
+
+  it('defaults enabled to true when not specified in toggle entry', () => {
+    const config = {
+      ...baseConfig,
+      agents: {
+        defaultModel: 'sonnet',
+        budgetLimit: 10,
+        toggles: {
+          'trend-scout': {},
+        },
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.agents.toggles['trend-scout'].enabled).toBe(true)
+    }
+  })
+
+  it('preserves existing agents fields alongside toggles', () => {
+    const config = {
+      ...baseConfig,
+      agents: {
+        defaultModel: 'opus',
+        budgetLimit: 25,
+        toggles: {'trend-scout': {enabled: false}},
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.agents.defaultModel).toBe('opus')
+      expect(result.data.agents.budgetLimit).toBe(25)
+      expect(result.data.agents.toggles['trend-scout'].enabled).toBe(false)
+    }
+  })
+})
+
 describe('schemas/index.ts re-export', () => {
   it('re-exports configSchema from index', async () => {
     const {configSchema: schema} = await import('../../../src/lib/schemas/index.js')
     expect(schema).toBeDefined()
+  })
+
+  it('re-exports agentTogglesSchema from index', async () => {
+    const {agentTogglesSchema} = await import('../../../src/lib/schemas/index.js')
+    expect(agentTogglesSchema).toBeDefined()
   })
 })

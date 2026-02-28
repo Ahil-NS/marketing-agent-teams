@@ -4,7 +4,7 @@ import {join} from 'node:path'
 import {afterEach, beforeEach, describe, expect, it} from 'vitest'
 import YAML from 'yaml'
 
-import {readConfig, writeConfig} from '../../../src/lib/config/index.js'
+import {getConfigPath, readConfig, writeConfig} from '../../../src/lib/config/index.js'
 import {MATError} from '../../../src/lib/utils/errors.js'
 import {createTestDir, removeTestDir} from '../../helpers/test-project.js'
 
@@ -101,7 +101,7 @@ describe('config-manager', () => {
         await writeConfig(testDir, invalidConfig)
       } catch (error) {
         expect(error).toBeInstanceOf(MATError)
-        expect((error as MATError).code).toBe('CONFIG_WRITE_VALIDATION_FAILED')
+        expect((error as MATError).code).toBe('CONFIG_VALIDATION_FAILED')
       }
     })
 
@@ -113,6 +113,13 @@ describe('config-manager', () => {
         expect(error).toBeInstanceOf(MATError)
         expect((error as MATError).code).toBe('CONFIG_WRITE_FAILED')
       }
+    })
+  })
+
+  describe('getConfigPath', () => {
+    it('returns path to .mat/config.yaml', () => {
+      const result = getConfigPath('/my/project')
+      expect(result).toBe(join('/my/project', '.mat', 'config.yaml'))
     })
   })
 })
