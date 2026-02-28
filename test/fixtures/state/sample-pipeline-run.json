@@ -1,0 +1,70 @@
+{
+  "id": "run-test-001",
+  "status": "running",
+  "currentStage": "strategy",
+  "stageResults": {
+    "research": {
+      "stage": "research",
+      "status": "completed",
+      "agentResults": {
+        "trend-scout": {
+          "agentName": "trend-scout",
+          "status": "success",
+          "result": {
+            "agentName": "trend-scout",
+            "status": "success",
+            "outputs": { "trends": [], "viralPatterns": [], "opportunities": [] },
+            "usage": { "inputTokens": 500, "outputTokens": 200, "cost": 0.003 },
+            "duration": 4200,
+            "errors": []
+          },
+          "error": null,
+          "duration": 4200
+        },
+        "audience-researcher": {
+          "agentName": "audience-researcher",
+          "status": "success",
+          "result": {
+            "agentName": "audience-researcher",
+            "status": "success",
+            "outputs": { "segments": [], "demographics": {} },
+            "usage": { "inputTokens": 400, "outputTokens": 150, "cost": 0.002 },
+            "duration": 3800,
+            "errors": []
+          },
+          "error": null,
+          "duration": 3800
+        },
+        "competitor-analyst": {
+          "agentName": "competitor-analyst",
+          "status": "success",
+          "result": {
+            "agentName": "competitor-analyst",
+            "status": "success",
+            "outputs": { "competitors": [], "gaps": [] },
+            "usage": { "inputTokens": 450, "outputTokens": 180, "cost": 0.0025 },
+            "duration": 4000,
+            "errors": []
+          },
+          "error": null,
+          "duration": 4000
+        }
+      },
+      "startedAt": "2026-02-28T10:00:00.000Z",
+      "completedAt": "2026-02-28T10:00:04.200Z",
+      "errors": []
+    }
+  },
+  "config": {
+    "platforms": ["reddit", "tiktok"],
+    "dryRun": false
+  },
+  "budget": {
+    "spent": 0.0075,
+    "limit": 5.00,
+    "currency": "USD"
+  },
+  "startedAt": "2026-02-28T10:00:00.000Z",
+  "updatedAt": "2026-02-28T10:00:04.200Z",
+  "errors": []
+}
