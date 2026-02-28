@@ -168,3 +168,22 @@ export interface StageTransition {
   toStatus: StageStatus
   timestamp: string // ISO 8601
 }
+
+// ============================================================
+// Orchestrator Types (Story 2.5)
+// ============================================================
+
+export interface OrchestratorConfig {
+  platforms: string[]
+  dryRun: boolean
+  budgetLimit: number
+  disabledAgents: string[]
+  projectRoot: string
+}
+
+export interface OrchestratorEvents {
+  onStageStart?: (stage: PipelineStage) => void
+  onStageComplete?: (stage: PipelineStage, result: StageExecutionResult) => void
+  onAgentFailed?: (agentName: string, error: Error) => void
+  onPipelinePaused?: (stage: PipelineStage) => void
+}

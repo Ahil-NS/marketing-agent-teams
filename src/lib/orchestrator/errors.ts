@@ -140,3 +140,33 @@ export class PipelineSerializeError extends MATError {
     )
   }
 }
+
+// ============================================================
+// Orchestrator Errors (Story 2.5)
+// ============================================================
+
+export class PipelineExecutionError extends MATError {
+  constructor(
+    message: string,
+    code: string,
+    reason: string,
+    resolution: string,
+    source: string,
+    severity: ErrorSeverity,
+  ) {
+    super(message, code, reason, resolution, source, severity)
+  }
+}
+
+export class AllAgentsFailedError extends MATError {
+  constructor(
+    message: string,
+    code: string,
+    reason: string,
+    resolution: string,
+    source: string,
+    severity: ErrorSeverity,
+  ) {
+    super(message, code, reason, resolution, source, severity)
+  }
+}

@@ -1,6 +1,8 @@
+export {Orchestrator} from './orchestrator.js'
 export {PipelineStateMachine} from './pipeline-state.js'
 export {StageRunner} from './stage-runner.js'
 export {resolveInputs} from './input-resolver.js'
+export {getStageDefinition, getStagesAfter, getStagesFrom, getStageAgents} from './stage-registry.js'
 export {
   loadPipelineRun,
   listPipelineRuns,
@@ -8,7 +10,9 @@ export {
   savePipelineRun,
 } from './state-serializer.js'
 export {
+  AllAgentsFailedError,
   PipelineCorruptedError,
+  PipelineExecutionError,
   PipelineNotFoundError,
   PipelineSerializeError,
   PipelineStateError,
@@ -24,6 +28,8 @@ export {
 } from './errors.js'
 export type {
   AgentAssignment,
+  OrchestratorConfig,
+  OrchestratorEvents,
   PipelineError,
   PipelineRun,
   PipelineRunStatus,
