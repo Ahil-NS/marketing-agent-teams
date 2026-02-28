@@ -11,7 +11,7 @@ export interface MockResultMessage {
   }
   num_turns?: number
   duration_ms?: number
-  errors?: Array<{message: string}>
+  errors?: string[]
 }
 
 export function createSuccessMessage(jsonOutput: unknown): MockResultMessage {
@@ -36,7 +36,7 @@ export function createErrorMessage(
     result: '',
     total_cost_usd: costUsd,
     usage: {input_tokens: 100, output_tokens: 0},
-    errors: [{message: `Agent failed with ${subtype}`}],
+    errors: [`Agent failed with ${subtype}`],
   }
 }
 

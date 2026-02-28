@@ -5,3 +5,7 @@ export {AgentMemoryStore} from './memory-store.js'
 export {loadSkill, loadAllSkills} from './skill-loader.js'
 export type {AgentResult, AgentInputs, ResearchInputs, SkillDefinition, SkillPermissions, ExampleInputs, MemoryEntry, AgentMemoryState, AgentMemoryOptions} from './types.js'
 export {AgentExecutionError, AgentTimeoutError, AgentValidationError, MemoryStoreError, MemoryCorruptionError, SkillLoadError} from './errors.js'
+
+// Re-export AgentExecutor adapter interface for convenience
+export type {AgentExecutor} from '../agent-executor/index.js'
+export {createAgentExecutor} from '../agent-executor/index.js'

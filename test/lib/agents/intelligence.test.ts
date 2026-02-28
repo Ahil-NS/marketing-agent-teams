@@ -99,7 +99,7 @@ describe('runTrendScout', () => {
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {runTrendScout} = await import('../../../src/lib/agents/intelligence.js')
-    const {AgentExecutionError} = await import('../../../src/lib/agents/errors.js')
+    const {AgentExecutionError} = await import('../../../src/lib/agent-executor/errors.js')
 
     await expect(runTrendScout(testInputs)).rejects.toThrow(AgentExecutionError)
   })

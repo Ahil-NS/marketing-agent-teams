@@ -1,8 +1,10 @@
-import {query} from '@anthropic-ai/claude-agent-sdk'
 import type {z} from 'zod'
 
+import {createAgentExecutor} from '../agent-executor/index.js'
+import {AgentValidationError as NewAgentValidationError} from '../agent-executor/errors.js'
+
 import type {AgentResult} from './types.js'
-import {AgentExecutionError, AgentTimeoutError, AgentValidationError} from './errors.js'
+import {AgentValidationError} from './errors.js'
 
 export interface AgentExecuteOptions<T> {
   prompt: string
@@ -14,78 +16,69 @@ export interface AgentExecuteOptions<T> {
   maxBudgetUsd?: number
 }
 
+/**
+ * Backward-compatible wrapper around AgentExecutor.execute().
+ * Story 2.1 callers (intelligence.ts, etc.) continue to use this function.
+ * Internally delegates to ClaudeAgentExecutor via the adapter interface.
+ */
 export async function executeAgent<T>(
   agentName: string,
   options: AgentExecuteOptions<T>,
 ): Promise<AgentResult<T>> {
+  const executor = createAgentExecutor()
   const startTime = Date.now()
 
-  for await (const message of query({
-    prompt: options.prompt,
-    options: {
-      systemPrompt: options.systemPrompt,
-      allowedTools: options.allowedTools,
-      model: options.model,
+  for await (const message of executor.execute({
+    agentName,
+    skillMd: options.systemPrompt,
+    input: {prompt: options.prompt},
+    model: options.model,
+    allowedTools: options.allowedTools,
+    budget: {
+      maxCostUsd: options.maxBudgetUsd ?? Infinity,
       maxTurns: options.maxTurns ?? 15,
-      // Agents run non-interactively in pipeline; tool calls are pre-authorized
-      // by the agent's allowedTools list. Trust boundary enforced via allowedTools.
-      permissionMode: 'bypassPermissions',
-      ...(options.maxBudgetUsd !== undefined && {maxBudgetUsd: options.maxBudgetUsd}),
     },
   })) {
-    if (message.type === 'result') {
-      if (message.subtype === 'success') {
-        let jsonData: unknown
-        try {
-          jsonData = JSON.parse(message.result)
-        } catch {
-          throw new AgentValidationError(
-            agentName,
-            new Error(`Agent returned invalid JSON: ${message.result.slice(0, 200)}`),
-          )
-        }
-
-        const parsed = options.outputSchema.safeParse(jsonData)
-        if (!parsed.success) {
-          throw new AgentValidationError(agentName, parsed.error)
-        }
-        return {
+    if (message.type === 'result' && message.subtype === 'success') {
+      // Validate output with Zod
+      let jsonData: unknown
+      try {
+        jsonData = JSON.parse(message.result ?? '')
+      } catch {
+        throw new AgentValidationError(
           agentName,
-          status: 'success',
-          outputs: parsed.data,
-          usage: {
-            inputTokens: message.usage?.input_tokens ?? 0,
-            outputTokens: message.usage?.output_tokens ?? 0,
-            cost: message.total_cost_usd ?? 0,
-          },
-          duration: Date.now() - startTime,
-          errors: [],
-        }
-      }
-
-      if (message.subtype === 'error_max_turns') {
-        throw new AgentTimeoutError(agentName, 'Max turns exceeded')
-      }
-
-      if (message.subtype === 'error_max_budget_usd') {
-        throw new AgentExecutionError(
-          agentName,
-          'AGENT_BUDGET_EXCEEDED',
-          `Agent '${agentName}' exceeded budget: $${message.total_cost_usd}`,
+          new Error(`Agent returned invalid JSON: ${(message.result ?? '').slice(0, 200)}`),
         )
       }
 
-      throw new AgentExecutionError(
+      const parsed = options.outputSchema.safeParse(jsonData)
+      if (!parsed.success) {
+        throw new AgentValidationError(agentName, parsed.error)
+      }
+
+      return {
         agentName,
-        'AGENT_EXECUTION_FAILED',
-        `Agent '${agentName}' failed: ${message.subtype}`,
-      )
+        runId: '',
+        status: 'success',
+        outputs: parsed.data,
+        usage: {
+          inputTokens: message.usage?.inputTokens ?? 0,
+          outputTokens: message.usage?.outputTokens ?? 0,
+          cost: message.totalCostUsd ?? 0,
+        },
+        duration: Date.now() - startTime,
+        errors: [],
+      }
     }
   }
 
-  throw new AgentExecutionError(
-    agentName,
+  // Should not reach here — ClaudeAgentExecutor throws on all error paths
+  throw new NewAgentValidationError(
+    `Agent '${agentName}' completed without result`,
     'AGENT_NO_RESULT',
-    `Agent '${agentName}' completed without producing a result`,
+    `Agent '${agentName}' completed without result — this should not happen`,
+    'Check the ClaudeAgentExecutor implementation for missing error handlers',
+    `agents/${agentName}`,
+    'transient',
   )
 }

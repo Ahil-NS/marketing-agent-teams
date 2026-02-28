@@ -19,7 +19,7 @@ const baseOptions = {
   maxTurns: 5,
 }
 
-describe('executeAgent', () => {
+describe('executeAgent (backward-compatible wrapper)', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     vi.resetModules()
@@ -41,16 +41,26 @@ describe('executeAgent', () => {
     expect(result.usage.cost).toBe(0.0025)
     expect(result.duration).toBeGreaterThanOrEqual(0)
     expect(result.errors).toEqual([])
+  })
 
+  it('delegates to ClaudeAgentExecutor via createAgentExecutor()', async () => {
+    const validOutput = {answer: 'hello', confidence: 0.95}
+    const mockQuery = createMockQuery([createSuccessMessage(validOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
+    await executeAgent<TestOutput>('test-agent', baseOptions)
+
+    // The wrapper delegates to ClaudeAgentExecutor which calls query()
     expect(mockQuery).toHaveBeenCalledWith({
       prompt: 'test prompt',
-      options: {
+      options: expect.objectContaining({
         systemPrompt: 'test system prompt',
         allowedTools: ['WebSearch'],
         model: 'haiku',
         maxTurns: 5,
         permissionMode: 'bypassPermissions',
-      },
+      }),
     })
   })
 
@@ -81,54 +91,61 @@ describe('executeAgent', () => {
     await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(AgentValidationError)
   })
 
-  it('throws AgentTimeoutError on max turns exceeded', async () => {
+  it('throws on max turns exceeded (via ClaudeAgentExecutor)', async () => {
     const mockQuery = createMockQuery([createErrorMessage('error_max_turns')])
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
-    const {AgentTimeoutError} = await import('../../../src/lib/agents/errors.js')
+    const {MATError} = await import('../../../src/lib/utils/errors.js')
 
-    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(AgentTimeoutError)
+    // After migration, error is AgentTimeoutError from agent-executor/errors.ts
+    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(MATError)
+    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(/exceeded maximum turns/)
   })
 
-  it('throws AgentExecutionError on budget exceeded', async () => {
+  it('throws on budget exceeded (via ClaudeAgentExecutor)', async () => {
     const mockQuery = createMockQuery([createErrorMessage('error_max_budget_usd', 5.0)])
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
-    const {AgentExecutionError} = await import('../../../src/lib/agents/errors.js')
+    const {MATError} = await import('../../../src/lib/utils/errors.js')
 
-    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(AgentExecutionError)
+    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(MATError)
+    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(/exceeded budget/)
   })
 
-  it('throws AgentExecutionError on execution error', async () => {
+  it('throws on execution error (via ClaudeAgentExecutor)', async () => {
     const mockQuery = createMockQuery([createErrorMessage('error_during_execution')])
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
-    const {AgentExecutionError} = await import('../../../src/lib/agents/errors.js')
+    const {MATError} = await import('../../../src/lib/utils/errors.js')
 
-    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(AgentExecutionError)
+    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(MATError)
+    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(/failed during execution/)
   })
 
-  it('throws AgentExecutionError when no result produced', async () => {
+  it('throws when no result produced (via ClaudeAgentExecutor)', async () => {
     const mockQuery = createMockQuery([])
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
-    const {AgentExecutionError} = await import('../../../src/lib/agents/errors.js')
+    const {MATError} = await import('../../../src/lib/utils/errors.js')
 
-    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(AgentExecutionError)
+    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(MATError)
+    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(/completed without producing a result/)
   })
 
-  it('propagates SDK errors as-is when query() throws', async () => {
+  it('wraps SDK errors via ClaudeAgentExecutor', async () => {
     const sdkError = new Error('Network failure')
     const mockQuery = createMockQueryThatThrows(sdkError)
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
+    const {MATError} = await import('../../../src/lib/utils/errors.js')
 
-    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow('Network failure')
+    // After migration, unknown SDK errors are wrapped in AgentExecutionError (MATError)
+    await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(MATError)
   })
 
   it('throws AgentValidationError when result contains invalid JSON', async () => {
@@ -147,5 +164,19 @@ describe('executeAgent', () => {
     const {AgentValidationError} = await import('../../../src/lib/agents/errors.js')
 
     await expect(executeAgent('test-agent', baseOptions)).rejects.toThrow(AgentValidationError)
+  })
+
+  it('preserves executeAgent function signature after migration', async () => {
+    const validOutput = {answer: 'test', confidence: 0.8}
+    const mockQuery = createMockQuery([createSuccessMessage(validOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
+
+    // Function should accept same parameters as before migration
+    expect(typeof executeAgent).toBe('function')
+    const result = await executeAgent<TestOutput>('test-agent', baseOptions)
+    expect(result.outputs.answer).toBe('test')
+    expect(result.outputs.confidence).toBe(0.8)
   })
 })
