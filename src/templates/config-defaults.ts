@@ -3,8 +3,9 @@
 
 export const DEFAULT_BRAND_VOICE = {
   tone: 'professional',
-  style: 'conversational',
-  audience: 'general',
+  communicationStyle: 'clear and direct',
+  brandPrinciples: [] as string[],
+  bannedPhrases: [] as string[],
 } as const
 
 export const DEFAULT_AGENTS = {

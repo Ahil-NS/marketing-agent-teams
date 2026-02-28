@@ -9,8 +9,9 @@ describe('configSchema', () => {
     skillLevel: 'intermediate',
     brandVoice: {
       tone: 'professional',
-      style: 'conversational',
-      audience: 'general',
+      communicationStyle: 'clear and direct',
+      brandPrinciples: ['Be helpful'],
+      bannedPhrases: ['synergy'],
     },
     agents: {
       defaultModel: 'sonnet',
@@ -59,17 +60,6 @@ describe('configSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('provides defaults for brandVoice when omitted', () => {
-    const {brandVoice: _, ...config} = validConfig
-    const result = configSchema.safeParse(config)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.brandVoice.tone).toBe('professional')
-      expect(result.data.brandVoice.style).toBe('conversational')
-      expect(result.data.brandVoice.audience).toBe('general')
-    }
-  })
-
   it('provides defaults for agents when omitted', () => {
     const {agents: _, ...config} = validConfig
     const result = configSchema.safeParse(config)
@@ -89,6 +79,115 @@ describe('configSchema', () => {
   it('exports inferred type Config', async () => {
     const {configSchema: schema} = await import('../../../src/lib/schemas/config-schema.js')
     expect(schema).toBeDefined()
+  })
+})
+
+describe('brandVoiceSchema', () => {
+  const baseConfig = {
+    productName: 'TestProduct',
+    platforms: ['reddit'],
+    skillLevel: 'intermediate',
+  }
+
+  it('provides defaults for all brandVoice fields when omitted', () => {
+    const result = configSchema.safeParse(baseConfig)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.brandVoice.tone).toBe('professional')
+      expect(result.data.brandVoice.communicationStyle).toBe('clear and direct')
+      expect(result.data.brandVoice.brandPrinciples).toEqual([])
+      expect(result.data.brandVoice.bannedPhrases).toEqual([])
+    }
+  })
+
+  it('accepts valid brandVoice with all fields', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {
+        tone: 'friendly',
+        communicationStyle: 'conversational',
+        brandPrinciples: ['Be authentic', 'Stay curious'],
+        bannedPhrases: ['synergy', 'leverage'],
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.brandVoice.tone).toBe('friendly')
+      expect(result.data.brandVoice.communicationStyle).toBe('conversational')
+      expect(result.data.brandVoice.brandPrinciples).toEqual(['Be authentic', 'Stay curious'])
+      expect(result.data.brandVoice.bannedPhrases).toEqual(['synergy', 'leverage'])
+    }
+  })
+
+  it('rejects empty string for tone', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {tone: ''},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty string for communicationStyle', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {communicationStyle: ''},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty strings in brandPrinciples array', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {brandPrinciples: ['Valid', '']},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty strings in bannedPhrases array', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {bannedPhrases: ['ok', '']},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts empty arrays for brandPrinciples and bannedPhrases', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {
+        tone: 'casual',
+        communicationStyle: 'minimal',
+        brandPrinciples: [],
+        bannedPhrases: [],
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts partial brandVoice and fills defaults', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {tone: 'enthusiastic'},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.brandVoice.tone).toBe('enthusiastic')
+      expect(result.data.brandVoice.communicationStyle).toBe('clear and direct')
+      expect(result.data.brandVoice.brandPrinciples).toEqual([])
+      expect(result.data.brandVoice.bannedPhrases).toEqual([])
+    }
+  })
+
+  it('exports BrandVoiceConfig type', async () => {
+    const mod = await import('../../../src/lib/schemas/config-schema.js')
+    expect(mod.brandVoiceSchema).toBeDefined()
   })
 })
 

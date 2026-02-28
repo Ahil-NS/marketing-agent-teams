@@ -1,0 +1,51 @@
+# Brand Voice Example Profiles
+# Use these as inspiration when configuring your brand voice with `mat config voice`
+
+profiles:
+  - name: Tech Startup
+    tone: enthusiastic
+    communicationStyle: conversational
+    brandPrinciples:
+      - Innovation over convention
+      - Simplify complexity
+      - Move fast, learn faster
+    bannedPhrases:
+      - synergy
+      - leverage
+      - circle back
+
+  - name: Wellness Brand
+    tone: friendly
+    communicationStyle: inspirational
+    brandPrinciples:
+      - Authenticity above all
+      - Empower, don't prescribe
+      - Science-backed claims only
+    bannedPhrases:
+      - miracle cure
+      - guaranteed results
+      - detox
+
+  - name: Enterprise B2B
+    tone: authoritative
+    communicationStyle: formal
+    brandPrinciples:
+      - Data-driven insights
+      - Thought leadership
+      - Customer success focus
+    bannedPhrases:
+      - game-changer
+      - disrupt
+      - pivot
+
+  - name: Casual Consumer
+    tone: playful
+    communicationStyle: conversational
+    brandPrinciples:
+      - Keep it real
+      - Fun first, sell second
+      - Community over customers
+    bannedPhrases:
+      - limited time offer
+      - act now
+      - don't miss out

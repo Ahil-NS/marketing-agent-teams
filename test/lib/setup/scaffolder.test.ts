@@ -85,8 +85,9 @@ describe('scaffolder', () => {
 
     expect(config.brandVoice).toBeDefined()
     expect(config.brandVoice.tone).toBe('professional')
-    expect(config.brandVoice.style).toBe('conversational')
-    expect(config.brandVoice.audience).toBe('general')
+    expect(config.brandVoice.communicationStyle).toBe('clear and direct')
+    expect(config.brandVoice.brandPrinciples).toEqual([])
+    expect(config.brandVoice.bannedPhrases).toEqual([])
   })
 
   it('config.yaml includes sensible defaults for agents', async () => {

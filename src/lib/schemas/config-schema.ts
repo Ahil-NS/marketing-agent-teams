@@ -2,15 +2,19 @@ import {z} from 'zod'
 
 const platformSchema = z.enum(['reddit', 'tiktok', 'facebook', 'instagram'])
 
-const brandVoiceSchema = z.object({
-  tone: z.string().default('professional'),
-  style: z.string().default('conversational'),
-  audience: z.string().default('general'),
+export const brandVoiceSchema = z.object({
+  tone: z.string().min(1).default('professional'),
+  communicationStyle: z.string().min(1).default('clear and direct'),
+  brandPrinciples: z.array(z.string().min(1)).default([]),
+  bannedPhrases: z.array(z.string().min(1)).default([]),
 }).default({
   tone: 'professional',
-  style: 'conversational',
-  audience: 'general',
+  communicationStyle: 'clear and direct',
+  brandPrinciples: [],
+  bannedPhrases: [],
 })
+
+export type BrandVoiceConfig = z.infer<typeof brandVoiceSchema>
 
 const agentsSchema = z.object({
   defaultModel: z.string().default('sonnet'),
