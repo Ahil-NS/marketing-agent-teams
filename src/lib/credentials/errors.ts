@@ -56,3 +56,32 @@ export class KeychainUnavailableError extends MATError {
     )
   }
 }
+
+export const CREDENTIAL_TRUST_VIOLATION = 'CREDENTIAL_TRUST_VIOLATION'
+export const CREDENTIAL_ACCESS_DENIED = 'CREDENTIAL_ACCESS_DENIED'
+
+export class TrustViolationError extends MATError {
+  constructor(agentName: string, attempted: string, declared: string[]) {
+    super(
+      `Agent '${agentName}' attempted to access '${attempted}' but only declares: [${declared.join(', ')}]`,
+      CREDENTIAL_TRUST_VIOLATION,
+      `Agent '${agentName}' attempted to access '${attempted}' but only declares: [${declared.join(', ')}]`,
+      `Update the agent's SKILL.md permissions.credentials to include '${attempted}', or remove the credential request`,
+      'credentials',
+      'permanent',
+    )
+  }
+}
+
+export class CredentialAccessDeniedError extends MATError {
+  constructor(agentName: string, trustTier: string) {
+    super(
+      `Agent '${agentName}' at trust tier '${trustTier}' is not permitted to access credentials`,
+      CREDENTIAL_ACCESS_DENIED,
+      `Agent '${agentName}' at trust tier '${trustTier}' is not permitted to access credentials`,
+      `Promote the agent to 'verified' tier: mat agents trust ${agentName} verified`,
+      'credentials',
+      'permanent',
+    )
+  }
+}

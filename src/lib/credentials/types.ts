@@ -31,3 +31,17 @@ export interface KeychainAdapter {
   getPassword(service: string, account: string): Promise<string | null>
   deletePassword(service: string, account: string): Promise<boolean>
 }
+
+/**
+ * Immutable map of platform credential key → token value.
+ * Scoped per-agent by resolveForAgent(). Must never be serialized to disk or logs.
+ */
+export type CredentialContext = ReadonlyMap<string, string>
+
+export type TrustTier = 'builtin' | 'verified' | 'community'
+
+export interface PlatformCredentialMetadata {
+  connectedAt: string
+  expiresAt: string
+  scopes: string[]
+}
