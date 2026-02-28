@@ -168,9 +168,10 @@ describe('agentDefinitionSchema', () => {
       name: 'test-agent',
       description: 'A test agent',
       cluster: 'intelligence',
+      tools: ['WebSearch', 'WebFetch'],
       permissions: {
         credentials: ['reddit-oauth'],
-        dataScopes: ['brand-config', 'trend-data'],
+        dataScopes: ['brand-config', 'pipeline-state'],
         toolScopes: ['WebSearch', 'WebFetch'],
       },
     }
@@ -230,6 +231,34 @@ describe('agentDefinitionSchema', () => {
     }
     const result = agentDefinitionSchema.safeParse(invalid)
     expect(result.success).toBe(false)
+  })
+
+  it('rejects toolScopes that reference tools not in tools array', () => {
+    const invalid = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'intelligence',
+      tools: ['WebSearch'],
+      permissions: {
+        toolScopes: ['WebSearch', 'Read'],
+      },
+    }
+    const result = agentDefinitionSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts toolScopes that are a subset of tools', () => {
+    const valid = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'intelligence',
+      tools: ['WebSearch', 'Read', 'Bash'],
+      permissions: {
+        toolScopes: ['WebSearch', 'Read'],
+      },
+    }
+    const result = agentDefinitionSchema.safeParse(valid)
+    expect(result.success).toBe(true)
   })
 })
 

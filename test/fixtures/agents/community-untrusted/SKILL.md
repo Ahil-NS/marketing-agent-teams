@@ -6,7 +6,12 @@ cluster: intelligence
 model: haiku
 tools:
   - Read
-trustTier: unreviewed
+trustTier: community
+permissions:
+  credentials: []
+  dataScopes: []
+  toolScopes:
+    - Read
 ---
 
 # Community Agent (Unreviewed)

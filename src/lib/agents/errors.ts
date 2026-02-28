@@ -102,3 +102,45 @@ export class SkillLoadError extends MATError {
     )
   }
 }
+
+/**
+ * Thrown when an agent attempts to access a tool or data scope
+ * not declared in its SKILL.md permissions block.
+ *
+ * For credential scope violations, use TrustViolationError from
+ * src/lib/credentials/errors.ts instead — do NOT duplicate.
+ */
+export class PermissionDeniedError extends MATError {
+  constructor(
+    agentName: string,
+    scopeType: 'tool' | 'dataScope',
+    requested: string,
+    declared: string[],
+  ) {
+    const scopeLabel = scopeType === 'tool' ? 'tool' : 'data scope'
+    super(
+      `Agent '${agentName}' attempted to access ${scopeLabel} '${requested}' but only declares: [${declared.join(', ')}]`,
+      'PERMISSION_DENIED',
+      `Agent '${agentName}' requested ${scopeLabel} '${requested}' which is not in its declared permissions`,
+      `Update the agent's SKILL.md permissions.${scopeType === 'tool' ? 'toolScopes' : 'dataScopes'} to include '${requested}', or remove the access request`,
+      'permission-enforcer',
+      'permanent',
+    )
+  }
+}
+
+export class SandboxViolationError extends MATError {
+  constructor(agentName: string, findings: Array<{line: number; message: string}>) {
+    const findingsSummary = findings
+      .map((f) => `  Line ${f.line}: ${f.message}`)
+      .join('\n')
+    super(
+      `Agent '${agentName}' SKILL.md failed sandbox validation:\n${findingsSummary}`,
+      'SANDBOX_VIOLATION',
+      `Agent '${agentName}' SKILL.md contains unsafe patterns that could enable code execution or credential exfiltration`,
+      `Fix the identified patterns in the agent's SKILL.md file. SKILL.md must contain only markdown text and YAML front matter — no executable code.`,
+      'sandbox-validator',
+      'permanent',
+    )
+  }
+}

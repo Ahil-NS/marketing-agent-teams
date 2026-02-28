@@ -1,19 +1,53 @@
 import {z} from 'zod'
 
+/**
+ * Known Agent SDK built-in tools.
+ * This is the authoritative allowlist — tools not in this list are rejected at schema validation time.
+ */
+export const VALID_SDK_TOOLS = [
+  'WebSearch',
+  'WebFetch',
+  'Read',
+  'Write',
+  'Edit',
+  'Bash',
+  'Glob',
+  'Grep',
+  'Task',
+] as const
+
+/**
+ * Known data scope identifiers.
+ * Agents declare which data stores they need access to — permission enforcer validates against this list.
+ */
+export const VALID_DATA_SCOPES = [
+  'pipeline-state',
+  'brand-config',
+  'agent-memory',
+  'content-items',
+  'review-queue',
+  'platform-metrics',
+] as const
+
 export const exampleInputsSchema = z.object({
   description: z.string().min(1),
   inputs: z.record(z.string(), z.unknown()),
 })
 
-export const skillPermissionsSchema = z.object({
+export const permissionsBlockSchema = z.object({
   credentials: z.array(z.string()).default([]),
-  dataScopes: z.array(z.string()).default([]),
-  toolScopes: z.array(z.string()).default([]),
+  dataScopes: z.array(z.enum(VALID_DATA_SCOPES)).default([]),
+  toolScopes: z.array(z.enum(VALID_SDK_TOOLS)).default([]),
 }).default({
   credentials: [],
   dataScopes: [],
   toolScopes: [],
 })
+
+/** @deprecated Use permissionsBlockSchema instead */
+export const skillPermissionsSchema = permissionsBlockSchema
+
+export type PermissionsBlock = z.infer<typeof permissionsBlockSchema>
 
 export const agentDefinitionSchema = z.object({
   name: z.string().min(1),
@@ -29,10 +63,13 @@ export const agentDefinitionSchema = z.object({
   ]),
   model: z.enum(['haiku', 'sonnet']).default('haiku'),
   tools: z.array(z.string()).default([]),
-  trustTier: z.enum(['builtin', 'reviewed', 'unreviewed']).default('builtin'),
-  permissions: skillPermissionsSchema,
+  trustTier: z.enum(['builtin', 'verified', 'community']).default('builtin'),
+  permissions: permissionsBlockSchema,
   examples: z.array(exampleInputsSchema).optional(),
-})
+}).refine(
+  (data) => data.permissions.toolScopes.every((scope) => data.tools.includes(scope)),
+  {message: 'permissions.toolScopes must be a subset of tools — all tool scopes must be declared in the tools array'},
+)
 
 export type AgentDefinition = z.infer<typeof agentDefinitionSchema>
 

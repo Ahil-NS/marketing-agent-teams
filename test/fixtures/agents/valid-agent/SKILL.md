@@ -13,7 +13,7 @@ permissions:
   credentials: []
   dataScopes:
     - brand-config
-    - trend-data
+    - pipeline-state
   toolScopes:
     - WebSearch
     - Read

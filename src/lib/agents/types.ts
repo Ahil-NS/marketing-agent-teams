@@ -1,14 +1,12 @@
 import type {MATError} from '../utils/errors.js'
+import type {TrustTier} from '../credentials/types.js'
+import type {PermissionsBlock} from '../schemas/agent-schema.js'
 
-/** Permission boundaries for agent execution — extracted from SKILL.md YAML front matter */
-export interface SkillPermissions {
-  /** Credential keys this agent may access (e.g., ['reddit-oauth']) */
-  credentials: string[]
-  /** Data scopes this agent may read (e.g., ['brand-config', 'trend-data']) */
-  dataScopes: string[]
-  /** Tool scopes this agent may invoke (e.g., ['WebSearch', 'WebFetch']) */
-  toolScopes: string[]
-}
+/**
+ * Permission boundaries for agent execution — extracted from SKILL.md YAML front matter.
+ * Type alias for PermissionsBlock from the Zod schema to ensure they cannot diverge.
+ */
+export type SkillPermissions = PermissionsBlock
 
 export interface AgentResult<T = unknown> {
   agentName: string
@@ -48,9 +46,9 @@ export interface SkillDefinition {
   /** Allowed SDK tools — security boundary for agent execution */
   tools: string[]
   /** Trust tier — determines credential access and publishing capability */
-  trustTier: 'builtin' | 'reviewed' | 'unreviewed'
-  /** Permission boundaries — credentials, data scopes, tool scopes */
-  permissions: SkillPermissions
+  trustTier: TrustTier
+  /** Permission boundaries — credentials, data scopes, tool scopes (defaults to deny-all if omitted) */
+  permissions?: SkillPermissions
   /** Full SKILL.md content (YAML front matter stripped) used as system prompt */
   systemPrompt: string
   /** Concatenated knowledge/ file contents — injected into system prompt */
@@ -99,6 +97,20 @@ export interface AgentMemoryState {
   entries: MemoryEntry[]
   /** Extensible metadata (agent-specific key-value pairs) */
   metadata: Record<string, unknown>
+}
+
+/** Result of permission enforcement validation */
+export interface PermissionEnforcementResult {
+  /** Whether the agent's declared permissions are compatible with its trust tier */
+  allowed: boolean
+  /** List of specific violations found (empty if allowed) */
+  violations: string[]
+  /** Final tool list to pass to AgentExecutor.execute() */
+  effectiveTools: string[]
+  /** Trust tier used for enforcement */
+  trustTier: TrustTier
+  /** Agent name for error context */
+  agentName: string
 }
 
 /** Options for configuring agent memory behavior */
