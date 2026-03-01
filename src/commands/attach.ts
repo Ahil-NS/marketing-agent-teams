@@ -1,7 +1,9 @@
+import {join} from 'node:path'
+
 import {Args, Command} from '@oclif/core'
 
-import {listPipelineRuns} from '../lib/orchestrator/index.js'
 import {TmuxSessionManager, TmuxNotFoundError} from '../lib/tmux/index.js'
+import {listRecentLogDirs, formatActiveSessionList, formatNoActiveSessions} from '../lib/tmux/logger.js'
 import {MATError} from '../lib/utils/errors.js'
 
 export default class Attach extends Command {
@@ -17,56 +19,40 @@ export default class Attach extends Command {
   async run(): Promise<void> {
     const {args} = await this.parse(Attach)
     const manager = new TmuxSessionManager()
+    const matDir = join(process.cwd(), '.mat')
 
-    if (!TmuxSessionManager.isAvailable()) {
-      this.error(new TmuxNotFoundError().message)
+    if (args['run-id']) {
+      // Reattach requires tmux
+      if (!TmuxSessionManager.isAvailable()) {
+        this.error(new TmuxNotFoundError().message)
+        return
+      }
+
+      try {
+        manager.attach(args['run-id'])
+      } catch (error) {
+        if (error instanceof MATError) {
+          this.error(`[${error.code}] ${error.message}\nReason: ${error.reason}\nFix: ${error.resolution}`)
+        }
+
+        throw error
+      }
+
       return
     }
 
-    try {
-      if (args['run-id']) {
-        manager.attach(args['run-id'])
-        return
-      }
-
-      // No run-id provided — list active sessions
+    // No run-id provided — list active sessions or recent logs
+    if (TmuxSessionManager.isAvailable()) {
       const activeSessions = manager.list()
 
       if (activeSessions.length > 0) {
-        this.log('Active pipeline sessions:')
-        for (const runId of activeSessions) {
-          this.log(`  mat-${runId}`)
-        }
-
-        this.log('')
-        this.log('Attach with: mat attach <run-id>')
+        this.log(formatActiveSessionList(activeSessions))
         return
       }
-
-      // No active sessions — show recent completed runs
-      this.log('No active pipeline sessions.')
-      const projectDir = process.cwd()
-      try {
-        const recentRuns = await listPipelineRuns(projectDir)
-        if (recentRuns.length > 0) {
-          this.log('')
-          this.log('Recent completed runs:')
-          for (const runId of recentRuns.slice(0, 5)) {
-            this.log(`  ${runId}`)
-          }
-
-          this.log('')
-          this.log('Start a new session with: mat run --tmux')
-        }
-      } catch {
-        // Ignore errors listing past runs
-      }
-    } catch (error) {
-      if (error instanceof MATError) {
-        this.error(`[${error.code}] ${error.message}\nReason: ${error.reason}\nFix: ${error.resolution}`)
-      }
-
-      throw error
     }
+
+    // No active sessions (or tmux not installed) — show recent completed runs
+    const recentRuns = listRecentLogDirs(matDir)
+    this.log(formatNoActiveSessions(recentRuns))
   }
 }

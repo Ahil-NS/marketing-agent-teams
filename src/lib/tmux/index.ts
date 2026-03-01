@@ -41,3 +41,12 @@ export type {
   StatusBarLines,
   StatusBarState,
 } from './status-bar.js'
+
+export {
+  TmuxLogger,
+  TmuxLogCaptureError,
+  TMUX_LOG_CAPTURE_ERROR,
+  listRecentLogDirs,
+  formatActiveSessionList,
+  formatNoActiveSessions,
+} from './logger.js'
