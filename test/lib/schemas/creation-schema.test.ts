@@ -16,6 +16,8 @@ import {
   videoGeneratorEnum,
   viralContentItemSchema,
   derivativeContentItemSchema,
+  atomizedContentSchema,
+  atomizationInputsSchema,
 } from '../../../src/lib/schemas/creation-schema.js'
 
 import validRedditContent from '../../fixtures/responses/claude-reddit-content.json'
@@ -297,6 +299,7 @@ describe('creationStageOutputSchema', () => {
       tiktokPackage: validTiktokContent,
       facebookPackage: validFacebookContent,
       instagramPackage: validInstagramContent,
+      atomizedOutput: null,
       contentItems: [{
         itemId: 'post-001',
         platform: 'reddit',
@@ -327,6 +330,7 @@ describe('creationStageOutputSchema', () => {
       tiktokPackage: validTiktokContent,
       facebookPackage: validFacebookContent,
       instagramPackage: null,
+      atomizedOutput: null,
       contentItems: [],
       hookWriterOutput: null,
       stageMetadata: {
@@ -345,6 +349,7 @@ describe('creationStageOutputSchema', () => {
       tiktokPackage: null,
       facebookPackage: null,
       instagramPackage: null,
+      atomizedOutput: null,
       contentItems: [],
       hookWriterOutput: null,
       stageMetadata: {
@@ -363,6 +368,7 @@ describe('creationStageOutputSchema', () => {
       tiktokPackage: validTiktokContent,
       facebookPackage: validFacebookContent,
       instagramPackage: validInstagramContent,
+      atomizedOutput: null,
       contentItems: [],
       hookWriterOutput: null,
       stageMetadata: {
@@ -1253,6 +1259,236 @@ describe('derivativeContentItemSchema', () => {
   it('rejects missing variationStrategy', () => {
     const {variationStrategy: _, ...invalid} = validDerivative
     const result = derivativeContentItemSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('atomizedContentSchema', () => {
+  const validAtomized = {
+    atomizationId: 'atomize-001',
+    sourceContentId: 'calendar-entry-001',
+    sourceContentType: 'campaign-theme',
+    microContent: [
+      {
+        itemId: 'atom-001-reddit',
+        platform: 'reddit',
+        contentType: 'thread',
+        title: 'Thread title here',
+        body: 'Full thread body text with several paragraphs',
+        metadata: {format: 'thread', sections: 5, hasTldr: true},
+        sourceSection: 'Key Statistics section',
+        traceabilityLink: 'calendar-entry-001#key-statistics',
+      },
+    ],
+  }
+
+  it('validates correct structure', () => {
+    const result = atomizedContentSchema.safeParse(validAtomized)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.atomizationId).toBe('atomize-001')
+      expect(result.data.sourceContentId).toBe('calendar-entry-001')
+      expect(result.data.sourceContentType).toBe('campaign-theme')
+      expect(result.data.microContent).toHaveLength(1)
+      expect(result.data.microContent[0].platform).toBe('reddit')
+      expect(result.data.microContent[0].traceabilityLink).toBe('calendar-entry-001#key-statistics')
+    }
+  })
+
+  it('validates all sourceContentType values', () => {
+    const types = ['campaign-theme', 'content-calendar-entry', 'blog-post', 'article'] as const
+    for (const type of types) {
+      const item = {...validAtomized, sourceContentType: type}
+      const result = atomizedContentSchema.safeParse(item)
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects invalid sourceContentType', () => {
+    const invalid = {...validAtomized, sourceContentType: 'podcast'}
+    const result = atomizedContentSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty microContent array', () => {
+    const invalid = {...validAtomized, microContent: []}
+    const result = atomizedContentSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing atomizationId', () => {
+    const {atomizationId: _, ...invalid} = validAtomized
+    const result = atomizedContentSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing sourceContentId', () => {
+    const {sourceContentId: _, ...invalid} = validAtomized
+    const result = atomizedContentSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('microContent items have required platform and traceabilityLink fields', () => {
+    const result = atomizedContentSchema.safeParse(validAtomized)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      for (const item of result.data.microContent) {
+        expect(item.platform).toBeDefined()
+        expect(['reddit', 'tiktok', 'facebook', 'instagram']).toContain(item.platform)
+        expect(item.traceabilityLink).toBeDefined()
+        expect(item.traceabilityLink.length).toBeGreaterThan(0)
+        expect(item.sourceSection).toBeDefined()
+        expect(item.sourceSection.length).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it('validates multiple microContent items across platforms', () => {
+    const multiPlatform = {
+      ...validAtomized,
+      microContent: [
+        {
+          itemId: 'atom-001-reddit',
+          platform: 'reddit',
+          contentType: 'thread',
+          title: 'Reddit thread',
+          body: 'Reddit body',
+          metadata: {},
+          sourceSection: 'Section 1',
+          traceabilityLink: 'source#section-1',
+        },
+        {
+          itemId: 'atom-002-tiktok',
+          platform: 'tiktok',
+          contentType: 'script-hook',
+          title: 'TikTok hook',
+          body: 'TikTok body',
+          metadata: {},
+          sourceSection: 'Section 2',
+          traceabilityLink: 'source#section-2',
+        },
+        {
+          itemId: 'atom-003-instagram',
+          platform: 'instagram',
+          contentType: 'carousel',
+          title: 'Instagram carousel',
+          body: 'Instagram body',
+          metadata: {},
+          sourceSection: 'Section 3',
+          traceabilityLink: 'source#section-3',
+        },
+      ],
+    }
+    const result = atomizedContentSchema.safeParse(multiPlatform)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.microContent).toHaveLength(3)
+    }
+  })
+
+  it('rejects microContent with missing traceabilityLink', () => {
+    const invalid = {
+      ...validAtomized,
+      microContent: [{
+        itemId: 'atom-001',
+        platform: 'reddit',
+        contentType: 'thread',
+        title: 'Title',
+        body: 'Body',
+        metadata: {},
+        sourceSection: 'Section',
+        // traceabilityLink missing
+      }],
+    }
+    const result = atomizedContentSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects microContent with invalid platform', () => {
+    const invalid = {
+      ...validAtomized,
+      microContent: [{
+        itemId: 'atom-001',
+        platform: 'linkedin',
+        contentType: 'post',
+        title: 'Title',
+        body: 'Body',
+        metadata: {},
+        sourceSection: 'Section',
+        traceabilityLink: 'source#section',
+      }],
+    }
+    const result = atomizedContentSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('atomizationInputsSchema', () => {
+  const validInputs = {
+    sourceContent: 'Long-form content about morning routines and wellness habits...',
+    brandVoiceConfig: {
+      tone: 'professional',
+      communicationStyle: 'clear',
+      brandPrinciples: ['authenticity'],
+      bannedPhrases: ['guaranteed'],
+    },
+    targetPlatforms: ['reddit', 'tiktok'],
+    atomizationStrategy: 'comprehensive',
+  }
+
+  it('validates correct structure', () => {
+    const result = atomizationInputsSchema.safeParse(validInputs)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.atomizationStrategy).toBe('comprehensive')
+      expect(result.data.targetPlatforms).toEqual(['reddit', 'tiktok'])
+    }
+  })
+
+  it('validates all strategy enum values', () => {
+    const strategies = ['comprehensive', 'highlights', 'key-points'] as const
+    for (const strategy of strategies) {
+      const item = {...validInputs, atomizationStrategy: strategy}
+      const result = atomizationInputsSchema.safeParse(item)
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects invalid atomizationStrategy', () => {
+    const invalid = {...validInputs, atomizationStrategy: 'minimal'}
+    const result = atomizationInputsSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty targetPlatforms array', () => {
+    const invalid = {...validInputs, targetPlatforms: []}
+    const result = atomizationInputsSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing sourceContent', () => {
+    const {sourceContent: _, ...invalid} = validInputs
+    const result = atomizationInputsSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts optional campaignId and verticalContext', () => {
+    const withOptionals = {
+      ...validInputs,
+      campaignId: 'plan-001',
+      verticalContext: '# Wellness vertical context',
+    }
+    const result = atomizationInputsSchema.safeParse(withOptionals)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.campaignId).toBe('plan-001')
+      expect(result.data.verticalContext).toBe('# Wellness vertical context')
+    }
+  })
+
+  it('rejects invalid platform in targetPlatforms', () => {
+    const invalid = {...validInputs, targetPlatforms: ['reddit', 'linkedin']}
+    const result = atomizationInputsSchema.safeParse(invalid)
     expect(result.success).toBe(false)
   })
 })

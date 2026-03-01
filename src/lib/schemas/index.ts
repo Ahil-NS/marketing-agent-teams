@@ -53,8 +53,10 @@ export {
   engagementMetricsSchema,
   viralContentItemSchema,
   derivativeContentItemSchema,
+  atomizedContentSchema,
+  atomizationInputsSchema,
 } from './creation-schema.js'
-export type {RedditContentPackage, TikTokContentPackage, FacebookContentPackage, InstagramContentPackage, ContentItem, CreationInputs, CreationStageOutput, HookWriterOutput, HookWriterInputs, ImagePrompt, VideoPrompt, EngagementMetrics, ViralContentItem, DerivativeContentItem} from './creation-schema.js'
+export type {RedditContentPackage, TikTokContentPackage, FacebookContentPackage, InstagramContentPackage, ContentItem, CreationInputs, CreationStageOutput, HookWriterOutput, HookWriterInputs, ImagePrompt, VideoPrompt, EngagementMetrics, ViralContentItem, DerivativeContentItem, AtomizedContent, AtomizationInputs} from './creation-schema.js'
 export {
   pipelineErrorSchema,
   pipelineRunSchema,

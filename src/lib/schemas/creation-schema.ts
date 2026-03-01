@@ -434,6 +434,47 @@ export const hookWriterInputsSchema = z.object({
 
 export type HookWriterInputs = z.infer<typeof hookWriterInputsSchema>
 
+// ── Atomized Content (output of content-atomizer agent) ─────────────────────
+
+const atomizedMicroContentSchema = z.object({
+  itemId: z.string().min(1),
+  platform: z.enum(['reddit', 'tiktok', 'facebook', 'instagram']),
+  contentType: z.string().min(1),
+  title: z.string().min(1),
+  body: z.string().min(1),
+  metadata: z.record(z.string(), z.unknown()),
+  sourceSection: z.string().min(1),
+  traceabilityLink: z.string().min(1),
+})
+
+export const atomizedContentSchema = z.object({
+  atomizationId: z.string().min(1),
+  sourceContentId: z.string().min(1),
+  sourceContentType: z.enum(['campaign-theme', 'content-calendar-entry', 'blog-post', 'article']),
+  microContent: z.array(atomizedMicroContentSchema).min(1),
+})
+
+export type AtomizedContent = z.infer<typeof atomizedContentSchema>
+
+// ── AtomizationInputs (typed inputs for content-atomizer agent) ─────────────
+
+export const atomizationInputsSchema = z.object({
+  sourceContent: z.string().min(1),
+  brandVoiceConfig: z.object({
+    tone: z.string().min(1),
+    communicationStyle: z.string().min(1),
+    brandPrinciples: z.array(z.string().min(1)),
+    bannedPhrases: z.array(z.string().min(1)),
+    productName: z.string().optional(),
+  }),
+  targetPlatforms: z.array(z.enum(['reddit', 'tiktok', 'facebook', 'instagram'])).min(1),
+  atomizationStrategy: z.enum(['comprehensive', 'highlights', 'key-points']),
+  campaignId: z.string().min(1).optional(),
+  verticalContext: z.string().optional(),
+})
+
+export type AtomizationInputs = z.infer<typeof atomizationInputsSchema>
+
 // ── CreationStageOutput (combined output of the creation stage) ──────────────
 
 const stageMetadataSchema = z.object({
@@ -448,6 +489,7 @@ export const creationStageOutputSchema = z.object({
   tiktokPackage: tiktokContentPackageSchema.nullable(),
   facebookPackage: facebookContentPackageSchema.nullable(),
   instagramPackage: instagramContentPackageSchema.nullable(),
+  atomizedOutput: atomizedContentSchema.nullable(),
   contentItems: z.array(contentItemSchema),
   hookWriterOutput: hookWriterOutputSchema.nullable(),
   stageMetadata: stageMetadataSchema,

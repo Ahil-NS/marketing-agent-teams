@@ -1,0 +1,66 @@
+{
+  "atomizationId": "atomize-001",
+  "sourceContentId": "calendar-entry-001",
+  "sourceContentType": "campaign-theme",
+  "microContent": [
+    {
+      "itemId": "atom-001-reddit",
+      "platform": "reddit",
+      "contentType": "thread",
+      "title": "5 Morning Routine Hacks That Actually Changed My Life [Data-Backed]",
+      "body": "**TL;DR:** I tried 12 different morning routines over 6 months. Here are the 5 that actually moved the needle.\n\n**1. Cold exposure (2 min shower)**\nStudies show cold exposure increases norepinephrine by 200-300%. I noticed sharper focus within the first week.\n\n**2. No phone for first 30 minutes**\nThis one was the hardest but most impactful. My anxiety dropped noticeably when I stopped doom-scrolling before breakfast.\n\n**3. Movement before caffeine**\nEven 10 minutes of walking before coffee made a difference. The research backs this — exercise primes your cortisol response.\n\n**4. Journaling (just 5 minutes)**\nNot fancy journaling. Just writing three things I want to accomplish. Kept me focused all day.\n\n**5. Protein-first breakfast**\nSwitching from cereal to eggs + greens was a game changer for sustained energy.\n\n---\n\nWhat morning habits have worked for you? I'm always looking to experiment.",
+      "metadata": {
+        "format": "thread",
+        "sections": 5,
+        "hasTldr": true,
+        "characterCount": 892
+      },
+      "sourceSection": "Morning Routine Optimization campaign theme",
+      "traceabilityLink": "calendar-entry-001#morning-routine-hacks"
+    },
+    {
+      "itemId": "atom-002-tiktok",
+      "platform": "tiktok",
+      "contentType": "script-hook",
+      "title": "Stop scrolling if you're tired every morning",
+      "body": "HOOK: Stop scrolling if you wake up tired every single morning.\n\nSETUP: I tested 12 morning routines over 6 months. Most were garbage. But these 3 actually worked.\n\nVALUE: Number 1 — cold shower for just 2 minutes. Sounds awful but studies show it boosts your focus hormone by 300%.\n\nNumber 2 — no phone for 30 minutes. Your anxiety will literally drop.\n\nNumber 3 — move before coffee. Even a 10-minute walk changes your whole day.\n\nCTA: Save this and try it tomorrow. Follow for more science-backed hacks.",
+      "metadata": {
+        "format": "three-things",
+        "duration": "30s",
+        "hashtags": ["#morningroutine", "#wellnesshacks", "#productivity", "#healthyhabits"],
+        "characterCount": 512
+      },
+      "sourceSection": "Top 3 morning routine findings",
+      "traceabilityLink": "calendar-entry-001#top-findings"
+    },
+    {
+      "itemId": "atom-003-facebook",
+      "platform": "facebook",
+      "contentType": "question-post",
+      "title": "What's your non-negotiable morning habit?",
+      "body": "I spent 6 months testing different morning routines. The one that surprised me most? Skipping my phone for the first 30 minutes.\n\nNo emails. No news. No social media.\n\nThe result? Less anxiety, more focus, and I actually enjoy my mornings now.\n\nWhat's the ONE morning habit you refuse to skip? Drop it below 👇",
+      "metadata": {
+        "format": "question-post",
+        "characterCount": 342,
+        "engagementHook": "Drop it below"
+      },
+      "sourceSection": "No-phone experiment results",
+      "traceabilityLink": "calendar-entry-001#no-phone-experiment"
+    },
+    {
+      "itemId": "atom-004-instagram",
+      "platform": "instagram",
+      "contentType": "carousel",
+      "title": "5 Morning Habits Backed by Science",
+      "body": "Slide 1: 5 Morning Habits That Actually Work (backed by science)\n\nSlide 2: Cold Exposure — 2 min cold shower boosts focus hormone by 300%\n\nSlide 3: Phone-Free First 30 Min — Reduces morning anxiety significantly\n\nSlide 4: Move Before Caffeine — 10 min walk primes your cortisol response\n\nSlide 5: 5-Min Journaling — Write 3 goals. Stay focused all day.\n\nSlide 6: Protein-First Breakfast — Swap cereal for eggs + greens = sustained energy\n\nSlide 7: Save this post & try ONE of these tomorrow. Which will you start with? 👇",
+      "metadata": {
+        "format": "carousel",
+        "slideCount": 7,
+        "hashtags": ["#morningroutine", "#healthyhabits", "#wellnesstips", "#productivityhacks", "#sciencebacked"],
+        "characterCount": 580
+      },
+      "sourceSection": "Complete morning routine framework",
+      "traceabilityLink": "calendar-entry-001#complete-framework"
+    }
+  ]
+}

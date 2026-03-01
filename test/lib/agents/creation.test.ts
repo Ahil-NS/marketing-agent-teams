@@ -8,6 +8,7 @@ import validTiktokContent from '../../fixtures/responses/claude-tiktok-content.j
 import validFacebookContent from '../../fixtures/responses/claude-facebook-content.json'
 import validInstagramContent from '../../fixtures/responses/claude-instagram-content.json'
 import validHookWriterOutput from '../../fixtures/responses/claude-hook-writer.json'
+import validAtomizedContent from '../../fixtures/responses/claude-atomized-content.json'
 import validCampaignPlan from '../../fixtures/responses/claude-campaign-plan.json'
 import validContentCalendar from '../../fixtures/responses/claude-content-calendar.json'
 import validChannelOptimization from '../../fixtures/responses/claude-channel-optimization.json'
@@ -612,14 +613,15 @@ describe('runCreationStage', () => {
     vi.resetModules()
   })
 
-  /** Helper: create a mock query that routes by prompt content, including hook writer */
+  /** Helper: create a mock query that routes by prompt content, including hook writer and atomizer */
   function createStageQuery(options: {
     reddit?: boolean
     tiktok?: boolean
     facebook?: boolean
     instagram?: boolean
     hookWriter?: boolean
-  } = {reddit: true, tiktok: true, facebook: true, instagram: true, hookWriter: true}) {
+    atomizer?: boolean
+  } = {reddit: true, tiktok: true, facebook: true, instagram: true, hookWriter: true, atomizer: true}) {
     return vi.fn((args: {prompt: string}) => {
       // Hook writer detection
       if (args.prompt.includes('Generate platform-tailored hook variations')) {
@@ -640,6 +642,31 @@ describe('runCreationStage', () => {
             type: 'result' as const,
             subtype: 'success' as const,
             result: JSON.stringify(validHookWriterOutput),
+            total_cost_usd: 0.0025,
+            usage: {input_tokens: 450, output_tokens: 380},
+          }
+        })()
+      }
+
+      // Content atomizer detection
+      if (args.prompt.includes('Atomize the following source content')) {
+        if (options.atomizer === false) {
+          return (async function* () {
+            yield {
+              type: 'result' as const,
+              subtype: 'error_during_execution' as const,
+              result: '',
+              total_cost_usd: 0.001,
+              usage: {input_tokens: 100, output_tokens: 0},
+              errors: ['Agent failed during execution'],
+            }
+          })()
+        }
+        return (async function* () {
+          yield {
+            type: 'result' as const,
+            subtype: 'success' as const,
+            result: JSON.stringify(validAtomizedContent),
             total_cost_usd: 0.0025,
             usage: {input_tokens: 450, output_tokens: 380},
           }
@@ -691,17 +718,17 @@ describe('runCreationStage', () => {
     })
   }
 
-  it('runs all four platform agents plus hook writer (Phase 1 + Phase 2)', async () => {
+  it('runs all four platform agents plus content atomizer plus hook writer (Phase 1 + Phase 2)', async () => {
     const mockQuery = createStageQuery()
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
     const result = await runCreationStage(creationInputs)
 
-    // 4 platform agents + 1 hook writer = 5 calls
-    expect(mockQuery).toHaveBeenCalledTimes(5)
+    // 4 platform agents + 1 atomizer + 1 hook writer = 6 calls
+    expect(mockQuery).toHaveBeenCalledTimes(6)
     expect(result.stageMetadata.agentsExecuted).toEqual([
-      'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'hook-writer',
+      'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'content-atomizer', 'hook-writer',
     ])
   })
 
@@ -724,17 +751,21 @@ describe('runCreationStage', () => {
     expect(result.hookWriterOutput!.hooks.length).toBeGreaterThanOrEqual(1)
     expect(result.hookWriterOutput!.topPicks.length).toBeGreaterThanOrEqual(1)
     expect(result.hookWriterOutput!.abPairs.length).toBeGreaterThanOrEqual(1)
+    // M2: atomizedOutput is returned as first-class stage output
+    expect(result.atomizedOutput).not.toBeNull()
+    expect(result.atomizedOutput!.microContent.length).toBeGreaterThanOrEqual(1)
+    expect(result.atomizedOutput!.atomizationId).toBeDefined()
     expect(result.stageMetadata.agentsSucceeded).toEqual(
       expect.arrayContaining([
-        'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'hook-writer',
+        'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'content-atomizer', 'hook-writer',
       ]),
     )
     expect(result.stageMetadata.agentsFailed).toEqual([])
   })
 
   it('returns partial results when some platform agents fail (degraded mode)', async () => {
-    // Reddit and Facebook succeed, TikTok and Instagram fail, hook writer still runs
-    const mockQuery = createStageQuery({reddit: true, tiktok: false, facebook: true, instagram: false, hookWriter: true})
+    // Reddit and Facebook succeed, TikTok and Instagram fail, atomizer and hook writer still run
+    const mockQuery = createStageQuery({reddit: true, tiktok: false, facebook: true, instagram: false, hookWriter: true, atomizer: true})
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
@@ -749,6 +780,7 @@ describe('runCreationStage', () => {
     expect(result.hookWriterOutput).not.toBeNull()
     expect(result.stageMetadata.agentsSucceeded).toContain('reddit-creator')
     expect(result.stageMetadata.agentsSucceeded).toContain('facebook-creator')
+    expect(result.stageMetadata.agentsSucceeded).toContain('content-atomizer')
     expect(result.stageMetadata.agentsSucceeded).toContain('hook-writer')
     expect(result.stageMetadata.agentsFailed).toContain('tiktok-creator')
     expect(result.stageMetadata.agentsFailed).toContain('instagram-creator')
@@ -756,18 +788,23 @@ describe('runCreationStage', () => {
     expect(result.stageMetadata.agentErrors).toBeDefined()
     expect(result.stageMetadata.agentErrors!['tiktok-creator']).toBeDefined()
     expect(result.stageMetadata.agentErrors!['instagram-creator']).toBeDefined()
-    // ContentItems only from successful agents
+    // ContentItems from successful platform agents + all atomized items
     expect(result.contentItems.length).toBeGreaterThanOrEqual(1)
-    const platforms = new Set(result.contentItems.map((i) => i.platform))
-    expect(platforms.has('reddit')).toBe(true)
-    expect(platforms.has('facebook')).toBe(true)
-    expect(platforms.has('tiktok')).toBe(false)
-    expect(platforms.has('instagram')).toBe(false)
+    // Platform agent items only from successful agents
+    const platformAgentItems = result.contentItems.filter((i) => i.agentName !== 'content-atomizer')
+    const platformAgentPlatforms = new Set(platformAgentItems.map((i) => i.platform))
+    expect(platformAgentPlatforms.has('reddit')).toBe(true)
+    expect(platformAgentPlatforms.has('facebook')).toBe(true)
+    expect(platformAgentPlatforms.has('tiktok')).toBe(false)
+    expect(platformAgentPlatforms.has('instagram')).toBe(false)
+    // Atomized items may include all platforms
+    const atomizerItems = result.contentItems.filter((i) => i.agentName === 'content-atomizer')
+    expect(atomizerItems.length).toBeGreaterThanOrEqual(1)
   })
 
   it('handles partial failure: 3 agents fail, 1 succeeds, hook writer runs on remaining', async () => {
-    // Only Instagram succeeds, hook writer runs on Instagram content
-    const mockQuery = createStageQuery({reddit: false, tiktok: false, facebook: false, instagram: true, hookWriter: true})
+    // Only Instagram succeeds, atomizer succeeds, hook writer runs on content
+    const mockQuery = createStageQuery({reddit: false, tiktok: false, facebook: false, instagram: true, hookWriter: true, atomizer: true})
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
@@ -779,12 +816,15 @@ describe('runCreationStage', () => {
     expect(result.instagramPackage).not.toBeNull()
     expect(result.hookWriterOutput).not.toBeNull()
     expect(result.stageMetadata.agentsSucceeded).toContain('instagram-creator')
+    expect(result.stageMetadata.agentsSucceeded).toContain('content-atomizer')
     expect(result.stageMetadata.agentsSucceeded).toContain('hook-writer')
     expect(result.stageMetadata.agentsFailed).toHaveLength(3)
     // agentErrors should capture failure reasons (M1)
     expect(result.stageMetadata.agentErrors).toBeDefined()
     expect(Object.keys(result.stageMetadata.agentErrors!)).toHaveLength(3)
-    expect(result.contentItems.every((i) => i.platform === 'instagram')).toBe(true)
+    // Platform agent items only from Instagram; atomized items may include all platforms
+    const platformAgentItems = result.contentItems.filter((i) => i.agentName !== 'content-atomizer')
+    expect(platformAgentItems.every((i) => i.platform === 'instagram')).toBe(true)
   })
 
   it('returns failed status when all platform agents fail (hook writer skipped)', async () => {
@@ -799,15 +839,16 @@ describe('runCreationStage', () => {
     expect(result.facebookPackage).toBeNull()
     expect(result.instagramPackage).toBeNull()
     expect(result.hookWriterOutput).toBeNull()
+    expect(result.atomizedOutput).toBeNull()
     expect(result.contentItems).toEqual([])
     expect(result.stageMetadata.agentsSucceeded).toEqual([])
     // hook-writer is skipped (not executed) when no content items — should NOT appear in agentsExecuted or agentsFailed
     expect(result.stageMetadata.agentsExecuted).toEqual([
-      'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator',
+      'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'content-atomizer',
     ])
     expect(result.stageMetadata.agentsFailed).toEqual(
       expect.arrayContaining([
-        'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator',
+        'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'content-atomizer',
       ]),
     )
     expect(result.stageMetadata.agentsFailed).not.toContain('hook-writer')
@@ -828,6 +869,20 @@ describe('runCreationStage', () => {
             type: 'result' as const,
             subtype: 'success' as const,
             result: JSON.stringify(validHookWriterOutput),
+            total_cost_usd: 0.0025,
+            usage: {input_tokens: 450, output_tokens: 380},
+          }
+        })()
+      }
+
+      // Content atomizer detection
+      if (args.prompt.includes('Atomize the following source content')) {
+        callOrder.push('atomizer')
+        return (async function* () {
+          yield {
+            type: 'result' as const,
+            subtype: 'success' as const,
+            result: JSON.stringify(validAtomizedContent),
             total_cost_usd: 0.0025,
             usage: {input_tokens: 450, output_tokens: 380},
           }
@@ -862,23 +917,38 @@ describe('runCreationStage', () => {
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
     await runCreationStage(creationInputs)
 
-    // Hook writer call must come AFTER all platform agent calls
+    // Hook writer call must come AFTER all platform agent + atomizer calls
     const hookWriterIndex = callOrder.lastIndexOf('hook-writer')
     expect(hookWriterIndex).toBe(callOrder.length - 1) // Last call
     expect(callOrder.filter((c) => c === 'platform-agent').length).toBe(4)
   })
 
-  it('hook writer receives ContentItem[] from platform agents', async () => {
+  it('hook writer receives ContentItem[] from platform agents (excludes atomized items)', async () => {
     const mockQuery = vi.fn((args: {prompt: string}) => {
       if (args.prompt.includes('Generate platform-tailored hook variations')) {
-        // Verify content items are passed as JSON in the prompt
+        // Verify platform agent content items are passed in the prompt
         expect(args.prompt).toContain('post-001') // Reddit post ID
         expect(args.prompt).toContain('script-001') // TikTok script ID
+        // M4: Atomized micro-content should NOT be passed to hook writer
+        expect(args.prompt).not.toContain('atom-001-reddit')
         return (async function* () {
           yield {
             type: 'result' as const,
             subtype: 'success' as const,
             result: JSON.stringify(validHookWriterOutput),
+            total_cost_usd: 0.0025,
+            usage: {input_tokens: 450, output_tokens: 380},
+          }
+        })()
+      }
+
+      // Content atomizer detection
+      if (args.prompt.includes('Atomize the following source content')) {
+        return (async function* () {
+          yield {
+            type: 'result' as const,
+            subtype: 'success' as const,
+            result: JSON.stringify(validAtomizedContent),
             total_cost_usd: 0.0025,
             usage: {input_tokens: 450, output_tokens: 380},
           }
@@ -922,12 +992,12 @@ describe('runCreationStage', () => {
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
     const result = await runCreationStage(creationInputs)
 
-    // ContentItems from all four platforms
-    // 2 reddit posts + 2 tiktok scripts + 3 facebook (2 posts + 1 story) + 5 instagram (2 posts + 1 reel + 1 story + 1 carousel)
-    expect(result.contentItems.length).toBeGreaterThanOrEqual(12)
+    // ContentItems from all four platforms + atomizer
+    // 2 reddit posts + 2 tiktok scripts + 3 facebook (2 posts + 1 story) + 5 instagram (2 posts + 1 reel + 1 story + 1 carousel) + 4 atomized
+    expect(result.contentItems.length).toBeGreaterThanOrEqual(16)
 
-    // Check Reddit content items
-    const redditItems = result.contentItems.filter((i) => i.platform === 'reddit')
+    // Check Reddit content items (from platform agent only)
+    const redditItems = result.contentItems.filter((i) => i.platform === 'reddit' && i.agentName === 'reddit-creator')
     expect(redditItems.length).toBe(2)
     expect(redditItems[0].contentType).toBe('post')
     expect(redditItems[0].agentName).toBe('reddit-creator')
@@ -936,8 +1006,8 @@ describe('runCreationStage', () => {
     expect(redditItems[0].metadata).toHaveProperty('subreddit')
     expect(redditItems[0].metadata).toHaveProperty('firstComment')
 
-    // Check TikTok content items
-    const tiktokItems = result.contentItems.filter((i) => i.platform === 'tiktok')
+    // Check TikTok content items (from platform agent only)
+    const tiktokItems = result.contentItems.filter((i) => i.platform === 'tiktok' && i.agentName === 'tiktok-creator')
     expect(tiktokItems.length).toBe(2)
     expect(tiktokItems[0].contentType).toBe('video-script')
     expect(tiktokItems[0].agentName).toBe('tiktok-creator')
@@ -946,8 +1016,8 @@ describe('runCreationStage', () => {
     expect(tiktokItems[0].metadata).toHaveProperty('veo3Prompt')
     expect(tiktokItems[0].metadata).toHaveProperty('hashtags')
 
-    // Check Facebook content items (posts + stories)
-    const facebookItems = result.contentItems.filter((i) => i.platform === 'facebook')
+    // Check Facebook content items (posts + stories, from platform agent only)
+    const facebookItems = result.contentItems.filter((i) => i.platform === 'facebook' && i.agentName === 'facebook-creator')
     expect(facebookItems.length).toBe(3) // 2 posts + 1 story
     const facebookPosts = facebookItems.filter((i) => i.contentType !== 'story')
     const facebookStories = facebookItems.filter((i) => i.contentType === 'story')
@@ -960,8 +1030,8 @@ describe('runCreationStage', () => {
     expect(facebookStories[0].metadata).toHaveProperty('frames')
     expect(facebookStories[0].metadata).toHaveProperty('interactions')
 
-    // Check Instagram content items (posts + reels + stories + carousels)
-    const instagramItems = result.contentItems.filter((i) => i.platform === 'instagram')
+    // Check Instagram content items (posts + reels + stories + carousels, from platform agent only)
+    const instagramItems = result.contentItems.filter((i) => i.platform === 'instagram' && i.agentName === 'instagram-creator')
     expect(instagramItems.length).toBe(5) // 2 posts + 1 reel + 1 story + 1 carousel
     const instagramPosts = instagramItems.filter((i) => 'hashtags' in (i.metadata as Record<string, unknown>))
     const instagramReels = instagramItems.filter((i) => i.contentType === 'reel')
@@ -980,6 +1050,15 @@ describe('runCreationStage', () => {
     expect(instagramStories[0].metadata).toHaveProperty('interactions')
     expect(instagramCarousels[0].metadata).toHaveProperty('slides')
     expect(instagramCarousels[0].metadata).toHaveProperty('swipeNarrative')
+
+    // H1 fix: Atomized content items must have correct campaignId (matching platform agents)
+    const atomizerItems = result.contentItems.filter((i) => i.agentName === 'content-atomizer')
+    expect(atomizerItems.length).toBeGreaterThanOrEqual(1)
+    for (const item of atomizerItems) {
+      expect(item.campaignId).toBe('plan-2026-03-wellness-spring')
+      expect(item.metadata).toHaveProperty('traceabilityLink')
+      expect(item.metadata).toHaveProperty('atomizationId')
+    }
   })
 
   it('ContentItem metadata contains imagePrompts for Instagram posts', async () => {
@@ -989,9 +1068,9 @@ describe('runCreationStage', () => {
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
     const result = await runCreationStage(creationInputs)
 
-    // AC5: Instagram posts should have imagePrompts
+    // AC5: Instagram posts should have imagePrompts (from platform agent only)
     const instagramPosts = result.contentItems.filter(
-      (i) => i.platform === 'instagram' && i.contentType !== 'reel' && i.contentType !== 'story' && i.contentType !== 'carousel',
+      (i) => i.platform === 'instagram' && i.agentName === 'instagram-creator' && i.contentType !== 'reel' && i.contentType !== 'story' && i.contentType !== 'carousel',
     )
     for (const post of instagramPosts) {
       expect(post.imagePrompts).toBeDefined()
@@ -1006,9 +1085,9 @@ describe('runCreationStage', () => {
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
     const result = await runCreationStage(creationInputs)
 
-    // AC5: Instagram Reels should have videoPrompts
+    // AC5: Instagram Reels should have videoPrompts (from platform agent)
     const instagramReels = result.contentItems.filter(
-      (i) => i.platform === 'instagram' && i.contentType === 'reel',
+      (i) => i.platform === 'instagram' && i.contentType === 'reel' && i.agentName === 'instagram-creator',
     )
     expect(instagramReels.length).toBeGreaterThanOrEqual(1)
     for (const reel of instagramReels) {
@@ -1026,8 +1105,8 @@ describe('runCreationStage', () => {
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
     const result = await runCreationStage(creationInputs)
 
-    // AC5: TikTok scripts should have videoPrompts
-    const tiktokItems = result.contentItems.filter((i) => i.platform === 'tiktok')
+    // AC5: TikTok scripts should have videoPrompts (from platform agent)
+    const tiktokItems = result.contentItems.filter((i) => i.platform === 'tiktok' && i.agentName === 'tiktok-creator')
     expect(tiktokItems.length).toBeGreaterThanOrEqual(1)
     for (const item of tiktokItems) {
       expect(item.videoPrompts).toBeDefined()
@@ -1240,5 +1319,200 @@ describe('runHookWriter', () => {
 
     const callArgs2 = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
     expect(callArgs2.options.systemPrompt).not.toContain('## Vertical Context')
+  })
+})
+
+describe('runContentAtomizer', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.resetModules()
+  })
+
+  const atomizerInputs = {
+    sourceContent: 'A comprehensive guide to morning routines. Key findings: cold exposure boosts norepinephrine by 300%. No-phone mornings reduce anxiety. Movement before caffeine primes cortisol response.',
+    brandVoiceConfig: {
+      tone: 'professional',
+      communicationStyle: 'clear and direct',
+      brandPrinciples: ['authenticity', 'empowerment'],
+      bannedPhrases: ['guaranteed results'],
+      productName: 'WellnessApp',
+    },
+    targetPlatforms: ['reddit', 'tiktok', 'facebook', 'instagram'] as const,
+    atomizationStrategy: 'comprehensive' as const,
+    campaignId: 'plan-2026-03-wellness-spring',
+  }
+
+  it('returns valid AtomizedContent on success', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    const result = await runContentAtomizer(atomizerInputs)
+
+    expect(result.agentName).toBe('content-atomizer')
+    expect(result.status).toBe('success')
+    expect(result.outputs.atomizationId).toBe('atomize-001')
+    expect(result.outputs.sourceContentId).toBe('calendar-entry-001')
+    expect(result.outputs.sourceContentType).toBe('campaign-theme')
+    expect(result.outputs.microContent.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('produces micro-content for all target platforms', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    const result = await runContentAtomizer(atomizerInputs)
+
+    const platforms = new Set(result.outputs.microContent.map((m) => m.platform))
+    expect(platforms.has('reddit')).toBe(true)
+    expect(platforms.has('tiktok')).toBe(true)
+    expect(platforms.has('facebook')).toBe(true)
+    expect(platforms.has('instagram')).toBe(true)
+  })
+
+  it('atomized content includes source traceability links', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    const result = await runContentAtomizer(atomizerInputs)
+
+    for (const item of result.outputs.microContent) {
+      expect(item.traceabilityLink).toBeDefined()
+      expect(item.traceabilityLink.length).toBeGreaterThan(0)
+      expect(item.sourceSection).toBeDefined()
+      expect(item.sourceSection.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('atomized content maintains brand voice references', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    await runContentAtomizer(atomizerInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('Brand Voice')
+    expect(callArgs.prompt).toContain('professional')
+    expect(callArgs.prompt).toContain('authenticity')
+    expect(callArgs.prompt).toContain('guaranteed results')
+  })
+
+  it('atomized content converts to ContentItem[] array', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer, atomizedContentToContentItems} = await import('../../../src/lib/agents/creation.js')
+    const result = await runContentAtomizer(atomizerInputs)
+    const testCampaignId = 'plan-2026-03-wellness-spring'
+    const contentItems = atomizedContentToContentItems(result.outputs, testCampaignId)
+
+    expect(contentItems.length).toBe(result.outputs.microContent.length)
+    for (const item of contentItems) {
+      expect(item.agentName).toBe('content-atomizer')
+      expect(item.generatedBy).toBe('content-atomizer')
+      expect(item.status).toBe('draft')
+      // H1 fix: campaignId must match the passed campaignId, not sourceContentId
+      expect(item.campaignId).toBe(testCampaignId)
+      expect(item.metadata).toHaveProperty('traceabilityLink')
+      expect(item.metadata).toHaveProperty('sourceSection')
+      expect(item.metadata).toHaveProperty('atomizationId')
+      expect(item.metadata).toHaveProperty('sourceContentId')
+    }
+  })
+
+  it('throws AgentExecutionError on failure', async () => {
+    const mockQuery = createMockQuery([createErrorMessage('error_during_execution')])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+
+    await expect(runContentAtomizer(atomizerInputs)).rejects.toThrow()
+  })
+
+  it('throws AgentValidationError when inputs are invalid', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    const invalidInputs = {...atomizerInputs, targetPlatforms: []}
+
+    await expect(runContentAtomizer(invalidInputs as typeof atomizerInputs)).rejects.toThrow()
+  })
+
+  it('passes correct tools to query() (Read, Glob)', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    await runContentAtomizer(atomizerInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {allowedTools: string[]}}
+    expect(callArgs.options.allowedTools).toEqual(
+      expect.arrayContaining(['Read', 'Glob']),
+    )
+  })
+
+  it('includes knowledge context in systemPrompt', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    await runContentAtomizer(atomizerInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).toContain('Knowledge Base')
+  })
+
+  it('includes vertical context in systemPrompt when provided', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    const inputsWithVertical = {...atomizerInputs, verticalContext: '# Wellness Compliance\n\nNo medical claims.'}
+    await runContentAtomizer(inputsWithVertical)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).toContain('## Vertical Context')
+    expect(callArgs.options.systemPrompt).toContain('# Wellness Compliance')
+  })
+
+  it('does not include vertical context when verticalContext is undefined', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    await runContentAtomizer(atomizerInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).not.toContain('## Vertical Context')
+  })
+
+  it('tracks token usage and cost', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    const result = await runContentAtomizer(atomizerInputs)
+
+    expect(result.usage).toBeDefined()
+    expect(result.usage.inputTokens).toBe(450)
+    expect(result.usage.outputTokens).toBe(380)
+    expect(result.usage.cost).toBe(0.0025)
+    expect(result.duration).toBeTypeOf('number')
+  })
+
+  it('includes atomization strategy in prompt', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAtomizedContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentAtomizer} = await import('../../../src/lib/agents/creation.js')
+    await runContentAtomizer(atomizerInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('comprehensive')
+    expect(callArgs.prompt).toContain('Atomization Strategy')
   })
 })

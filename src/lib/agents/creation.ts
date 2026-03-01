@@ -8,6 +8,8 @@ import {
   instagramContentPackageSchema,
   hookWriterOutputSchema,
   hookWriterInputsSchema,
+  atomizedContentSchema,
+  atomizationInputsSchema,
 } from '../schemas/creation-schema.js'
 import type {
   RedditContentPackage,
@@ -21,6 +23,8 @@ import type {
   HookWriterOutput,
   ImagePrompt,
   VideoPrompt,
+  AtomizedContent,
+  AtomizationInputs,
 } from '../schemas/creation-schema.js'
 
 import {executeAgent} from './agent-executor.js'
@@ -570,21 +574,123 @@ Follow your output format specification exactly. Output valid JSON.`,
 }
 
 /**
+ * Run the Content Atomizer agent.
+ * Breaks long-form content (campaign plan themes, content calendar entries) into
+ * platform-specific micro-content with full source traceability.
+ *
+ * Parallel execution: Runs independently in Phase 1 alongside platform agents (from campaign plan).
+ * Inputs: sourceContent + BrandVoiceConfig + targetPlatforms + atomizationStrategy
+ * Output: AtomizedContent (atomizationId, sourceContentId, microContent[])
+ */
+export async function runContentAtomizer(inputs: AtomizationInputs): Promise<AgentResult<AtomizedContent>> {
+  const parsed = atomizationInputsSchema.safeParse(inputs)
+  if (!parsed.success) {
+    throw new AgentValidationError('content-atomizer', parsed.error)
+  }
+
+  const skill = await loadSkill(join(agentsRoot(), 'creation', 'content-atomizer'))
+
+  const knowledgeSection = skill.knowledgeContext
+    ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  return executeAgent('content-atomizer', {
+    prompt: `Atomize the following source content into platform-specific micro-content:
+
+## Source Content
+${inputs.sourceContent}
+
+## Brand Voice
+- Tone: ${inputs.brandVoiceConfig.tone}
+- Communication Style: ${inputs.brandVoiceConfig.communicationStyle}
+- Brand Principles: ${inputs.brandVoiceConfig.brandPrinciples.join(', ')}
+- Banned Phrases: ${inputs.brandVoiceConfig.bannedPhrases.join(', ')}
+
+## Target Platforms
+${inputs.targetPlatforms.join(', ')}
+
+## Atomization Strategy
+${inputs.atomizationStrategy}
+- comprehensive: Extract ALL possible micro-content (8-15 pieces)
+- highlights: Top 3-5 most impactful elements
+- key-points: Core message + 1-2 supporting points (2-3 pieces)
+
+${inputs.campaignId ? `## Campaign ID\n${inputs.campaignId}` : ''}
+
+## Requirements
+- Produce platform-specific micro-content for EACH target platform
+- EVERY micro-content piece MUST include a traceabilityLink back to source content
+- Respect platform character limits, hashtag conventions, and formatting rules
+- Maintain brand voice consistency across all atomized pieces
+- Create ADDITIONAL content from different angles — do NOT duplicate platform agent output
+- Each piece must stand alone — readers should not need the original to understand it
+- Include platform-appropriate metadata (characterCount, hashtags, format details)
+
+Follow your output format specification exactly. Output valid JSON.`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}${buildVerticalSection(inputs.verticalContext)}`,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: atomizedContentSchema,
+    maxTurns: 20,
+  })
+}
+
+/**
+ * Convert AtomizedContent to ContentItem[] for downstream pipeline stages.
+ * Preserves traceability by storing sourceSection and traceabilityLink in metadata.
+ * @param campaignId - The campaign ID to assign to each ContentItem (must match platform agent items).
+ */
+export function atomizedContentToContentItems(atomized: AtomizedContent, campaignId: string): ContentItem[] {
+  const now = new Date().toISOString()
+  return atomized.microContent.map((micro) => ({
+    itemId: micro.itemId,
+    platform: micro.platform,
+    contentType: micro.contentType,
+    title: micro.title,
+    body: micro.body,
+    metadata: {
+      ...micro.metadata,
+      sourceSection: micro.sourceSection,
+      traceabilityLink: micro.traceabilityLink,
+      atomizationId: atomized.atomizationId,
+      sourceContentId: atomized.sourceContentId,
+    },
+    status: 'draft' as const,
+    generatedBy: 'content-atomizer',
+    agentName: 'content-atomizer',
+    campaignId,
+    createdAt: now,
+  }))
+}
+
+/**
  * Run the creation stage — TWO-PHASE execution:
- *   Phase 1 (parallel): All four platform agents via Promise.allSettled() (FR63)
+ *   Phase 1 (parallel): All four platform agents + content atomizer via Promise.allSettled() (FR63)
  *   Phase 2 (sequential): Hook writer processes ContentItem[] from Phase 1
  *
  * Uses Promise.allSettled() for partial failure handling (FR3, degraded mode).
  * If any platform agent fails, the others' results are still collected.
+ * Content atomizer runs in Phase 1 alongside platform agents (independent, from campaign plan).
  * Hook writer runs ONLY if at least one platform agent produced content items.
  */
 export async function runCreationStage(inputs: CreationInputs): Promise<CreationStageOutput> {
-  // Phase 1: Platform agents in PARALLEL (FR63)
-  const [redditResult, tiktokResult, facebookResult, instagramResult] = await Promise.allSettled([
+  // Build atomization inputs from creation inputs (campaign plan themes as source content)
+  const atomizerInputs: AtomizationInputs = {
+    sourceContent: JSON.stringify(inputs.campaignPlan, null, 2),
+    brandVoiceConfig: inputs.brandVoiceConfig,
+    targetPlatforms: ['reddit', 'tiktok', 'facebook', 'instagram'],
+    atomizationStrategy: 'comprehensive',
+    campaignId: inputs.campaignPlan.planId,
+    verticalContext: inputs.verticalContext,
+  }
+
+  // Phase 1: Platform agents + content atomizer in PARALLEL (FR63)
+  const [redditResult, tiktokResult, facebookResult, instagramResult, atomizerResult] = await Promise.allSettled([
     runRedditCreator(inputs),
     runTikTokCreator(inputs),
     runFacebookCreator(inputs),
     runInstagramCreator(inputs),
+    runContentAtomizer(atomizerInputs),
   ])
 
   // Handle partial success (FR3, degraded mode)
@@ -592,23 +698,26 @@ export async function runCreationStage(inputs: CreationInputs): Promise<Creation
   const tiktokPackage = tiktokResult.status === 'fulfilled' ? tiktokResult.value.outputs : null
   const facebookPackage = facebookResult.status === 'fulfilled' ? facebookResult.value.outputs : null
   const instagramPackage = instagramResult.status === 'fulfilled' ? instagramResult.value.outputs : null
+  const atomizedContent = atomizerResult.status === 'fulfilled' ? atomizerResult.value.outputs : null
 
   // Convert to ContentItem[] for downstream stages
+  const campaignId = inputs.campaignPlan.planId
   const contentItems: ContentItem[] = [
     ...(redditPackage ? redditPackageToContentItems(redditPackage) : []),
     ...(tiktokPackage ? tiktokPackageToContentItems(tiktokPackage) : []),
     ...(facebookPackage ? facebookPackageToContentItems(facebookPackage) : []),
     ...(instagramPackage ? instagramPackageToContentItems(instagramPackage) : []),
+    ...(atomizedContent ? atomizedContentToContentItems(atomizedContent, campaignId) : []),
   ]
 
-  const platformAgents = ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator']
-  const agentsExecuted = [...platformAgents]
-  const platformResults = [redditResult, tiktokResult, facebookResult, instagramResult]
+  const phase1Agents = ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'content-atomizer']
+  const agentsExecuted = [...phase1Agents]
+  const phase1Results = [redditResult, tiktokResult, facebookResult, instagramResult, atomizerResult]
 
   // Capture error reasons for debugging (M1: don't silently discard failure info)
   const agentErrors: Record<string, string> = {}
-  for (const [i, agent] of platformAgents.entries()) {
-    const result = platformResults[i]
+  for (const [i, agent] of phase1Agents.entries()) {
+    const result = phase1Results[i]
     if (result.status === 'rejected') {
       agentErrors[agent] = result.reason instanceof Error
         ? result.reason.message
@@ -616,16 +725,18 @@ export async function runCreationStage(inputs: CreationInputs): Promise<Creation
     }
   }
 
-  const succeededAgents = platformAgents.filter((_, i) => platformResults[i].status === 'fulfilled')
-  const failedAgents = platformAgents.filter((_, i) => platformResults[i].status === 'rejected')
+  const succeededAgents = phase1Agents.filter((_, i) => phase1Results[i].status === 'fulfilled')
+  const failedAgents = phase1Agents.filter((_, i) => phase1Results[i].status === 'rejected')
 
-  // Phase 2: Hook writer runs AFTER platform agents, only if content items exist
+  // Phase 2: Hook writer runs AFTER platform agents, only if platform content items exist.
+  // Atomized micro-content is excluded — it's already distilled and doesn't need hook variations.
+  const platformContentItems = contentItems.filter((item) => item.agentName !== 'content-atomizer')
   let hookWriterOutput: HookWriterOutput | null = null
-  if (contentItems.length > 0) {
+  if (platformContentItems.length > 0) {
     agentsExecuted.push('hook-writer')
     try {
       const hookResult = await runHookWriter({
-        contentItems,
+        contentItems: platformContentItems,
         brandVoiceConfig: inputs.brandVoiceConfig,
         campaignPlan: inputs.campaignPlan,
         verticalContext: inputs.verticalContext,
@@ -639,7 +750,7 @@ export async function runCreationStage(inputs: CreationInputs): Promise<Creation
         : String(error)
     }
   } else {
-    // No content items — hook writer skipped (not executed, not failed)
+    // No platform content items — hook writer skipped (not executed, not failed)
     agentErrors['hook-writer'] = 'Skipped: no content items from platform agents'
   }
 
@@ -648,6 +759,7 @@ export async function runCreationStage(inputs: CreationInputs): Promise<Creation
     tiktokPackage,
     facebookPackage,
     instagramPackage,
+    atomizedOutput: atomizedContent,
     contentItems,
     hookWriterOutput,
     stageMetadata: {
