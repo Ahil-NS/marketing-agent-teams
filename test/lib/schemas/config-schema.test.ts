@@ -535,4 +535,112 @@ describe('schemas/index.ts re-export', () => {
     const {agentTogglesSchema} = await import('../../../src/lib/schemas/index.js')
     expect(agentTogglesSchema).toBeDefined()
   })
+
+  it('re-exports viralConfigSchema from index', async () => {
+    const {viralConfigSchema} = await import('../../../src/lib/schemas/index.js')
+    expect(viralConfigSchema).toBeDefined()
+  })
+})
+
+describe('viralConfigSchema (Story 6.8)', () => {
+  const baseConfig = {
+    productName: 'TestProduct',
+    platforms: ['reddit'] as const,
+    skillLevel: 'intermediate' as const,
+  }
+
+  it('defaults viral.enabled to true when omitted', () => {
+    const result = configSchema.safeParse(baseConfig)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viral.enabled).toBe(true)
+    }
+  })
+
+  it('defaults viral.thresholds to empty per-platform objects', () => {
+    const result = configSchema.safeParse(baseConfig)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viral.thresholds.reddit).toEqual({})
+      expect(result.data.viral.thresholds.tiktok).toEqual({})
+      expect(result.data.viral.thresholds.facebook).toEqual({})
+      expect(result.data.viral.thresholds.instagram).toEqual({})
+    }
+  })
+
+  it('accepts per-platform per-metric thresholds', () => {
+    const config = {
+      ...baseConfig,
+      viral: {
+        enabled: true,
+        thresholds: {
+          reddit: {engagementRate: 0.05, likes: 500, comments: 100},
+          tiktok: {views: 10000, likes: 1000, shares: 200},
+        },
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viral.thresholds.reddit.engagementRate).toBe(0.05)
+      expect(result.data.viral.thresholds.reddit.likes).toBe(500)
+      expect(result.data.viral.thresholds.tiktok.views).toBe(10000)
+    }
+  })
+
+  it('allows disabling viral detection (AC2)', () => {
+    const config = {
+      ...baseConfig,
+      viral: {enabled: false},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viral.enabled).toBe(false)
+    }
+  })
+
+  it('rejects negative threshold values', () => {
+    const config = {
+      ...baseConfig,
+      viral: {
+        thresholds: {
+          reddit: {likes: -1},
+        },
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects engagementRate above 1', () => {
+    const config = {
+      ...baseConfig,
+      viral: {
+        thresholds: {
+          reddit: {engagementRate: 1.5},
+        },
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts partial platform threshold config', () => {
+    const config = {
+      ...baseConfig,
+      viral: {
+        thresholds: {
+          reddit: {likes: 1000},
+          // Other platforms use defaults (empty = no overrides)
+        },
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viral.thresholds.reddit.likes).toBe(1000)
+      expect(result.data.viral.thresholds.reddit.engagementRate).toBeUndefined()
+    }
+  })
 })

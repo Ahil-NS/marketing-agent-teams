@@ -60,6 +60,41 @@ export const viralThresholdSchema = z.object({
 
 export type ViralThreshold = z.infer<typeof viralThresholdSchema>
 
+// ── Per-metric viral threshold config per platform (Story 6.8) ──────────────
+
+const platformMetricThresholdSchema = z.object({
+  engagementRate: z.number().min(0).max(1).optional(),
+  views: z.number().int().nonnegative().optional(),
+  likes: z.number().int().nonnegative().optional(),
+  comments: z.number().int().nonnegative().optional(),
+  shares: z.number().int().nonnegative().optional(),
+}).default({})
+
+export const viralConfigSchema = z.object({
+  enabled: z.boolean().default(true),
+  thresholds: z.object({
+    reddit: platformMetricThresholdSchema,
+    tiktok: platformMetricThresholdSchema,
+    facebook: platformMetricThresholdSchema,
+    instagram: platformMetricThresholdSchema,
+  }).default({
+    reddit: {},
+    tiktok: {},
+    facebook: {},
+    instagram: {},
+  }),
+}).default({
+  enabled: true,
+  thresholds: {
+    reddit: {},
+    tiktok: {},
+    facebook: {},
+    instagram: {},
+  },
+})
+
+export type ViralConfig = z.infer<typeof viralConfigSchema>
+
 const optimizationSchema = z.object({
   humanization: humanizationConfigSchema.default({
     aiDetectionThreshold: 20,
@@ -79,6 +114,7 @@ export const configSchema = z.object({
   brandVoice: brandVoiceSchema,
   agents: agentsSchema,
   viralThreshold: viralThresholdSchema,
+  viral: viralConfigSchema,
   optimization: optimizationSchema,
   vertical: z.string().min(1).optional(),
 })

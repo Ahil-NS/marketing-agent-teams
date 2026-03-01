@@ -1,5 +1,5 @@
-export {agentToggleSchema, agentTogglesSchema, brandVoiceSchema, configSchema, viralThresholdSchema} from './config-schema.js'
-export type {AgentToggles, BrandVoiceConfig, Config, ViralThreshold} from './config-schema.js'
+export {agentToggleSchema, agentTogglesSchema, brandVoiceSchema, configSchema, viralConfigSchema, viralThresholdSchema} from './config-schema.js'
+export type {AgentToggles, BrandVoiceConfig, Config, ViralConfig, ViralThreshold} from './config-schema.js'
 export {platformCredentialSchema, platformsMetadataSchema} from './platform-schema.js'
 export type {PlatformCredentialMetadata, PlatformsMetadata} from './platform-schema.js'
 export {

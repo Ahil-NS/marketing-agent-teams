@@ -10,6 +10,14 @@ export {
   savePipelineRun,
 } from './state-serializer.js'
 export {BudgetTracker} from './budget-tracker.js'
+export {ViralDetector} from './viral-detector.js'
+export {ViralTracker} from './viral-tracker.js'
+export {
+  buildDerivativeTasks,
+  buildDerivativeReviewItem,
+  canSpawnDerivatives,
+  executeDerivativeTasks,
+} from './derivative-spawner.js'
 export {
   AllAgentsFailedError,
   BUDGET_STATE_CORRUPT,
@@ -64,3 +72,17 @@ export {
   REVIEW_STAGE,
   STAGE_AGENT_MAP,
 } from './types.js'
+export type {
+  DerivativeMetadata,
+  DerivativeTask,
+  DerivationType,
+  ViralDetectionResult,
+  ViralThresholdConfig,
+  ViralTrackingState,
+} from './viral-types.js'
+export {
+  DEFAULT_VIRAL_THRESHOLDS,
+  viralThresholdConfigSchema,
+  viralTrackingEntrySchema,
+  viralTrackingStateSchema,
+} from './viral-types.js'
