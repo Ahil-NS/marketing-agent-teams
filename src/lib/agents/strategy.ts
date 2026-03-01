@@ -118,9 +118,11 @@ Follow your output format specification exactly.`,
 /**
  * Run the Channel Optimizer (Seasonal Campaign) agent.
  * Refines content calendar using algorithm intelligence and identifies seasonal opportunities.
+ * When audience profile data is available, also produces platform-audience fit scores.
  *
  * Sequential dependency: Runs THIRD — requires CampaignPlan + ContentCalendar + PlatformAlgorithmReport.
- * Inputs: CampaignPlan + ContentCalendar + PlatformAlgorithmReport
+ * Optional: AudienceProfile (from audience-researcher) enhances output with fit scoring.
+ * Inputs: CampaignPlan + ContentCalendar + PlatformAlgorithmReport + AudienceProfile (optional)
  * Output: ChannelOptimizationPlan (consumed by creation and distribution stages)
  */
 export async function runChannelOptimizer(inputs: OptimizerInputs): Promise<AgentResult<ChannelOptimizationPlan>> {
@@ -128,6 +130,19 @@ export async function runChannelOptimizer(inputs: OptimizerInputs): Promise<Agen
 
   const knowledgeSection = skill.knowledgeContext
     ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  const audienceSection = inputs.audienceProfile
+    ? `\n## Audience Profile Data
+${JSON.stringify(inputs.audienceProfile, null, 2)}
+
+## Additional Requirements (Audience-Driven)
+- Score each platform for audience-platform fit (0-1 scale)
+- Include audienceProfileId referencing "${inputs.audienceProfile.profileId}"
+- Include platformScores[] with fitScore, audienceOverlap, engagementPotential, recommendedFormats, priority
+- Include postingFrequency[] with per-platform frequency recommendations
+- Include contentFormatRecommendations[] mapping audience segments to optimal formats
+- Include crossPlatformStrategy summary informed by audience multi-platform behavior`
     : ''
 
   return executeAgent('channel-optimizer', {
@@ -141,6 +156,7 @@ ${JSON.stringify(inputs.contentCalendar, null, 2)}
 
 ## Platform Algorithm Intelligence
 ${JSON.stringify(inputs.platformAlgorithmReport, null, 2)}
+${audienceSection}
 
 ## Requirements
 - Optimize posting times per platform using algorithm intelligence

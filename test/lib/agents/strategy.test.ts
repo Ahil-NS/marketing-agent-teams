@@ -6,6 +6,7 @@ import type {StrategyInputs, CalendarInputs, OptimizerInputs} from '../../../src
 import validCampaignPlan from '../../fixtures/responses/claude-campaign-plan.json'
 import validContentCalendar from '../../fixtures/responses/claude-content-calendar.json'
 import validChannelOptimization from '../../fixtures/responses/claude-channel-optimization.json'
+import validAudienceProfile from '../../fixtures/responses/claude-audience-profile.json'
 
 const strategyInputs: StrategyInputs = {
   trendBrief: {
@@ -426,5 +427,38 @@ describe('runChannelOptimizer', () => {
     const {AgentValidationError} = await import('../../../src/lib/agents/index.js')
 
     await expect(runChannelOptimizer(optimizerInputs)).rejects.toThrow(AgentValidationError)
+  })
+
+  it('includes audience profile data in prompt when provided', async () => {
+    const optimizerWithAudience: OptimizerInputs = {
+      ...optimizerInputs,
+      audienceProfile: validAudienceProfile,
+    }
+
+    const mockQuery = createMockQuery([createSuccessMessage(validChannelOptimization)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runChannelOptimizer} = await import('../../../src/lib/agents/strategy.js')
+    await runChannelOptimizer(optimizerWithAudience)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('Audience Profile Data')
+    expect(callArgs.prompt).toContain(validAudienceProfile.profileId)
+    expect(callArgs.prompt).toContain('platformScores')
+    expect(callArgs.prompt).toContain('postingFrequency')
+    expect(callArgs.prompt).toContain('contentFormatRecommendations')
+    expect(callArgs.prompt).toContain('crossPlatformStrategy')
+  })
+
+  it('does not include audience section when audienceProfile is absent', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validChannelOptimization)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runChannelOptimizer} = await import('../../../src/lib/agents/strategy.js')
+    await runChannelOptimizer(optimizerInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).not.toContain('Audience Profile Data')
+    expect(callArgs.prompt).not.toContain('Additional Requirements (Audience-Driven)')
   })
 })

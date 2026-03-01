@@ -1,0 +1,198 @@
+{
+  "profileId": "ap-2026-03-wellness",
+  "brandName": "WellnessApp",
+  "segments": [
+    {
+      "segmentName": "Health-Conscious Millennials",
+      "size": "TAM: 15M, SAM: 2M, SOM: 200K",
+      "demographics": {
+        "ageRange": "25-34",
+        "gender": "Skews female (60%)",
+        "location": "Urban US, UK, Canada",
+        "income": "$50K-$100K",
+        "education": "College-educated",
+        "profession": "White-collar professionals, freelancers"
+      },
+      "psychographics": {
+        "values": ["self-improvement", "work-life balance", "authenticity"],
+        "lifestyle": "Active lifestyle with wellness routines, mindful spending",
+        "motivations": ["feel better daily", "reduce stress", "build healthy habits"],
+        "valsType": "Achievers"
+      },
+      "primaryPlatforms": ["instagram", "tiktok"],
+      "contentFormats": ["short-form video", "carousel", "stories"],
+      "engagementPatterns": "High engagement with visual content, saves educational posts, shares aspirational content"
+    },
+    {
+      "segmentName": "Wellness-Curious Gen Z",
+      "size": "TAM: 20M, SAM: 3M, SOM: 150K",
+      "demographics": {
+        "ageRange": "18-24",
+        "gender": "Even split (52% female, 48% male)",
+        "location": "US, global English-speaking markets",
+        "income": "$20K-$50K",
+        "education": "College students and recent graduates",
+        "profession": "Students, entry-level workers, gig economy"
+      },
+      "psychographics": {
+        "values": ["mental health awareness", "community", "self-expression"],
+        "lifestyle": "Digitally native, trend-aware, budget-conscious wellness",
+        "motivations": ["discover new wellness practices", "fit in with health-conscious peers", "affordable self-care"],
+        "valsType": "Experiencers"
+      },
+      "primaryPlatforms": ["tiktok", "reddit"],
+      "contentFormats": ["short-form video", "text posts", "memes"],
+      "engagementPatterns": "Comments and shares on relatable content, participates in challenges, lurks on Reddit"
+    },
+    {
+      "segmentName": "Mid-Career Health Optimizers",
+      "size": "TAM: 10M, SAM: 1.5M, SOM: 100K",
+      "demographics": {
+        "ageRange": "35-49",
+        "gender": "Even split",
+        "location": "Suburban US, UK, Australia",
+        "income": "$75K-$150K",
+        "education": "College-educated, many with advanced degrees",
+        "profession": "Mid-senior level professionals, managers, entrepreneurs"
+      },
+      "psychographics": {
+        "values": ["efficiency", "evidence-based approaches", "family health"],
+        "lifestyle": "Busy professionals seeking optimized health routines",
+        "motivations": ["maximize limited time", "data-driven health decisions", "model healthy behavior for family"],
+        "valsType": "Thinkers"
+      },
+      "primaryPlatforms": ["facebook", "reddit"],
+      "contentFormats": ["long-form text", "data-driven posts", "group discussions"],
+      "engagementPatterns": "Active in Facebook Groups, reads long Reddit posts, prefers evidence over trends"
+    }
+  ],
+  "demographics": {
+    "primaryAge": "18-49",
+    "genderSplit": "55% female, 45% male",
+    "topLocations": ["United States", "United Kingdom", "Canada", "Australia"],
+    "incomeRange": "$20K-$150K"
+  },
+  "psychographics": {
+    "coreValues": ["self-improvement", "wellness", "authenticity", "community"],
+    "sharedMotivations": ["improve daily wellbeing", "build sustainable habits", "reduce stress"],
+    "dominantValsTypes": ["Achievers", "Experiencers", "Thinkers"]
+  },
+  "painPoints": [
+    {
+      "painPoint": "Overwhelmed by conflicting wellness advice from influencers and brands",
+      "severity": "high",
+      "segments": ["Health-Conscious Millennials", "Wellness-Curious Gen Z"],
+      "contentOpportunity": "Evidence-based, simplified wellness content that cuts through noise"
+    },
+    {
+      "painPoint": "Difficulty maintaining consistent wellness routines with busy schedules",
+      "severity": "high",
+      "segments": ["Health-Conscious Millennials", "Mid-Career Health Optimizers"],
+      "contentOpportunity": "Quick routine content, time-saving wellness tips, habit-building frameworks"
+    },
+    {
+      "painPoint": "Wellness products and services feel too expensive or inaccessible",
+      "severity": "medium",
+      "segments": ["Wellness-Curious Gen Z"],
+      "contentOpportunity": "Budget-friendly wellness tips, free resources, cost comparisons"
+    }
+  ],
+  "contentPreferences": [
+    {
+      "format": "short-form video",
+      "platforms": ["tiktok", "instagram"],
+      "segments": ["Health-Conscious Millennials", "Wellness-Curious Gen Z"],
+      "engagementLevel": "high"
+    },
+    {
+      "format": "educational carousel",
+      "platforms": ["instagram"],
+      "segments": ["Health-Conscious Millennials"],
+      "engagementLevel": "high"
+    },
+    {
+      "format": "data-driven text post",
+      "platforms": ["reddit"],
+      "segments": ["Mid-Career Health Optimizers", "Wellness-Curious Gen Z"],
+      "engagementLevel": "medium"
+    },
+    {
+      "format": "group discussion post",
+      "platforms": ["facebook"],
+      "segments": ["Mid-Career Health Optimizers"],
+      "engagementLevel": "medium"
+    }
+  ],
+  "platformUsage": [
+    {
+      "platform": "tiktok",
+      "audienceSize": "Estimated 2.5M reachable in wellness niche",
+      "primarySegments": ["Wellness-Curious Gen Z", "Health-Conscious Millennials"],
+      "usagePattern": "Daily scrolling with discovery intent; engagement via likes, comments, challenges",
+      "peakActivity": "7-9 AM, 7-11 PM EST",
+      "contentPreferences": ["hook-driven short videos", "wellness tips under 60s", "trend-based content"]
+    },
+    {
+      "platform": "instagram",
+      "audienceSize": "Estimated 1.8M reachable in wellness niche",
+      "primarySegments": ["Health-Conscious Millennials"],
+      "usagePattern": "Visual browsing, saves educational content, shops from posts",
+      "peakActivity": "7-9 AM, 11 AM-1 PM, 7-9 PM EST",
+      "contentPreferences": ["Reels", "educational carousels", "aesthetic lifestyle posts"]
+    },
+    {
+      "platform": "reddit",
+      "audienceSize": "Estimated 800K across wellness subreddits",
+      "primarySegments": ["Mid-Career Health Optimizers", "Wellness-Curious Gen Z"],
+      "usagePattern": "Deep reading, community discussions, seeking authentic advice",
+      "peakActivity": "8-10 AM, 12-2 PM, 5-7 PM EST",
+      "contentPreferences": ["data-driven posts", "AMAs", "personal experience stories"]
+    },
+    {
+      "platform": "facebook",
+      "audienceSize": "Estimated 1.2M in wellness-related Groups",
+      "primarySegments": ["Mid-Career Health Optimizers"],
+      "usagePattern": "Group participation, article sharing, event-based engagement",
+      "peakActivity": "9-11 AM, 1-3 PM, 7-9 PM EST",
+      "contentPreferences": ["group discussions", "video content", "article shares"]
+    }
+  ],
+  "personas": [
+    {
+      "name": "Wellness-Seeking Sarah",
+      "ageRange": "28-33",
+      "segment": "Health-Conscious Millennials",
+      "demographics": "Female, urban professional, $65K income, college-educated",
+      "psychographicProfile": "Achiever — values self-improvement and work-life balance. Morning routine enthusiast with curated Instagram feed.",
+      "primaryPlatforms": ["instagram", "tiktok"],
+      "contentPreferences": ["Reels with quick wellness tips", "carousel breakdowns of routines", "before/after transformations"],
+      "painPoints": ["information overload from wellness influencers", "difficulty maintaining routines during busy weeks", "skeptical of unscientific claims"],
+      "behavioralIndicators": ["saves wellness posts on Instagram", "follows 10+ wellness accounts", "watches wellness Reels to completion", "member of wellness-focused Facebook Group"],
+      "messagingAngle": "Evidence-based simplicity — 'science-backed wellness that fits your real schedule'"
+    },
+    {
+      "name": "Discovery-Driven Dani",
+      "ageRange": "19-23",
+      "segment": "Wellness-Curious Gen Z",
+      "demographics": "Non-binary, college student, $25K income, digitally native",
+      "psychographicProfile": "Experiencer — trend-aware, values mental health, explores wellness through social media",
+      "primaryPlatforms": ["tiktok", "reddit"],
+      "contentPreferences": ["short TikToks with trending sounds", "Reddit AMAs with wellness experts", "meme-formatted wellness tips"],
+      "painPoints": ["can't afford expensive wellness products", "overwhelmed by where to start", "wants peer validation for wellness choices"],
+      "behavioralIndicators": ["daily TikTok user (2+ hours)", "participates in wellness hashtag challenges", "lurks on r/selfimprovement and r/mentalhealth", "shares relatable wellness memes"],
+      "messagingAngle": "Accessible and relatable — 'affordable wellness that doesn't take itself too seriously'"
+    },
+    {
+      "name": "Data-Driven Dave",
+      "ageRange": "38-45",
+      "segment": "Mid-Career Health Optimizers",
+      "demographics": "Male, suburban, $120K income, MBA, manager at tech company",
+      "psychographicProfile": "Thinker — values evidence and efficiency. Researches before buying. Skeptical of fads.",
+      "primaryPlatforms": ["reddit", "facebook"],
+      "contentPreferences": ["long-form posts with citations", "comparison data", "expert-led discussions"],
+      "painPoints": ["too busy for complicated routines", "wants proof that wellness approaches work", "needs family-friendly solutions"],
+      "behavioralIndicators": ["active commenter on r/fitness and r/nutrition", "member of 3+ Facebook wellness Groups", "reads studies linked in posts", "shares content with spouse"],
+      "messagingAngle": "Evidence and efficiency — 'optimized wellness backed by research, designed for busy professionals'"
+    }
+  ]
+}

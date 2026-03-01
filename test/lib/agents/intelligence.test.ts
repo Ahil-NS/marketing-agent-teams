@@ -2,6 +2,9 @@ import {describe, it, expect, vi, beforeEach} from 'vitest'
 
 import {createSuccessMessage, createErrorMessage, createMockQuery} from '../../helpers/mock-agent-sdk.js'
 import type {ResearchInputs} from '../../../src/lib/agents/types.js'
+import type {AudienceResearchInputs} from '../../../src/lib/schemas/audience-schema.js'
+
+import validAudienceProfile from '../../fixtures/responses/claude-audience-profile.json'
 
 const validTrendBrief = {
   trends: [
@@ -594,5 +597,180 @@ describe('runPlatformAlgorithm', () => {
     expect(result.usage.outputTokens).toBe(380)
     expect(result.usage.cost).toBe(0.0025)
     expect(result.duration).toBeTypeOf('number')
+  })
+})
+
+const audienceResearchInputs: AudienceResearchInputs = {
+  brandConfig: {
+    brandName: 'WellnessApp',
+    productDomain: 'health and wellness',
+    tone: 'professional',
+    communicationStyle: 'clear and direct',
+    productName: 'WellnessApp',
+  },
+  verticalContext: 'Health & wellness industry vertical',
+  competitorData: 'CompetitorCo is active on TikTok with wellness content',
+}
+
+describe('runAudienceResearcher', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.resetModules()
+  })
+
+  it('returns validated AudienceProfile on success', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAudienceProfile)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runAudienceResearcher} = await import('../../../src/lib/agents/intelligence.js')
+    const result = await runAudienceResearcher(audienceResearchInputs)
+
+    expect(result.agentName).toBe('audience-researcher')
+    expect(result.status).toBe('success')
+    expect(result.outputs.profileId).toBe('ap-2026-03-wellness')
+    expect(result.outputs.brandName).toBe('WellnessApp')
+    expect(result.outputs.segments.length).toBeGreaterThanOrEqual(2)
+    expect(result.outputs.segments[0].segmentName).toBe('Health-Conscious Millennials')
+    expect(result.outputs.segments[0].demographics.ageRange).toBe('25-34')
+    expect(result.outputs.segments[0].psychographics.valsType).toBe('Achievers')
+    expect(result.outputs.painPoints.length).toBeGreaterThanOrEqual(1)
+    expect(result.outputs.personas.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('runs in intelligence stage parallel with trend-scout (same stage cluster)', async () => {
+    const {STAGE_AGENT_MAP} = await import('../../../src/lib/orchestrator/types.js')
+    expect(STAGE_AGENT_MAP.research).toContain('audience-researcher')
+    expect(STAGE_AGENT_MAP.research).toContain('trend-scout')
+    expect(STAGE_AGENT_MAP.research).toContain('competitor-analyst')
+  })
+
+  it('throws AgentExecutionError on failure', async () => {
+    const mockQuery = createMockQuery([createErrorMessage('error_during_execution')])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runAudienceResearcher} = await import('../../../src/lib/agents/intelligence.js')
+    const {AgentExecutionError} = await import('../../../src/lib/agent-executor/errors.js')
+
+    await expect(runAudienceResearcher(audienceResearchInputs)).rejects.toThrow(AgentExecutionError)
+  })
+
+  it('audience profile includes platform usage patterns', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAudienceProfile)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runAudienceResearcher} = await import('../../../src/lib/agents/intelligence.js')
+    const result = await runAudienceResearcher(audienceResearchInputs)
+
+    expect(result.outputs.platformUsage.length).toBeGreaterThanOrEqual(1)
+    const tiktokUsage = result.outputs.platformUsage.find(p => p.platform === 'tiktok')
+    expect(tiktokUsage).toBeDefined()
+    expect(tiktokUsage!.audienceSize).toBeTruthy()
+    expect(tiktokUsage!.primarySegments.length).toBeGreaterThanOrEqual(1)
+    expect(tiktokUsage!.usagePattern).toBeTruthy()
+    expect(tiktokUsage!.peakActivity).toBeTruthy()
+    expect(tiktokUsage!.contentPreferences.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('audience profile includes personas with content preferences', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAudienceProfile)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runAudienceResearcher} = await import('../../../src/lib/agents/intelligence.js')
+    const result = await runAudienceResearcher(audienceResearchInputs)
+
+    expect(result.outputs.personas.length).toBeGreaterThanOrEqual(1)
+    const persona = result.outputs.personas[0]
+    expect(persona.name).toBeTruthy()
+    expect(persona.segment).toBeTruthy()
+    expect(persona.primaryPlatforms.length).toBeGreaterThanOrEqual(1)
+    expect(persona.contentPreferences.length).toBeGreaterThanOrEqual(1)
+    expect(persona.painPoints.length).toBeGreaterThanOrEqual(1)
+    expect(persona.behavioralIndicators.length).toBeGreaterThanOrEqual(3)
+    expect(persona.messagingAngle).toBeTruthy()
+  })
+
+  it('throws AgentValidationError when output is invalid', async () => {
+    const invalidOutput = {profileId: 'test', segments: 'not an array'}
+    const mockQuery = createMockQuery([createSuccessMessage(invalidOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runAudienceResearcher} = await import('../../../src/lib/agents/intelligence.js')
+    const {AgentValidationError} = await import('../../../src/lib/agents/errors.js')
+
+    await expect(runAudienceResearcher(audienceResearchInputs)).rejects.toThrow(AgentValidationError)
+  })
+
+  it('includes brand info and context in prompt', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAudienceProfile)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runAudienceResearcher} = await import('../../../src/lib/agents/intelligence.js')
+    await runAudienceResearcher(audienceResearchInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('WellnessApp')
+    expect(callArgs.prompt).toContain('health and wellness')
+    expect(callArgs.prompt).toContain('Industry Vertical Context')
+    expect(callArgs.prompt).toContain('Competitor Data')
+  })
+
+  it('passes correct tools from SKILL.md (WebSearch, WebFetch, Read, Glob)', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAudienceProfile)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runAudienceResearcher} = await import('../../../src/lib/agents/intelligence.js')
+    await runAudienceResearcher(audienceResearchInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {allowedTools: string[]}}
+    expect(callArgs.options.allowedTools).toEqual(
+      expect.arrayContaining(['WebSearch', 'WebFetch', 'Read', 'Glob']),
+    )
+  })
+
+  it('includes knowledge context in systemPrompt', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAudienceProfile)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runAudienceResearcher} = await import('../../../src/lib/agents/intelligence.js')
+    await runAudienceResearcher(audienceResearchInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).toContain('Knowledge Base')
+  })
+
+  it('tracks token usage in AgentResult', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validAudienceProfile)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runAudienceResearcher} = await import('../../../src/lib/agents/intelligence.js')
+    const result = await runAudienceResearcher(audienceResearchInputs)
+
+    expect(result.usage).toBeDefined()
+    expect(result.usage.inputTokens).toBe(450)
+    expect(result.usage.outputTokens).toBe(380)
+    expect(result.usage.cost).toBe(0.0025)
+    expect(result.duration).toBeTypeOf('number')
+  })
+
+  it('works without optional vertical and competitor data', async () => {
+    const minimalInputs: AudienceResearchInputs = {
+      brandConfig: {
+        brandName: 'TestBrand',
+        productDomain: 'SaaS',
+      },
+    }
+
+    const mockQuery = createMockQuery([createSuccessMessage(validAudienceProfile)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runAudienceResearcher} = await import('../../../src/lib/agents/intelligence.js')
+    const result = await runAudienceResearcher(minimalInputs)
+
+    expect(result.status).toBe('success')
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('TestBrand')
+    expect(callArgs.prompt).not.toContain('Industry Vertical Context')
+    expect(callArgs.prompt).not.toContain('Competitor Data')
   })
 })

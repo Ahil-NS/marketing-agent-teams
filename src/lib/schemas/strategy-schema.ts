@@ -6,6 +6,12 @@ import {
   viralPatternReportSchema,
   platformAlgorithmReportSchema,
 } from './agent-schema.js'
+import {
+  audienceProfileSchema,
+  platformScoreSchema,
+  postingFrequencySchema,
+  contentFormatRecommendationSchema,
+} from './audience-schema.js'
 
 // ── Sub-schemas ──────────────────────────────────────────────────────────────
 
@@ -146,6 +152,12 @@ export const channelOptimizationPlanSchema = z.object({
   ),
   recommendations: z.string(),
   generatedAt: z.string(),
+  // Audience-driven scoring fields (present when audience profile is provided)
+  audienceProfileId: z.string().optional(),
+  platformScores: z.array(platformScoreSchema).optional(),
+  postingFrequency: z.array(postingFrequencySchema).optional(),
+  contentFormatRecommendations: z.array(contentFormatRecommendationSchema).optional(),
+  crossPlatformStrategy: z.string().optional(),
 })
 
 export type ChannelOptimizationPlan = z.infer<typeof channelOptimizationPlanSchema>
@@ -184,6 +196,7 @@ export const optimizerInputsSchema = z.object({
   campaignPlan: campaignPlanSchema,
   contentCalendar: contentCalendarSchema,
   platformAlgorithmReport: platformAlgorithmReportSchema,
+  audienceProfile: audienceProfileSchema.optional(),
 })
 
 export type OptimizerInputs = z.infer<typeof optimizerInputsSchema>

@@ -1,6 +1,6 @@
 export {executeAgent} from './agent-executor.js'
 export type {AgentExecuteOptions} from './agent-executor.js'
-export {runTrendScout, runCompetitorAnalyst, runViralPatternDecoder, runPlatformAlgorithm} from './intelligence.js'
+export {runTrendScout, runCompetitorAnalyst, runViralPatternDecoder, runPlatformAlgorithm, runAudienceResearcher} from './intelligence.js'
 export {runContentStrategist, runCampaignPlanner, runChannelOptimizer} from './strategy.js'
 export {runRedditCreator, runTikTokCreator, runFacebookCreator, runInstagramCreator, runHookWriter, runCreationStage} from './creation.js'
 export {detectViralContent, spawnDerivatives} from './derivative-spawner.js'

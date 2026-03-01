@@ -1,0 +1,105 @@
+{
+  "scoreId": "cs-2026-03-wellness",
+  "audienceProfileId": "ap-2026-03-wellness",
+  "platformScores": [
+    {
+      "platform": "tiktok",
+      "fitScore": 0.85,
+      "audienceOverlap": 0.82,
+      "engagementPotential": 0.9,
+      "recommendedFormats": ["hook-driven short video", "wellness tips under 60s", "trending sound + original concept"],
+      "priority": "primary"
+    },
+    {
+      "platform": "instagram",
+      "fitScore": 0.78,
+      "audienceOverlap": 0.75,
+      "engagementPotential": 0.8,
+      "recommendedFormats": ["Reels", "educational carousel", "Stories with polls"],
+      "priority": "primary"
+    },
+    {
+      "platform": "reddit",
+      "fitScore": 0.62,
+      "audienceOverlap": 0.55,
+      "engagementPotential": 0.72,
+      "recommendedFormats": ["data-driven text post", "AMA", "discussion/question post"],
+      "priority": "secondary"
+    },
+    {
+      "platform": "facebook",
+      "fitScore": 0.51,
+      "audienceOverlap": 0.45,
+      "engagementPotential": 0.58,
+      "recommendedFormats": ["Group discussion post", "native video", "Facebook Reels"],
+      "priority": "secondary"
+    }
+  ],
+  "recommendations": [
+    "Prioritize TikTok and Instagram as primary channels — highest audience overlap and engagement potential",
+    "Invest in Reddit for authority building — lower volume but high-quality engagement with health optimizers",
+    "Use Facebook Groups for community building with mid-career segment — avoid Page-only strategy",
+    "Allocate 50% content budget to TikTok/Instagram, 30% to Reddit, 20% to Facebook"
+  ],
+  "postingFrequency": [
+    {
+      "platform": "tiktok",
+      "recommended": "5-7 posts per week",
+      "minimum": "3 posts per week",
+      "maximum": "2 posts per day",
+      "rationale": "Gen Z and Millennial wellness audience expects daily content; TikTok algorithm rewards consistency"
+    },
+    {
+      "platform": "instagram",
+      "recommended": "4-5 feed posts + daily Stories + 3 Reels per week",
+      "minimum": "3 feed posts per week",
+      "maximum": "2 feed posts per day",
+      "rationale": "Millennial audience engages with regular visual content; Reels drive discovery"
+    },
+    {
+      "platform": "reddit",
+      "recommended": "2-3 posts per week across target subreddits",
+      "minimum": "1 post per week",
+      "maximum": "1 post per day per subreddit",
+      "rationale": "Quality over quantity on Reddit; audience values depth and authenticity"
+    },
+    {
+      "platform": "facebook",
+      "recommended": "3-4 posts per week including Group engagement",
+      "minimum": "2 posts per week",
+      "maximum": "1-2 posts per day",
+      "rationale": "Mid-career audience checks Facebook regularly but prefers meaningful over frequent content"
+    }
+  ],
+  "contentFormatRecommendations": [
+    {
+      "format": "Hook-driven wellness tip video (15-30s)",
+      "platforms": ["tiktok", "instagram"],
+      "audienceSegments": ["Health-Conscious Millennials", "Wellness-Curious Gen Z"],
+      "expectedEngagement": "high",
+      "rationale": "Both segments consume short-form video daily; trending sounds boost discoverability for Gen Z"
+    },
+    {
+      "format": "Educational carousel (5-7 slides)",
+      "platforms": ["instagram"],
+      "audienceSegments": ["Health-Conscious Millennials"],
+      "expectedEngagement": "high",
+      "rationale": "Highest save rate format on Instagram; Millennial audience bookmarks for reference"
+    },
+    {
+      "format": "Data-driven text post with citations",
+      "platforms": ["reddit"],
+      "audienceSegments": ["Mid-Career Health Optimizers"],
+      "expectedEngagement": "medium",
+      "rationale": "Thinker VALS type values evidence; Reddit rewards substantive posts with upvotes and discussion"
+    },
+    {
+      "format": "Expert discussion/AMA",
+      "platforms": ["reddit", "facebook"],
+      "audienceSegments": ["Mid-Career Health Optimizers", "Wellness-Curious Gen Z"],
+      "expectedEngagement": "high",
+      "rationale": "Builds brand authority; both segments seek expert guidance but through different platforms"
+    }
+  ],
+  "crossPlatformStrategy": "Lead with TikTok for awareness and discovery (Gen Z + Millennial reach), repurpose top-performing TikTok content as Instagram Reels with enhanced visuals. Use Reddit for depth and authority building with evidence-based content. Facebook Groups serve as community hub for mid-career segment. Cross-reference content across platforms — tease Reddit AMAs on TikTok, share Instagram carousel key insights as Reddit text posts."
+}

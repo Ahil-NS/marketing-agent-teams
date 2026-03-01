@@ -28,6 +28,15 @@ export {
 } from './strategy-schema.js'
 export type {CampaignPlan, ContentCalendar, ChannelOptimizationPlan, StrategyInputs, CalendarInputs, OptimizerInputs} from './strategy-schema.js'
 export {
+  audienceProfileSchema,
+  channelScoreSchema,
+  audienceResearchInputsSchema,
+  platformScoreSchema,
+  postingFrequencySchema,
+  contentFormatRecommendationSchema,
+} from './audience-schema.js'
+export type {AudienceProfile, ChannelScore, AudienceResearchInputs} from './audience-schema.js'
+export {
   redditContentPackageSchema,
   tiktokContentPackageSchema,
   facebookContentPackageSchema,
