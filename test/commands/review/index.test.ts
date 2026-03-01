@@ -3,6 +3,12 @@ import {beforeEach, describe, expect, it, vi} from 'vitest'
 import type {ReviewItem} from '../../../src/lib/review-queue/index.js'
 
 const mockList = vi.fn()
+const mockWriteFile = vi.fn()
+
+// Mock node:fs/promises
+vi.mock('node:fs/promises', () => ({
+  writeFile: (...args: unknown[]) => mockWriteFile(...args),
+}))
 
 // Mock the ReviewQueue class with a proper constructor
 vi.mock('../../../src/lib/review-queue/index.js', async (importOriginal) => {
@@ -75,7 +81,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false},
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false, export: undefined, output: undefined},
       args: {},
       argv: [],
       raw: [],
@@ -94,7 +100,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false},
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false, export: undefined, output: undefined},
       args: {},
       argv: [],
       raw: [],
@@ -114,7 +120,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: true},
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: true, export: undefined, output: undefined},
       args: {},
       argv: [],
       raw: [],
@@ -135,7 +141,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': targetRunId, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false},
+      flags: {'run-id': targetRunId, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false, export: undefined, output: undefined},
       args: {},
       argv: [],
       raw: [],
@@ -153,7 +159,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, platform: 'reddit', 'quality-above': undefined, type: undefined, status: undefined, json: false},
+      flags: {'run-id': undefined, platform: 'reddit', 'quality-above': undefined, type: undefined, status: undefined, json: false, export: undefined, output: undefined},
       args: {},
       argv: [],
       raw: [],
@@ -171,7 +177,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, platform: undefined, 'quality-above': 85, type: undefined, status: undefined, json: false},
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': 85, type: undefined, status: undefined, json: false, export: undefined, output: undefined},
       args: {},
       argv: [],
       raw: [],
@@ -189,7 +195,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: 'trending-derivative', status: undefined, json: false},
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: 'trending-derivative', status: undefined, json: false, export: undefined, output: undefined},
       args: {},
       argv: [],
       raw: [],
@@ -207,7 +213,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: 'approved', json: false},
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: 'approved', json: false, export: undefined, output: undefined},
       args: {},
       argv: [],
       raw: [],
@@ -225,7 +231,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, platform: 'reddit', 'quality-above': 90, type: undefined, status: 'pending', json: false},
+      flags: {'run-id': undefined, platform: 'reddit', 'quality-above': 90, type: undefined, status: 'pending', json: false, export: undefined, output: undefined},
       args: {},
       argv: [],
       raw: [],
@@ -250,7 +256,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, platform: 'reddit', 'quality-above': undefined, type: undefined, status: undefined, json: false},
+      flags: {'run-id': undefined, platform: 'reddit', 'quality-above': undefined, type: undefined, status: undefined, json: false, export: undefined, output: undefined},
       args: {},
       argv: [],
       raw: [],
@@ -261,5 +267,185 @@ describe('mat review command', () => {
     await cmd.run()
 
     expect(logOutput.some((line) => line.includes('Showing 1 of 3 items (filtered)'))).toBe(true)
+  })
+
+  describe('--export flag', () => {
+    it('exports items as JSON to stdout', async () => {
+      const items = [makeItem({id: 'item-001'})]
+      mockList.mockResolvedValue(items)
+
+      const cmd = createCommandInstance()
+      cmd.parse = vi.fn().mockResolvedValue({
+        flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false, export: 'json', output: undefined},
+        args: {},
+        argv: [],
+        raw: [],
+        metadata: {},
+        nonExistentFlags: {},
+      })
+
+      const result = await cmd.run()
+
+      expect(result).toEqual(items)
+      // Should output JSON to stdout (via this.log)
+      const jsonOutput = logOutput.join('\n')
+      const parsed = JSON.parse(jsonOutput) as ReviewItem[]
+      expect(parsed).toHaveLength(1)
+      expect(parsed[0].id).toBe('item-001')
+      // Should NOT render table
+      expect(vi.mocked(ContentRenderer.renderQueueTable)).not.toHaveBeenCalled()
+    })
+
+    it('exports items as CSV to stdout', async () => {
+      const items = [makeItem({id: 'item-001', platform: 'reddit', qualityScore: 0.85})]
+      mockList.mockResolvedValue(items)
+
+      const cmd = createCommandInstance()
+      cmd.parse = vi.fn().mockResolvedValue({
+        flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false, export: 'csv', output: undefined},
+        args: {},
+        argv: [],
+        raw: [],
+        metadata: {},
+        nonExistentFlags: {},
+      })
+
+      const result = await cmd.run()
+
+      expect(result).toEqual(items)
+      const csvOutput = logOutput.join('\n')
+      expect(csvOutput).toContain('id,platform,status,qualityScore')
+      expect(csvOutput).toContain('item-001')
+      expect(vi.mocked(ContentRenderer.renderQueueTable)).not.toHaveBeenCalled()
+    })
+
+    it('exports to file when --output is specified', async () => {
+      const items = [makeItem({id: 'item-001'})]
+      mockList.mockResolvedValue(items)
+      mockWriteFile.mockResolvedValue(undefined)
+
+      const cmd = createCommandInstance()
+      cmd.parse = vi.fn().mockResolvedValue({
+        flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false, export: 'json', output: '/tmp/export.json'},
+        args: {},
+        argv: [],
+        raw: [],
+        metadata: {},
+        nonExistentFlags: {},
+      })
+
+      await cmd.run()
+
+      expect(mockWriteFile).toHaveBeenCalledWith('/tmp/export.json', expect.any(String), 'utf-8')
+      expect(logOutput.some((line) => line.includes('Exported 1 items to /tmp/export.json'))).toBe(true)
+    })
+
+    it('exports CSV to file when --output and --export csv are specified', async () => {
+      const items = [makeItem({id: 'item-001'}), makeItem({id: 'item-002'})]
+      mockList.mockResolvedValue(items)
+      mockWriteFile.mockResolvedValue(undefined)
+
+      const cmd = createCommandInstance()
+      cmd.parse = vi.fn().mockResolvedValue({
+        flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false, export: 'csv', output: '/tmp/export.csv'},
+        args: {},
+        argv: [],
+        raw: [],
+        metadata: {},
+        nonExistentFlags: {},
+      })
+
+      await cmd.run()
+
+      expect(mockWriteFile).toHaveBeenCalledWith('/tmp/export.csv', expect.stringContaining('id,platform,status'), 'utf-8')
+      expect(logOutput.some((line) => line.includes('Exported 2 items to /tmp/export.csv'))).toBe(true)
+    })
+
+    it('combines export with platform filter', async () => {
+      const tiktokItems = [makeItem({id: 'item-001', platform: 'tiktok'})]
+      mockList.mockResolvedValue(tiktokItems)
+
+      const cmd = createCommandInstance()
+      cmd.parse = vi.fn().mockResolvedValue({
+        flags: {'run-id': undefined, platform: 'tiktok', 'quality-above': undefined, type: undefined, status: undefined, json: false, export: 'json', output: undefined},
+        args: {},
+        argv: [],
+        raw: [],
+        metadata: {},
+        nonExistentFlags: {},
+      })
+
+      const result = await cmd.run()
+
+      expect(mockList).toHaveBeenCalledWith({platform: 'tiktok'})
+      expect(result).toEqual(tiktokItems)
+      const jsonOutput = logOutput.join('\n')
+      const parsed = JSON.parse(jsonOutput) as ReviewItem[]
+      expect(parsed).toHaveLength(1)
+      expect(parsed[0].platform).toBe('tiktok')
+    })
+
+    it('combines export with multiple filters', async () => {
+      const items = [makeItem({id: 'item-001', platform: 'reddit', qualityScore: 0.95})]
+      mockList.mockResolvedValue(items)
+
+      const cmd = createCommandInstance()
+      cmd.parse = vi.fn().mockResolvedValue({
+        flags: {'run-id': undefined, platform: 'reddit', 'quality-above': 80, type: undefined, status: 'pending', json: false, export: 'csv', output: undefined},
+        args: {},
+        argv: [],
+        raw: [],
+        metadata: {},
+        nonExistentFlags: {},
+      })
+
+      await cmd.run()
+
+      expect(mockList).toHaveBeenCalledWith({platform: 'reddit', qualityAbove: 0.80, status: 'pending'})
+      const csvOutput = logOutput.join('\n')
+      expect(csvOutput).toContain('id,platform,status,qualityScore')
+      expect(csvOutput).toContain('item-001')
+    })
+
+    it('exports empty array when queue is empty', async () => {
+      mockList.mockResolvedValue([])
+
+      const cmd = createCommandInstance()
+      cmd.parse = vi.fn().mockResolvedValue({
+        flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false, export: 'json', output: undefined},
+        args: {},
+        argv: [],
+        raw: [],
+        metadata: {},
+        nonExistentFlags: {},
+      })
+
+      const result = await cmd.run()
+
+      expect(result).toEqual([])
+      expect(logOutput.join('')).toBe('[]')
+      // Should NOT show empty state message when exporting
+      expect(vi.mocked(ContentRenderer.renderEmptyState)).not.toHaveBeenCalled()
+    })
+
+    it('does not write to file when only --output is specified without --export', async () => {
+      const items = [makeItem({id: 'item-001'})]
+      mockList.mockResolvedValue(items)
+
+      const cmd = createCommandInstance()
+      cmd.parse = vi.fn().mockResolvedValue({
+        flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false, export: undefined, output: '/tmp/export.json'},
+        args: {},
+        argv: [],
+        raw: [],
+        metadata: {},
+        nonExistentFlags: {},
+      })
+
+      await cmd.run()
+
+      expect(mockWriteFile).not.toHaveBeenCalled()
+      expect(vi.mocked(ContentRenderer.renderQueueTable)).toHaveBeenCalled()
+    })
   })
 })

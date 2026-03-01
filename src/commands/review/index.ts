@@ -1,7 +1,9 @@
+import {writeFile} from 'node:fs/promises'
+
 import {Command, Flags} from '@oclif/core'
 
 import {ContentRenderer} from '../../lib/review-queue/content-renderer.js'
-import {ReviewQueue} from '../../lib/review-queue/index.js'
+import {exportToCSV, exportToJSON, ReviewQueue} from '../../lib/review-queue/index.js'
 import type {ReviewFilter, ReviewItem} from '../../lib/review-queue/index.js'
 
 export default class Review extends Command {
@@ -10,6 +12,13 @@ export default class Review extends Command {
   static enableJsonFlag = true
 
   static override flags = {
+    'export': Flags.string({
+      description: 'Export format (json or csv)',
+      options: ['json', 'csv'],
+    }),
+    'output': Flags.string({
+      description: 'Output file path (defaults to stdout)',
+    }),
     'platform': Flags.string({
       description: 'Filter by platform',
       options: ['reddit', 'tiktok', 'facebook', 'instagram'],
@@ -42,6 +51,20 @@ export default class Review extends Command {
 
     const hasFilter = Object.keys(filter).length > 0
     const items = await queue.list(hasFilter ? filter : undefined)
+
+    // Handle export mode
+    if (flags.export) {
+      const output = flags.export === 'json' ? exportToJSON(items) : exportToCSV(items)
+
+      if (flags.output) {
+        await writeFile(flags.output, output, 'utf-8')
+        this.log(`Exported ${items.length} items to ${flags.output}`)
+      } else {
+        this.log(output)
+      }
+
+      return items
+    }
 
     if (items.length === 0) {
       ContentRenderer.renderEmptyState(this)

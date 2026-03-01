@@ -1,4 +1,5 @@
 export {ReviewQueue} from './review-queue.js'
+export {exportToCSV, exportToJSON} from './exporter.js'
 export {InvalidStatusTransitionError, ReviewItemNotFoundError, ReviewQueueEmptyError} from './errors.js'
 export {
   renderPlatformPreview,
