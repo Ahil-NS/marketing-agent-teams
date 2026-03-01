@@ -4,7 +4,7 @@ import {tmpdir} from 'node:os'
 
 import {afterEach, beforeEach, describe, expect, it} from 'vitest'
 
-import {ReviewQueue, ReviewItemNotFoundError} from '../../../src/lib/review-queue/index.js'
+import {ReviewQueue, ReviewItemNotFoundError, InvalidStatusTransitionError} from '../../../src/lib/review-queue/index.js'
 import type {ReviewItem} from '../../../src/lib/review-queue/index.js'
 
 function makeItem(overrides: Partial<ReviewItem> = {}): ReviewItem {
@@ -247,6 +247,230 @@ describe('ReviewQueue', () => {
     it('returns zeros when queue is empty', async () => {
       const stats = await queue.getStats()
       expect(stats).toEqual({pending: 0, approved: 0, edited: 0, rejected: 0, total: 0})
+    })
+  })
+
+  describe('approve()', () => {
+    it('sets status to approved and populates userFeedback', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const item = makeItem({id: 'item-001', status: 'pending'})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(item))
+
+      const result = await queue.approve('item-001')
+      expect(result.status).toBe('approved')
+      expect(result.userFeedback).toBeDefined()
+      expect(result.userFeedback!.decision).toBe('approved')
+      expect(result.userFeedback!.editedAt).toBeDefined()
+    })
+
+    it('includes notes when provided', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001'})))
+
+      const result = await queue.approve('item-001', 'Great content')
+      expect(result.userFeedback!.notes).toBe('Great content')
+    })
+
+    it('allows approve from edited status', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'edited'})))
+
+      const result = await queue.approve('item-001')
+      expect(result.status).toBe('approved')
+    })
+
+    it('throws InvalidStatusTransitionError for approved → approved', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'approved'})))
+
+      await expect(queue.approve('item-001')).rejects.toThrow(InvalidStatusTransitionError)
+    })
+
+    it('throws InvalidStatusTransitionError for rejected → approved', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'rejected'})))
+
+      await expect(queue.approve('item-001')).rejects.toThrow(InvalidStatusTransitionError)
+    })
+
+    it('throws ReviewItemNotFoundError for non-existent item', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await expect(queue.approve('nonexistent')).rejects.toThrow(ReviewItemNotFoundError)
+    })
+
+    it('persists approved item to disk atomically', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001'})))
+
+      await queue.approve('item-001')
+      const raw = await readFile(join(queueDir, 'item-001.json'), 'utf-8')
+      const persisted = JSON.parse(raw) as Record<string, unknown>
+      expect(persisted.status).toBe('approved')
+      // No .tmp files remaining
+      const files = await readdir(queueDir)
+      expect(files.filter((f) => f.endsWith('.tmp'))).toHaveLength(0)
+    })
+
+    it('updates the updatedAt timestamp', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const item = makeItem({id: 'item-001', updatedAt: '2026-01-01T00:00:00Z'})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(item))
+
+      const result = await queue.approve('item-001')
+      expect(result.updatedAt).not.toBe('2026-01-01T00:00:00Z')
+    })
+  })
+
+  describe('reject()', () => {
+    it('sets status to rejected with reason', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001'})))
+
+      const result = await queue.reject('item-001', 'Off-brand tone')
+      expect(result.status).toBe('rejected')
+      expect(result.userFeedback).toBeDefined()
+      expect(result.userFeedback!.decision).toBe('rejected')
+      expect(result.userFeedback!.reason).toBe('Off-brand tone')
+    })
+
+    it('includes feedback when provided', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001'})))
+
+      const result = await queue.reject('item-001', 'Inaccurate', 'Check dates')
+      expect(result.userFeedback!.notes).toBe('Check dates')
+    })
+
+    it('allows reject from edited status', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'edited'})))
+
+      const result = await queue.reject('item-001', 'Still off-brand')
+      expect(result.status).toBe('rejected')
+    })
+
+    it('throws InvalidStatusTransitionError for approved → rejected', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'approved'})))
+
+      await expect(queue.reject('item-001', 'reason')).rejects.toThrow(InvalidStatusTransitionError)
+    })
+
+    it('throws InvalidStatusTransitionError for rejected → rejected', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'rejected'})))
+
+      await expect(queue.reject('item-001', 'reason')).rejects.toThrow(InvalidStatusTransitionError)
+    })
+
+    it('throws ReviewItemNotFoundError for non-existent item', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await expect(queue.reject('nonexistent', 'reason')).rejects.toThrow(ReviewItemNotFoundError)
+    })
+
+    it('persists rejected item to disk atomically', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001'})))
+
+      await queue.reject('item-001', 'Off-brand')
+      const raw = await readFile(join(queueDir, 'item-001.json'), 'utf-8')
+      const persisted = JSON.parse(raw) as Record<string, unknown>
+      expect(persisted.status).toBe('rejected')
+    })
+  })
+
+  describe('edit()', () => {
+    it('preserves original in editHistory and applies edits', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const item = makeItem({id: 'item-001', content: {title: 'Old title', body: 'Old body', platformMeta: {}}})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(item))
+
+      const result = await queue.edit('item-001', {title: 'New title'})
+      expect(result.content.title).toBe('New title')
+      expect(result.editHistory).toHaveLength(1)
+      expect(result.editHistory[0].field).toBe('title')
+      expect(result.editHistory[0].originalValue).toBe('Old title')
+      expect(result.editHistory[0].newValue).toBe('New title')
+    })
+
+    it('sets status to approved after edit', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001'})))
+
+      const result = await queue.edit('item-001', {body: 'Updated body'})
+      expect(result.status).toBe('approved')
+      expect(result.userFeedback!.decision).toBe('approved')
+    })
+
+    it('includes notes when provided', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001'})))
+
+      const result = await queue.edit('item-001', {body: 'Updated body'}, 'Fixed typo')
+      expect(result.userFeedback!.notes).toBe('Fixed typo')
+    })
+
+    it('handles multiple field edits', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const item = makeItem({id: 'item-001', content: {title: 'Title', body: 'Body', cta: 'Click here', platformMeta: {}}})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(item))
+
+      const result = await queue.edit('item-001', {title: 'New Title', body: 'New Body', cta: 'Learn more'})
+      expect(result.editHistory).toHaveLength(3)
+      expect(result.content.title).toBe('New Title')
+      expect(result.content.body).toBe('New Body')
+      expect(result.content.cta).toBe('Learn more')
+    })
+
+    it('allows edit from edited status', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'edited'})))
+
+      const result = await queue.edit('item-001', {body: 'Updated'})
+      expect(result.status).toBe('approved')
+    })
+
+    it('throws InvalidStatusTransitionError for approved → edit', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'approved'})))
+
+      await expect(queue.edit('item-001', {body: 'x'})).rejects.toThrow(InvalidStatusTransitionError)
+    })
+
+    it('throws InvalidStatusTransitionError for rejected → edit', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'rejected'})))
+
+      await expect(queue.edit('item-001', {body: 'x'})).rejects.toThrow(InvalidStatusTransitionError)
+    })
+
+    it('throws ReviewItemNotFoundError for non-existent item', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await expect(queue.edit('nonexistent', {body: 'x'})).rejects.toThrow(ReviewItemNotFoundError)
+    })
+
+    it('persists edited item to disk atomically', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001'})))
+
+      await queue.edit('item-001', {body: 'Updated body'})
+      const raw = await readFile(join(queueDir, 'item-001.json'), 'utf-8')
+      const persisted = JSON.parse(raw) as Record<string, unknown>
+      expect(persisted.status).toBe('approved')
+      const files = await readdir(queueDir)
+      expect(files.filter((f) => f.endsWith('.tmp'))).toHaveLength(0)
+    })
+
+    it('handles non-string original values in editHistory', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const item = makeItem({id: 'item-001'})
+      // Set a non-string field value
+      ;(item.content as Record<string, unknown>).customField = undefined
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(item))
+
+      const result = await queue.edit('item-001', {customField: 'new value'})
+      expect(result.editHistory).toHaveLength(1)
+      expect(result.editHistory[0].originalValue).toBe('""')
     })
   })
 })

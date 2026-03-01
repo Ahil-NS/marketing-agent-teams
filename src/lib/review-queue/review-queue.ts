@@ -3,8 +3,11 @@ import {join} from 'node:path'
 
 import {reviewItemSchema} from '../schemas/review-schema.js'
 
-import {ReviewItemNotFoundError} from './errors.js'
-import type {ReviewFilter, ReviewItem, ReviewQueueStats} from './types.js'
+import {InvalidStatusTransitionError, ReviewItemNotFoundError} from './errors.js'
+import type {EditHistoryEntry, ReviewFilter, ReviewItem, ReviewQueueStats, ReviewStatus} from './types.js'
+
+/** Statuses that allow transitions to approve/reject/edit */
+const ACTIONABLE_STATUSES = new Set<ReviewStatus>(['pending', 'edited'])
 
 /**
  * Manages the review queue stored as individual JSON files in .mat/state/review-queue/.
@@ -143,5 +146,105 @@ export class ReviewQueue {
     }
 
     return stats
+  }
+
+  /**
+   * Approve a review item, marking it eligible for distribution (FR30).
+   * Valid from: pending, edited. Invalid from: approved, rejected.
+   * @throws ReviewItemNotFoundError if item doesn't exist.
+   * @throws InvalidStatusTransitionError if current status cannot transition to approved.
+   */
+  async approve(itemId: string, notes?: string): Promise<ReviewItem> {
+    const item = await this.getById(itemId)
+    this.validateTransition(itemId, item.status, 'approved')
+
+    item.status = 'approved'
+    item.userFeedback = {
+      decision: 'approved',
+      notes,
+      editedAt: new Date().toISOString(),
+    }
+    item.updatedAt = new Date().toISOString()
+    await this.saveItem(item)
+    return item
+  }
+
+  /**
+   * Reject a review item with a reason (FR30, captures data for FR62).
+   * Valid from: pending, edited. Invalid from: approved, rejected.
+   * @throws ReviewItemNotFoundError if item doesn't exist.
+   * @throws InvalidStatusTransitionError if current status cannot transition to rejected.
+   */
+  async reject(itemId: string, reason: string, feedback?: string): Promise<ReviewItem> {
+    const item = await this.getById(itemId)
+    this.validateTransition(itemId, item.status, 'rejected')
+
+    item.status = 'rejected'
+    item.userFeedback = {
+      decision: 'rejected',
+      reason,
+      notes: feedback,
+      editedAt: new Date().toISOString(),
+    }
+    item.updatedAt = new Date().toISOString()
+    await this.saveItem(item)
+    return item
+  }
+
+  /**
+   * Edit a review item's content fields, preserving originals in editHistory.
+   * Auto-approves after edit (status → approved). Valid from: pending, edited.
+   * @throws ReviewItemNotFoundError if item doesn't exist.
+   * @throws InvalidStatusTransitionError if current status cannot transition.
+   */
+  async edit(itemId: string, edits: Record<string, string>, notes?: string): Promise<ReviewItem> {
+    const item = await this.getById(itemId)
+    this.validateTransition(itemId, item.status, 'approved')
+
+    const now = new Date().toISOString()
+
+    // Preserve originals in editHistory and apply edits
+    for (const [field, newValue] of Object.entries(edits)) {
+      const originalValue = (item.content as unknown as Record<string, unknown>)[field]
+      const entry: EditHistoryEntry = {
+        timestamp: now,
+        field,
+        originalValue: typeof originalValue === 'string' ? originalValue : JSON.stringify(originalValue ?? ''),
+        newValue,
+      }
+      item.editHistory.push(entry)
+      ;(item.content as unknown as Record<string, unknown>)[field] = newValue
+    }
+
+    item.status = 'approved'
+    item.userFeedback = {
+      decision: 'approved',
+      notes,
+      editedAt: now,
+    }
+    item.updatedAt = now
+    await this.saveItem(item)
+    return item
+  }
+
+  /**
+   * Validate a status transition. Only pending and edited statuses are actionable.
+   * @throws InvalidStatusTransitionError if the transition is not allowed.
+   */
+  private validateTransition(itemId: string, currentStatus: ReviewStatus, targetStatus: ReviewStatus): void {
+    if (!ACTIONABLE_STATUSES.has(currentStatus)) {
+      throw new InvalidStatusTransitionError(itemId, currentStatus, targetStatus)
+    }
+  }
+
+  /**
+   * Persist a review item atomically: write to .tmp then rename.
+   */
+  private async saveItem(item: ReviewItem): Promise<void> {
+    await mkdir(this.queueDir, {recursive: true})
+    const filePath = join(this.queueDir, `${item.id}.json`)
+    const tmpPath = `${filePath}.tmp`
+    await writeFile(tmpPath, JSON.stringify(item, null, 2), 'utf-8')
+    await rename(tmpPath, filePath)
   }
 }

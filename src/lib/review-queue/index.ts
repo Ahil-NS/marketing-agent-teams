@@ -1,5 +1,5 @@
 export {ReviewQueue} from './review-queue.js'
-export {ReviewItemNotFoundError, ReviewQueueEmptyError} from './errors.js'
+export {InvalidStatusTransitionError, ReviewItemNotFoundError, ReviewQueueEmptyError} from './errors.js'
 export type {
   ReviewItem,
   ReviewFilter,

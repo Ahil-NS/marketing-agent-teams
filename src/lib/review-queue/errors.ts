@@ -31,3 +31,19 @@ export class ReviewQueueEmptyError extends MATError {
     )
   }
 }
+
+/**
+ * Thrown when a review item status transition is invalid.
+ */
+export class InvalidStatusTransitionError extends MATError {
+  constructor(itemId: string, currentStatus: string, targetStatus: string) {
+    super(
+      `Cannot transition item '${itemId}' from '${currentStatus}' to '${targetStatus}'`,
+      'REVIEW_INVALID_TRANSITION',
+      `Item '${itemId}' has status '${currentStatus}' which cannot transition to '${targetStatus}'`,
+      `Check item status with 'mat review' before acting`,
+      'review-queue',
+      'permanent',
+    )
+  }
+}
