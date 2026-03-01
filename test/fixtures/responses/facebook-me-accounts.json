@@ -1,0 +1,24 @@
+{
+  "data": [
+    {
+      "id": "123456789",
+      "name": "My Business Page",
+      "access_token": "page-access-token-abc123",
+      "category": "Business",
+      "tasks": ["MANAGE", "CREATE_CONTENT", "MODERATE", "ADVERTISE"]
+    },
+    {
+      "id": "987654321",
+      "name": "My Other Page",
+      "access_token": "page-access-token-xyz789",
+      "category": "Brand",
+      "tasks": ["MANAGE", "CREATE_CONTENT"]
+    }
+  ],
+  "paging": {
+    "cursors": {
+      "before": "cursor_before_abc",
+      "after": "cursor_after_xyz"
+    }
+  }
+}

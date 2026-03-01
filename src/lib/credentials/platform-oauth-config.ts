@@ -15,9 +15,9 @@ export const PLATFORM_OAUTH_DEFAULTS: Record<Platform, PlatformOAuthDefaults> = 
     scopes: ['video.publish', 'user.info.basic'],
   },
   facebook: {
-    authorizationUrl: 'https://www.facebook.com/v19.0/dialog/oauth',
-    tokenUrl: 'https://graph.facebook.com/v19.0/oauth/access_token',
-    scopes: ['pages_manage_posts', 'pages_read_engagement'],
+    authorizationUrl: 'https://www.facebook.com/v24.0/dialog/oauth',
+    tokenUrl: 'https://graph.facebook.com/v24.0/oauth/access_token',
+    scopes: ['pages_manage_posts', 'pages_read_engagement', 'pages_show_list'],
   },
   instagram: {
     authorizationUrl: 'https://api.instagram.com/oauth/authorize',

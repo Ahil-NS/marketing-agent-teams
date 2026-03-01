@@ -11,6 +11,8 @@ export {RedditAdapter} from './reddit/index.js'
 export type {RedditAdapterOptions} from './reddit/index.js'
 export {TikTokAdapter} from './tiktok/index.js'
 export type {TikTokAdapterOptions} from './tiktok/index.js'
+export {FacebookAdapter} from './facebook/index.js'
+export type {FacebookAdapterOptions} from './facebook/index.js'
 export type {
   AuthResult,
   ContentValidationError,
