@@ -1,0 +1,87 @@
+{
+  "testPlans": [
+    {
+      "testId": "test-hook-content-1",
+      "originalContentItemId": "content-1",
+      "hypothesis": "A curiosity-driven question hook increases click-through rate by 15% over a statement hook",
+      "variableUnderTest": "hook",
+      "successMetric": "click-through rate"
+    },
+    {
+      "testId": "test-caption-content-1",
+      "originalContentItemId": "content-1",
+      "hypothesis": "Shorter captions with emojis increase engagement rate by 10%",
+      "variableUnderTest": "caption",
+      "successMetric": "engagement rate"
+    },
+    {
+      "testId": "test-cta-content-1",
+      "originalContentItemId": "content-1",
+      "hypothesis": "A direct CTA outperforms a soft CTA for conversion rate",
+      "variableUnderTest": "cta",
+      "successMetric": "conversion rate"
+    }
+  ],
+  "variations": [
+    {
+      "variationId": "var-hook-1",
+      "testId": "test-hook-content-1",
+      "originalContentItemId": "content-1",
+      "variationType": "hook",
+      "variationDescription": "Changed opening from statement to curiosity question",
+      "content": "Did you know that 90% of marketers miss this one simple trick?",
+      "changeDetails": "Replaced declarative statement with curiosity-gap question"
+    },
+    {
+      "variationId": "var-hook-2",
+      "testId": "test-hook-content-1",
+      "originalContentItemId": "content-1",
+      "variationType": "hook",
+      "variationDescription": "Changed opening to bold statistic claim",
+      "content": "90% of marketers are doing this wrong — here's the fix.",
+      "changeDetails": "Replaced declarative statement with bold statistical claim"
+    },
+    {
+      "variationId": "var-hook-3",
+      "testId": "test-hook-content-1",
+      "originalContentItemId": "content-1",
+      "variationType": "hook",
+      "variationDescription": "Changed opening to controversial take",
+      "content": "Stop wasting time on content that nobody reads.",
+      "changeDetails": "Replaced declarative statement with confrontational hook"
+    },
+    {
+      "variationId": "var-caption-1",
+      "testId": "test-caption-content-1",
+      "originalContentItemId": "content-1",
+      "variationType": "caption",
+      "variationDescription": "Shortened caption with emoji markers",
+      "content": "🚀 Boost your marketing ROI with this proven framework ✅",
+      "changeDetails": "Condensed 3-sentence caption to single emoji-bookended line"
+    },
+    {
+      "variationId": "var-cta-1",
+      "testId": "test-cta-content-1",
+      "originalContentItemId": "content-1",
+      "variationType": "cta",
+      "variationDescription": "Changed soft CTA to direct action CTA",
+      "content": "Download the free template now → link in bio",
+      "changeDetails": "Replaced 'learn more' soft CTA with direct 'download now' action CTA"
+    }
+  ],
+  "recommendations": {
+    "primaryTestId": "test-hook-content-1",
+    "rationale": "Hook variations historically show the highest ROI for engagement on social platforms. Testing 3 hook variants provides statistical power.",
+    "expectedImpact": "10-20% increase in click-through rate",
+    "testDuration": "7 days"
+  },
+  "summary": {
+    "totalVariations": 5,
+    "variationsByType": {
+      "hook": 3,
+      "caption": 1,
+      "cta": 1
+    },
+    "contentItemsCovered": 1
+  }
+}

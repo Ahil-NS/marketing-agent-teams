@@ -121,3 +121,15 @@ export type {
   DailyBudgetEntry as DailyBudgetEntryData,
   DailyBudgetState as DailyBudgetStateData,
 } from './budget-schema.js'
+export {
+  variationTypeSchema,
+  abTestOutputSchema,
+  abTestInputsSchema,
+  contentVariationSchema,
+} from './optimization-schema.js'
+export type {
+  VariationType,
+  AbTestOutput,
+  AbTestInputs,
+  ContentVariation,
+} from './optimization-schema.js'

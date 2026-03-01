@@ -4,6 +4,8 @@ import {seoOptimizationOutputSchema} from '../schemas/seo-schema.js'
 import type {SeoOptimizationOutput, SeoContentItem, PlatformSeoConfig} from '../schemas/seo-schema.js'
 import {humanizationOutputSchema} from '../schemas/humanization-schema.js'
 import type {HumanizationOutput} from '../schemas/humanization-schema.js'
+import {abTestOutputSchema} from '../schemas/optimization-schema.js'
+import type {AbTestOutput, AbTestInputs, ContentVariation} from '../schemas/optimization-schema.js'
 
 import {executeAgent} from './agent-executor.js'
 import {agentsRoot} from './paths.js'
@@ -182,4 +184,65 @@ Output a JSON object with "items" (array of humanization results) and "summary" 
     outputSchema: humanizationOutputSchema,
     maxTurns: 25,
   })
+}
+
+// --- A/B Test Designer ---
+
+export type {AbTestInputs, ContentVariation}
+
+/**
+ * Run the A/B Test Designer agent.
+ * Generates 3-5 variations per content item — varying hooks, captions,
+ * hashtags, format, or CTAs — each with a clear hypothesis about what
+ * is being tested and why.
+ *
+ * Uses model: haiku — fast and cheap for variation generation.
+ */
+export async function runAbTestDesigner(
+  inputs: AbTestInputs,
+): Promise<AgentResult<AbTestOutput>> {
+  const skill = await loadSkill(join(agentsRoot(), 'optimization', 'ab-test-designer'))
+
+  const knowledgeSection = skill.knowledgeContext
+    ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  const prompt = `Generate A/B test variations for the following content items.
+
+## Content Items
+
+${JSON.stringify(inputs.contentItems, null, 2)}
+
+## Brand Voice
+Tone: ${inputs.brandVoiceTone}
+Style: ${inputs.brandVoiceStyle}
+
+## Instructions
+- Generate 3-5 variations per content item
+- Vary hooks, captions, hashtags, format, or CTAs
+- Each variation must have a clear hypothesis
+- Link every variation to its original content item ID
+- Produce structured JSON output matching the schema`
+
+  const systemPrompt = `${skill.systemPrompt}${knowledgeSection}`
+
+  return executeAgent<AbTestOutput>('ab-test-designer', {
+    prompt,
+    systemPrompt,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: abTestOutputSchema,
+  })
+}
+
+/** Transform AbTestOutput.variations into pipeline-ready ContentVariation[] */
+export function buildVariationsForPipeline(output: AbTestOutput): ContentVariation[] {
+  return output.variations.map((v) => ({
+    variationId: v.variationId,
+    originalContentItemId: v.originalContentItemId,
+    testId: v.testId,
+    variationType: v.variationType,
+    variationDescription: v.variationDescription,
+    content: v.content,
+  }))
 }
