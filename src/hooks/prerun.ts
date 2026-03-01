@@ -6,8 +6,13 @@ import YAML from 'yaml'
 
 import {verifyClaudeAuth} from '../lib/auth/index.js'
 import {checkBudget} from '../lib/budget/index.js'
-import {refreshExpiredTokens} from '../lib/credentials/token-refresher.js'
+import {CredentialManager} from '../lib/credentials/credential-manager.js'
+import {KeytarKeychainAdapter} from '../lib/credentials/keychain-adapter.js'
 import {setTokenRefreshResults} from '../lib/hooks/prerun-context.js'
+import type {TokenRefreshStatus} from '../lib/credentials/token-refresher.js'
+import {AdapterRegistry} from '../lib/platforms/adapter-registry.js'
+import {PlatformConnectionManager} from '../lib/platforms/connection-manager.js'
+import {TokenLifecycleManager} from '../lib/platforms/token-lifecycle.js'
 import {MATError} from '../lib/utils/errors.js'
 
 const SKIP_AUTH_COMMANDS = new Set([
@@ -66,17 +71,28 @@ const hook: Hook.Prerun = async function (options) {
     }
   }
 
-  // 4. Token refresh — warn on failure, never block execution
+  // 4. Token refresh — use TokenLifecycleManager for proactive refresh (AC4)
   try {
-    const refreshResult = await refreshExpiredTokens(process.cwd())
-    setTokenRefreshResults(refreshResult)
-    for (const [platform, status] of Object.entries(refreshResult)) {
-      if (status === 'refreshed') {
-        this.debug(`Token refreshed for ${platform}`)
-      } else if (status === 'failed') {
-        this.warn(`Token refresh failed for ${platform}. Run 'mat config platforms add ${platform}' to reconnect.`)
-      }
+    const credManager = new CredentialManager(new KeytarKeychainAdapter(), process.cwd())
+    const adapterRegistry = new AdapterRegistry()
+    const connectionManager = new PlatformConnectionManager(credManager, adapterRegistry)
+    const lifecycleManager = new TokenLifecycleManager(credManager, connectionManager)
+
+    const summary = await lifecycleManager.refreshExpiringTokens()
+
+    // Build legacy-format results for backward compatibility
+    const refreshResult: Record<string, TokenRefreshStatus> = {}
+    for (const platform of summary.refreshed) {
+      refreshResult[platform] = 'refreshed'
+      this.debug(`Token refreshed for ${platform}`)
     }
+
+    for (const failure of summary.failed) {
+      refreshResult[failure.platform] = 'failed'
+      this.warn(`Token refresh failed for ${failure.platform}. Run '${failure.reAuthCommand}' to reconnect.`)
+    }
+
+    setTokenRefreshResults(refreshResult)
   } catch {
     this.debug('Token refresh check skipped (no credentials configured)')
   }

@@ -43,3 +43,7 @@ export {RetryQueue, RetryQueueError, RetryItemNotFoundError} from './retry-queue
 export type {RetryQueueOptions, RetryQueueItem, RetryQueueStatus, RetryProcessResult, RetryErrorDetail} from './retry-queue/index.js'
 export {ContentScheduler, getScheduleStatus, TimingAnalyzer, MIN_DATA_POINTS, DEFAULT_PLATFORM_SCHEDULE, scheduleSlotSchema, platformScheduleConfigSchema, scheduleOptionsSchema} from './scheduler/index.js'
 export type {ScheduleSlot, PlatformScheduleConfig, ScheduleOptions, ScheduleResult, ScheduledItem, SkippedItem, ScheduleStatus, ScheduledItemSummary} from './scheduler/index.js'
+export {PlatformConnectionManager, PlatformConnectionNotFoundError, PlatformConnectionError} from './connection-manager.js'
+export type {PlatformConnection, ConnectionStatus, TokenRefreshResult, ConnectionHealthResult, PlatformConnectionStatus} from './connection-manager.js'
+export {TokenLifecycleManager, REFRESH_WINDOWS} from './token-lifecycle.js'
+export type {ExpiringToken, TokenRefreshSummary} from './token-lifecycle.js'

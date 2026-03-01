@@ -1,5 +1,10 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 
+// Hoisted mock for TokenLifecycleManager's refreshExpiringTokens
+const { mockRefreshExpiringTokens } = vi.hoisted(() => ({
+  mockRefreshExpiringTokens: vi.fn().mockResolvedValue({ refreshed: [], failed: [] }),
+}))
+
 // Mock child_process
 vi.mock('node:child_process', () => ({
   execFile: vi.fn(),
@@ -10,10 +15,43 @@ vi.mock('../../src/lib/budget/budget-checker.js', () => ({
   checkBudget: vi.fn().mockResolvedValue({ok: true}),
 }))
 
-// Mock token refresher — default: no platforms
+// Mock token refresher — kept for backward compat reference
 vi.mock('../../src/lib/credentials/token-refresher.js', () => ({
   refreshExpiredTokens: vi.fn().mockResolvedValue({}),
 }))
+
+// Mock credential-manager constructor
+vi.mock('../../src/lib/credentials/credential-manager.js', () => {
+  return {
+    CredentialManager: class MockCredentialManager {
+      list = vi.fn().mockResolvedValue([])
+    },
+  }
+})
+
+// Mock keychain adapter
+vi.mock('../../src/lib/credentials/keychain-adapter.js', () => ({
+  KeytarKeychainAdapter: class MockKeytarKeychainAdapter {},
+}))
+
+// Mock adapter registry
+vi.mock('../../src/lib/platforms/adapter-registry.js', () => ({
+  AdapterRegistry: class MockAdapterRegistry {},
+}))
+
+// Mock PlatformConnectionManager
+vi.mock('../../src/lib/platforms/connection-manager.js', () => ({
+  PlatformConnectionManager: class MockPlatformConnectionManager {},
+}))
+
+// Mock TokenLifecycleManager — uses hoisted mock fn
+vi.mock('../../src/lib/platforms/token-lifecycle.js', () => {
+  return {
+    TokenLifecycleManager: class MockTokenLifecycleManager {
+      refreshExpiringTokens = mockRefreshExpiringTokens
+    },
+  }
+})
 
 // Mock prerun context — stores token refresh results
 vi.mock('../../src/lib/hooks/prerun-context.js', () => ({
@@ -62,6 +100,8 @@ describe('prerun hook', () => {
     // Re-establish default budget mock
     const budgetModule = await import('../../src/lib/budget/budget-checker.js')
     vi.mocked(budgetModule.checkBudget).mockResolvedValue({ok: true})
+    // Reset the hoisted mock to default
+    mockRefreshExpiringTokens.mockResolvedValue({ refreshed: [], failed: [] })
   })
 
   afterEach(() => {
@@ -217,9 +257,9 @@ describe('prerun hook', () => {
 
   describe('token refresh', () => {
     it('warns when token refresh fails for a platform', async () => {
-      const refresherModule = await import('../../src/lib/credentials/token-refresher.js')
-      vi.mocked(refresherModule.refreshExpiredTokens).mockResolvedValue({
-        reddit: 'failed',
+      mockRefreshExpiringTokens.mockResolvedValue({
+        refreshed: [],
+        failed: [{ platform: 'reddit', error: 'Token expired', reAuthCommand: 'mat config platforms add reddit' }],
       })
 
       const hook = (await import('../../src/hooks/prerun.js')).default
@@ -231,10 +271,9 @@ describe('prerun hook', () => {
     })
 
     it('does not warn for skipped or refreshed tokens', async () => {
-      const refresherModule = await import('../../src/lib/credentials/token-refresher.js')
-      vi.mocked(refresherModule.refreshExpiredTokens).mockResolvedValue({
-        reddit: 'skipped',
-        facebook: 'refreshed',
+      mockRefreshExpiringTokens.mockResolvedValue({
+        refreshed: ['reddit', 'facebook'],
+        failed: [],
       })
 
       const hook = (await import('../../src/hooks/prerun.js')).default
@@ -244,20 +283,23 @@ describe('prerun hook', () => {
     })
 
     it('stores token refresh results in prerun context', async () => {
-      const refresherModule = await import('../../src/lib/credentials/token-refresher.js')
       const contextModule = await import('../../src/lib/hooks/prerun-context.js')
-      const mockResults = {reddit: 'refreshed' as const, facebook: 'skipped' as const}
-      vi.mocked(refresherModule.refreshExpiredTokens).mockResolvedValue(mockResults)
+      mockRefreshExpiringTokens.mockResolvedValue({
+        refreshed: ['reddit'],
+        failed: [{ platform: 'facebook', error: 'Failed', reAuthCommand: 'mat config platforms add facebook' }],
+      })
 
       const hook = (await import('../../src/hooks/prerun.js')).default
       await hook.call(mockContext as never, createOptions('run') as never)
 
-      expect(contextModule.setTokenRefreshResults).toHaveBeenCalledWith(mockResults)
+      expect(contextModule.setTokenRefreshResults).toHaveBeenCalledWith({
+        reddit: 'refreshed',
+        facebook: 'failed',
+      })
     })
 
     it('does not block execution when token refresh throws', async () => {
-      const refresherModule = await import('../../src/lib/credentials/token-refresher.js')
-      vi.mocked(refresherModule.refreshExpiredTokens).mockRejectedValue(
+      mockRefreshExpiringTokens.mockRejectedValue(
         new Error('No credentials configured'),
       )
 
