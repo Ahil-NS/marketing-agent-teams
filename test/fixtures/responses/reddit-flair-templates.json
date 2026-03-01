@@ -1,0 +1,20 @@
+[
+  {
+    "id": "flair-uuid-1",
+    "text": "Discussion",
+    "text_editable": false,
+    "background_color": "#0079d3"
+  },
+  {
+    "id": "flair-uuid-2",
+    "text": "Question",
+    "text_editable": true,
+    "background_color": "#ff4500"
+  },
+  {
+    "id": "flair-uuid-3",
+    "text": "Resource",
+    "text_editable": false,
+    "background_color": "#46d160"
+  }
+]

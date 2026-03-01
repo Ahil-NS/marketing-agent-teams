@@ -1,0 +1,9 @@
+{
+  "status": 429,
+  "message": "Too Many Requests",
+  "headers": {
+    "x-ratelimit-used": "60",
+    "x-ratelimit-remaining": "0",
+    "x-ratelimit-reset": "120"
+  }
+}

@@ -7,7 +7,7 @@ export const PLATFORM_OAUTH_DEFAULTS: Record<Platform, PlatformOAuthDefaults> = 
   reddit: {
     authorizationUrl: 'https://www.reddit.com/api/v1/authorize',
     tokenUrl: 'https://www.reddit.com/api/v1/access_token',
-    scopes: ['identity', 'read', 'submit'],
+    scopes: ['identity', 'read', 'submit', 'flair'],
   },
   tiktok: {
     authorizationUrl: 'https://www.tiktok.com/v2/auth/authorize/',

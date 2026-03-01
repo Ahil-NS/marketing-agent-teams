@@ -1,0 +1,36 @@
+{
+  "rateLimit": {
+    "json": {
+      "errors": [["RATELIMIT", "you are doing that too much. try again in 8 minutes.", "ratelimit"]],
+      "data": null
+    }
+  },
+  "authRevoked": {
+    "status": 401,
+    "message": "Unauthorized",
+    "error": 401
+  },
+  "forbidden": {
+    "status": 403,
+    "message": "Forbidden",
+    "error": 403
+  },
+  "flairRequired": {
+    "json": {
+      "errors": [["SUBMIT_VALIDATION_FLAIR_REQUIRED", "Your post must have a flair.", "flair"]],
+      "data": null
+    }
+  },
+  "subredditNotAllowed": {
+    "json": {
+      "errors": [["SUBREDDIT_NOTALLOWED", "You can't post there.", "sr"]],
+      "data": null
+    }
+  },
+  "contentPolicy": {
+    "json": {
+      "errors": [["ALREADY_SUB", "that link has already been submitted", "url"]],
+      "data": null
+    }
+  }
+}

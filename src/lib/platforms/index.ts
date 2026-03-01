@@ -7,6 +7,8 @@ export {
   PlatformRateLimitError,
 } from './errors.js'
 export {PLATFORM_CONSTRAINTS, validateContentForPlatform} from './content-validator.js'
+export {RedditAdapter} from './reddit/index.js'
+export type {RedditAdapterOptions} from './reddit/index.js'
 export type {
   AuthResult,
   ContentValidationError,

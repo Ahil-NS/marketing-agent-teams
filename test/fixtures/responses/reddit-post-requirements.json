@@ -1,0 +1,10 @@
+{
+  "is_flair_required": true,
+  "title_text_min_length": 10,
+  "title_text_max_length": 300,
+  "body_restriction_policy": "none",
+  "body_blacklisted_strings": ["spam", "buy now"],
+  "domain_blacklist": ["evil.com"],
+  "body_text_min_length": 0,
+  "body_text_max_length": 40000
+}
