@@ -183,3 +183,13 @@ export type {
   RejectionPattern,
   RejectionMemory,
 } from './rejection-schema.js'
+export {
+  hashtagRecommendationSchema,
+  platformHashtagSetSchema,
+  hashtagStrategyOutputSchema,
+} from './hashtag-schema.js'
+export type {
+  HashtagRecommendation,
+  PlatformHashtagSet,
+  HashtagStrategyOutput,
+} from './hashtag-schema.js'

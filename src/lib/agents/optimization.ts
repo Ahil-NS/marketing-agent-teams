@@ -6,11 +6,15 @@ import {humanizationOutputSchema} from '../schemas/humanization-schema.js'
 import type {HumanizationOutput} from '../schemas/humanization-schema.js'
 import {abTestOutputSchema} from '../schemas/optimization-schema.js'
 import type {AbTestOutput, AbTestInputs, ContentVariation} from '../schemas/optimization-schema.js'
+import {z} from 'zod'
+import {hashtagStrategyOutputSchema} from '../schemas/hashtag-schema.js'
+import type {HashtagStrategyOutput} from '../schemas/hashtag-schema.js'
 
 import {executeAgent} from './agent-executor.js'
 import {agentsRoot} from './paths.js'
 import {loadSkill} from './skill-loader.js'
 import {getPlatformSeoConfig} from './seo-config.js'
+import {PLATFORM_HASHTAG_LIMITS} from './hashtag-config.js'
 import type {AgentResult} from './types.js'
 
 export interface SeoOptimizationInputs {
@@ -245,4 +249,113 @@ export function buildVariationsForPipeline(output: AbTestOutput): ContentVariati
     variationDescription: v.variationDescription,
     content: v.content,
   }))
+}
+
+// --- Hashtag Strategist ---
+
+export interface HashtagStrategistInputs {
+  contentItems: Array<{
+    id: string
+    contentText: string
+    platform: string
+    topic: string
+    keywords: string[]
+  }>
+  brandName: string
+  industryVertical: string
+}
+
+/**
+ * Run the Hashtag Strategist agent.
+ * Researches and recommends optimal hashtag sets per platform for each content
+ * item. Injects platform-specific hashtag limits into the prompt and validates
+ * output against hashtagStrategyOutputSchema.
+ *
+ * Uses model: haiku — structured research and optimization task.
+ */
+export async function runHashtagStrategist(
+  inputs: HashtagStrategistInputs,
+): Promise<AgentResult<HashtagStrategyOutput[]>> {
+  const skill = await loadSkill(join(agentsRoot(), 'optimization', 'hashtag-strategist'))
+
+  const prompt = `Research and recommend optimal hashtag sets for the following content items.
+
+Brand: ${inputs.brandName}
+Industry: ${inputs.industryVertical}
+
+Content Items:
+${inputs.contentItems.map((item, i) => `
+${i + 1}. [${item.platform}] ID: ${item.id}
+   Topic: ${item.topic}
+   Keywords: ${item.keywords.join(', ')}
+   Content: ${item.contentText.slice(0, 500)}
+`).join('\n')}
+
+Platform Hashtag Limits:
+- TikTok: ${PLATFORM_HASHTAG_LIMITS.tiktok.recommended} recommended (max ${PLATFORM_HASHTAG_LIMITS.tiktok.max})
+- Instagram: ${PLATFORM_HASHTAG_LIMITS.instagram.recommended} recommended (max ${PLATFORM_HASHTAG_LIMITS.instagram.max})
+- Facebook: ${PLATFORM_HASHTAG_LIMITS.facebook.recommended} recommended (max ${PLATFORM_HASHTAG_LIMITS.facebook.max})
+- Reddit: No hashtags (skip)
+
+Return a JSON array with one entry per content item.`
+
+  const knowledgeSection = skill.knowledgeContext
+    ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  const systemPrompt = `${skill.systemPrompt}${knowledgeSection}`
+
+  const result = await executeAgent<HashtagStrategyOutput[]>('hashtag-strategist', {
+    prompt,
+    systemPrompt,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: z.array(hashtagStrategyOutputSchema),
+    maxTurns: 15,
+  })
+
+  // Post-validation: check hashtag counts per platform
+  for (const output of result.outputs) {
+    const warnings = validateHashtagCounts(output, PLATFORM_HASHTAG_LIMITS)
+    if (warnings.length > 0) {
+      // Log warnings but don't fail — agent may have good reasons
+      console.warn(`Hashtag count warnings for ${output.contentItemId}:`, warnings)
+    }
+  }
+
+  return result
+}
+
+/**
+ * Post-validation: verify each platform set respects its hashtag limit.
+ * Returns array of warning strings for any violations (non-blocking).
+ */
+export function validateHashtagCounts(
+  output: HashtagStrategyOutput,
+  limits: Record<string, {min: number; max: number; recommended: number}>,
+): string[] {
+  const warnings: string[] = []
+
+  for (const platformSet of output.platformSets) {
+    const platformLimits = limits[platformSet.platform]
+    if (!platformLimits) {
+      warnings.push(`Unknown platform '${platformSet.platform}' — no hashtag limits defined`)
+      continue
+    }
+
+    const count = platformSet.hashtags.length
+    if (count > platformLimits.max) {
+      warnings.push(
+        `${platformSet.platform}: ${count} hashtags exceeds max ${platformLimits.max}`,
+      )
+    }
+
+    if (count < platformLimits.min) {
+      warnings.push(
+        `${platformSet.platform}: ${count} hashtags below min ${platformLimits.min}`,
+      )
+    }
+  }
+
+  return warnings
 }
