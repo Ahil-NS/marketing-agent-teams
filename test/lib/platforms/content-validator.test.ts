@@ -134,7 +134,7 @@ describe('validateContentForPlatform', () => {
       const content = makeContent({
         platform: 'tiktok',
         content: {
-          body: 'x'.repeat(301),
+          body: 'x'.repeat(2201),
           media: [{type: 'video'}],
           platformMeta: {},
         },
@@ -280,7 +280,7 @@ describe('validateContentForPlatform', () => {
       const content = makeContent({
         platform: 'tiktok',
         content: {
-          body: 'x'.repeat(301),
+          body: 'x'.repeat(2201),
           media: [{type: 'video'}],
           platformMeta: {},
         },
@@ -288,8 +288,8 @@ describe('validateContentForPlatform', () => {
       const result = validateContentForPlatform(content)
       const lengthError = result.errors.find((e) => e.constraint === 'maxLength')
       expect(lengthError).toBeDefined()
-      expect(lengthError!.value).toBe(301)
-      expect(lengthError!.limit).toBe(300)
+      expect(lengthError!.value).toBe(2201)
+      expect(lengthError!.limit).toBe(2200)
     })
   })
 })

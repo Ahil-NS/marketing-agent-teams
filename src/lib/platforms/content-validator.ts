@@ -16,7 +16,7 @@ export const PLATFORM_CONSTRAINTS: Record<PlatformName, PlatformConstraints> = {
     rateLimits: {postsPerDay: null, requestsPerMinute: 60},
   },
   tiktok: {
-    captionMaxLength: 300,
+    captionMaxLength: 2200,
     hashtagMaxCount: 30,
     requiresMedia: true,
     rateLimits: {postsPerDay: 15, requestsPerMinute: 6},

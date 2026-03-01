@@ -1,0 +1,10 @@
+{
+  "data": {
+    "publish_id": "pub_v2_1234567890"
+  },
+  "error": {
+    "code": "ok",
+    "message": "",
+    "log_id": "log_abc123"
+  }
+}

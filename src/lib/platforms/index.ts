@@ -9,6 +9,8 @@ export {
 export {PLATFORM_CONSTRAINTS, validateContentForPlatform} from './content-validator.js'
 export {RedditAdapter} from './reddit/index.js'
 export type {RedditAdapterOptions} from './reddit/index.js'
+export {TikTokAdapter} from './tiktok/index.js'
+export type {TikTokAdapterOptions} from './tiktok/index.js'
 export type {
   AuthResult,
   ContentValidationError,

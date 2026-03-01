@@ -12,7 +12,7 @@ export const PLATFORM_OAUTH_DEFAULTS: Record<Platform, PlatformOAuthDefaults> = 
   tiktok: {
     authorizationUrl: 'https://www.tiktok.com/v2/auth/authorize/',
     tokenUrl: 'https://open.tiktokapis.com/v2/oauth/token/',
-    scopes: ['user.info.basic', 'video.list'],
+    scopes: ['video.publish', 'user.info.basic'],
   },
   facebook: {
     authorizationUrl: 'https://www.facebook.com/v19.0/dialog/oauth',

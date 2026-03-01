@@ -1,0 +1,12 @@
+{
+  "data": {
+    "status": "FAILED",
+    "fail_reason": "url_ownership_unverified",
+    "publicaly_available_post_id": []
+  },
+  "error": {
+    "code": "ok",
+    "message": "",
+    "log_id": "log_status_fail"
+  }
+}
