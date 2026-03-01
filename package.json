@@ -1,6 +1,6 @@
 {
   "name": "marketing-agent-teams",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AI-powered marketing automation platform with 23 agents across 7 clusters",
   "type": "module",
   "bin": {
