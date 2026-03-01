@@ -1,0 +1,7 @@
+{
+  "config": {
+    "quota_total": 50,
+    "quota_duration": 86400
+  },
+  "quota_usage": 12
+}

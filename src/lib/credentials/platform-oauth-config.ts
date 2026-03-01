@@ -20,9 +20,9 @@ export const PLATFORM_OAUTH_DEFAULTS: Record<Platform, PlatformOAuthDefaults> = 
     scopes: ['pages_manage_posts', 'pages_read_engagement', 'pages_show_list'],
   },
   instagram: {
-    authorizationUrl: 'https://api.instagram.com/oauth/authorize',
-    tokenUrl: 'https://api.instagram.com/oauth/access_token',
-    scopes: ['user_profile', 'user_media'],
+    authorizationUrl: 'https://www.facebook.com/v24.0/dialog/oauth',
+    tokenUrl: 'https://graph.facebook.com/v24.0/oauth/access_token',
+    scopes: ['instagram_basic', 'instagram_content_publish', 'pages_show_list', 'pages_read_engagement'],
   },
 }
 

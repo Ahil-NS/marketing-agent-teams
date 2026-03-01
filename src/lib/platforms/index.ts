@@ -13,6 +13,8 @@ export {TikTokAdapter} from './tiktok/index.js'
 export type {TikTokAdapterOptions} from './tiktok/index.js'
 export {FacebookAdapter} from './facebook/index.js'
 export type {FacebookAdapterOptions} from './facebook/index.js'
+export {InstagramAdapter} from './instagram/index.js'
+export type {InstagramAdapterOptions} from './instagram/index.js'
 export type {
   AuthResult,
   ContentValidationError,
