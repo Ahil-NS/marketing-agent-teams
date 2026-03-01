@@ -66,3 +66,42 @@ export class PlatformRateLimitError extends MATError {
     )
   }
 }
+
+export class PlatformTimeoutError extends MATError {
+  constructor(platform: string, timeoutMs: number) {
+    super(
+      `Request to '${platform}' timed out after ${timeoutMs}ms`,
+      'PLATFORM_TIMEOUT',
+      `API request to '${platform}' exceeded timeout`,
+      `Will retry with backoff. Check 'mat status' for retry queue.`,
+      `platforms/${platform}`,
+      'transient',
+    )
+  }
+}
+
+export class PlatformContentPolicyError extends MATError {
+  constructor(platform: string, detail: string) {
+    super(
+      `Content policy violation on '${platform}': ${detail}`,
+      'PLATFORM_CONTENT_POLICY',
+      `Content blocked by '${platform}' policy`,
+      `Review and edit content to comply with '${platform}' guidelines. Run 'mat review' to modify.`,
+      `platforms/${platform}`,
+      'permanent',
+    )
+  }
+}
+
+export class PlatformNetworkError extends MATError {
+  constructor(platform: string, detail: string) {
+    super(
+      `Network error connecting to '${platform}': ${detail}`,
+      'PLATFORM_NETWORK_ERROR',
+      `Cannot reach '${platform}' API`,
+      `Check network connectivity. Will retry automatically with backoff.`,
+      `platforms/${platform}`,
+      'transient',
+    )
+  }
+}

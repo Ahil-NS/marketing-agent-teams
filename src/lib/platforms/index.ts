@@ -5,7 +5,16 @@ export {
   ContentValidationFailedError,
   PlatformPublishFailedError,
   PlatformRateLimitError,
+  PlatformTimeoutError,
+  PlatformContentPolicyError,
+  PlatformNetworkError,
 } from './errors.js'
+export {classifyError, classifyNetworkError} from './error-classifier.js'
+export type {ErrorClassification, ErrorClassificationType} from './error-classifier.js'
+export {RateLimitTracker} from './rate-limiter.js'
+export type {QuotaCheck, RateLimitState, RateLimitTrackerOptions} from './rate-limiter.js'
+export {createPlatformFetch} from './platform-fetch.js'
+export type {CreatePlatformFetchOptions, PlatformFetchOptions, PlatformFetchResult} from './platform-fetch.js'
 export {PLATFORM_CONSTRAINTS, validateContentForPlatform} from './content-validator.js'
 export {RedditAdapter} from './reddit/index.js'
 export type {RedditAdapterOptions} from './reddit/index.js'
