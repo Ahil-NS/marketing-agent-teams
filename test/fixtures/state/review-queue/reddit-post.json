@@ -1,0 +1,27 @@
+{
+  "id": "item-2026-03-01-001",
+  "runId": "550e8400-e29b-41d4-a716-446655440000",
+  "platform": "reddit",
+  "status": "pending",
+  "content": {
+    "title": "Why meditation apps fail most users",
+    "body": "A deep dive into meditation app UX patterns that lead to 90% churn within 30 days. Here's what the research shows and how mindfulness startups can fix it.",
+    "hooks": ["Stop scrolling and try this 5-minute reset"],
+    "cta": "Try our guided meditation session — link in bio",
+    "platformMeta": {
+      "subreddit": "r/meditation",
+      "flair": "Discussion",
+      "postType": "text",
+      "crossPostSubreddits": ["r/productivity", "r/selfimprovement"]
+    }
+  },
+  "qualityScore": 0.92,
+  "complianceFlags": [],
+  "contentType": "standard",
+  "generatedBy": "reddit-post-creator",
+  "generatedAt": "2026-03-01T10:00:00Z",
+  "scheduledTime": "2026-03-02T14:00:00Z",
+  "editHistory": [],
+  "createdAt": "2026-03-01T10:00:00Z",
+  "updatedAt": "2026-03-01T10:00:00Z"
+}

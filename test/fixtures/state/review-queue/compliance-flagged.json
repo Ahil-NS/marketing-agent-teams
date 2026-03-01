@@ -1,0 +1,28 @@
+{
+  "id": "item-2026-03-01-005",
+  "runId": "550e8400-e29b-41d4-a716-446655440000",
+  "platform": "reddit",
+  "status": "pending",
+  "content": {
+    "title": "Our new supplement blend cures anxiety in 24 hours",
+    "body": "We've developed an all-natural supplement that clinical trials show eliminates anxiety within 24 hours. No prescription needed. FDA-approved ingredients.\n\nUse code CALM20 for 20% off your first order.",
+    "cta": "Order now at our website",
+    "platformMeta": {
+      "subreddit": "r/supplements",
+      "flair": "Product",
+      "postType": "text"
+    }
+  },
+  "qualityScore": 0.45,
+  "complianceFlags": [
+    "health-claims: Unsubstantiated cure claim for anxiety",
+    "ftc-disclosure: Missing sponsored content disclosure",
+    "platform-policy: Reddit prohibits direct sales pitches without disclosure"
+  ],
+  "contentType": "compliance-flagged",
+  "generatedBy": "reddit-post-creator",
+  "generatedAt": "2026-03-01T10:20:00Z",
+  "editHistory": [],
+  "createdAt": "2026-03-01T10:20:00Z",
+  "updatedAt": "2026-03-01T10:20:00Z"
+}

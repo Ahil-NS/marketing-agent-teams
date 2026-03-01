@@ -217,3 +217,16 @@ export {
 export type {
   CombinedQualityReport,
 } from './quality-report-schema.js'
+export {
+  platformSchema,
+  reviewStatusSchema,
+  contentTypeSchema,
+  userFeedbackSchema,
+  editHistoryEntrySchema,
+  reviewItemSchema,
+  reviewFilterSchema,
+} from './review-schema.js'
+export type {
+  ReviewItemData,
+  ReviewFilterData,
+} from './review-schema.js'

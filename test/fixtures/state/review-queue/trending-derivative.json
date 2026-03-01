@@ -1,0 +1,28 @@
+{
+  "id": "item-2026-03-01-006",
+  "runId": "a50e8400-e29b-41d4-a716-446655440999",
+  "platform": "tiktok",
+  "status": "pending",
+  "content": {
+    "body": "This trend is WILD 🤯 We had to put our own spin on it\n\n#trending #viral #mindfulness #productivity",
+    "hashtags": ["#trending", "#viral", "#mindfulness", "#productivity"],
+    "hooks": ["This trend is WILD", "We had to try this"],
+    "cta": "Duet this with your own version!",
+    "platformMeta": {
+      "originalTrendId": "trend-7890",
+      "trendName": "productivity-stack",
+      "videoPrompt": "Recreation of trending format with brand-specific twist — stack of productivity tools revealed one by one",
+      "duration": "15s",
+      "soundSuggestion": "original trending audio"
+    }
+  },
+  "qualityScore": 0.78,
+  "complianceFlags": [],
+  "contentType": "trending-derivative",
+  "generatedBy": "viral-content-creator",
+  "generatedAt": "2026-03-01T11:00:00Z",
+  "scheduledTime": "2026-03-01T16:00:00Z",
+  "editHistory": [],
+  "createdAt": "2026-03-01T11:00:00Z",
+  "updatedAt": "2026-03-01T11:00:00Z"
+}

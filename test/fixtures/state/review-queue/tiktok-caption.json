@@ -1,0 +1,27 @@
+{
+  "id": "item-2026-03-01-002",
+  "runId": "550e8400-e29b-41d4-a716-446655440000",
+  "platform": "tiktok",
+  "status": "pending",
+  "content": {
+    "body": "POV: You just discovered the productivity hack that actually works 🧠✨ #productivity #mindfulness #growthmindset",
+    "hashtags": ["#productivity", "#mindfulness", "#growthmindset", "#lifehack", "#motivation"],
+    "hooks": ["Stop scrolling and try this", "Wait for the twist at the end"],
+    "cta": "Follow for more daily mindset shifts",
+    "platformMeta": {
+      "videoPrompt": "Person sitting at desk, overwhelmed → montage of small productivity wins → calm focused state",
+      "duration": "30s",
+      "soundSuggestion": "trending audio - motivational",
+      "captionStyle": "bold-overlay"
+    }
+  },
+  "qualityScore": 0.88,
+  "complianceFlags": [],
+  "contentType": "standard",
+  "generatedBy": "tiktok-caption-creator",
+  "generatedAt": "2026-03-01T10:05:00Z",
+  "scheduledTime": "2026-03-02T18:00:00Z",
+  "editHistory": [],
+  "createdAt": "2026-03-01T10:05:00Z",
+  "updatedAt": "2026-03-01T10:05:00Z"
+}

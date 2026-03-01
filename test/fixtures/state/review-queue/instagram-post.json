@@ -1,0 +1,27 @@
+{
+  "id": "item-2026-03-01-004",
+  "runId": "550e8400-e29b-41d4-a716-446655440000",
+  "platform": "instagram",
+  "status": "pending",
+  "content": {
+    "body": "Your morning routine is lying to you.\n\nSwipe to see what actually works ➡️\n\n#morningroutine #productivity #mindfulness #selfcare #growthmindset",
+    "hashtags": ["#morningroutine", "#productivity", "#mindfulness", "#selfcare", "#growthmindset"],
+    "hooks": ["Your morning routine is lying to you"],
+    "cta": "Save this for tomorrow morning ☀️",
+    "platformMeta": {
+      "carouselSlides": 7,
+      "coverImagePrompt": "Minimalist alarm clock on nightstand, soft morning light, clean aesthetic",
+      "aspectRatio": "4:5",
+      "altText": "Carousel post about evidence-based morning routine tips"
+    }
+  },
+  "qualityScore": 0.95,
+  "complianceFlags": [],
+  "contentType": "standard",
+  "generatedBy": "instagram-post-creator",
+  "generatedAt": "2026-03-01T10:15:00Z",
+  "scheduledTime": "2026-03-03T08:00:00Z",
+  "editHistory": [],
+  "createdAt": "2026-03-01T10:15:00Z",
+  "updatedAt": "2026-03-01T10:15:00Z"
+}
