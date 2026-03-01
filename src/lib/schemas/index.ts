@@ -193,3 +193,27 @@ export type {
   PlatformHashtagSet,
   HashtagStrategyOutput,
 } from './hashtag-schema.js'
+export {
+  factualClaimSchema,
+  claimVerdictSchema,
+  factCheckReportSchema,
+} from './fact-check-schema.js'
+export type {
+  FactualClaim,
+  ClaimVerdict,
+  FactCheckReport,
+} from './fact-check-schema.js'
+export {
+  sensitivityFlagSchema,
+  sensitivityReportSchema,
+} from './sensitivity-schema.js'
+export type {
+  SensitivityFlag,
+  SensitivityReport,
+} from './sensitivity-schema.js'
+export {
+  combinedQualityReportSchema,
+} from './quality-report-schema.js'
+export type {
+  CombinedQualityReport,
+} from './quality-report-schema.js'

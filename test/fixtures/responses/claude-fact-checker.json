@@ -1,0 +1,33 @@
+[
+  {
+    "contentItemId": "item-001",
+    "claimsFound": 2,
+    "verdicts": [
+      {
+        "claim": {
+          "claimText": "90% of users report improved productivity",
+          "claimType": "statistic",
+          "location": { "startIndex": 42, "endIndex": 83 }
+        },
+        "verdict": "verified",
+        "confidence": 88,
+        "evidence": "Confirmed by 2025 internal user survey with 5000+ respondents",
+        "sources": ["https://example.com/user-survey-2025"]
+      },
+      {
+        "claim": {
+          "claimText": "Founded in 1998",
+          "claimType": "historical",
+          "location": { "startIndex": 120, "endIndex": 135 }
+        },
+        "verdict": "likely-accurate",
+        "confidence": 75,
+        "evidence": "Corporate registry shows incorporation date of 1998",
+        "sources": ["https://example.com/corporate-registry"]
+      }
+    ],
+    "overallAccuracy": 82,
+    "recommendation": "pass",
+    "summary": "2 claims found. Both verified with high confidence."
+  }
+]

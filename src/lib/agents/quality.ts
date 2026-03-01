@@ -1,9 +1,16 @@
 import {join} from 'node:path'
 
+import {z} from 'zod'
+
 import {brandGuardianOutputSchema} from '../schemas/quality-schema.js'
 import type {BrandGuardianOutput} from '../schemas/quality-schema.js'
 import {complianceReportSchema} from '../schemas/compliance-schema.js'
 import type {ComplianceReport} from '../schemas/compliance-schema.js'
+import {factCheckReportSchema} from '../schemas/fact-check-schema.js'
+import type {FactCheckReport} from '../schemas/fact-check-schema.js'
+import {sensitivityReportSchema} from '../schemas/sensitivity-schema.js'
+import type {SensitivityReport} from '../schemas/sensitivity-schema.js'
+import type {CombinedQualityReport} from '../schemas/quality-report-schema.js'
 import type {BrandVoiceConfig} from '../schemas/config-schema.js'
 
 import {executeAgent} from './agent-executor.js'
@@ -220,4 +227,179 @@ Produce a compliance report as JSON.`,
   })
 
   return result.outputs
+}
+
+export interface FactCheckerInputs {
+  contentItems: Array<{
+    id: string
+    contentText: string
+    platform: string
+    topic: string
+  }>
+}
+
+/**
+ * Run the Fact Checker agent.
+ * Validates factual claims in content items and returns reports with
+ * confidence scores and suggested alternatives/caveats.
+ *
+ * Uses model: haiku — structured verification task.
+ * Uses tools: Read, WebSearch — needs web search to verify claims.
+ */
+export async function runFactChecker(
+  inputs: FactCheckerInputs,
+): Promise<FactCheckReport[]> {
+  const skill = await loadSkill(join(agentsRoot(), 'quality', 'fact-checker'))
+
+  const prompt = `Review the following content items for factual accuracy.
+Identify all factual claims (statistics, quotes, historical facts, scientific claims, comparisons).
+Skip opinions, marketing superlatives, and subjective statements.
+For each claim, verify via web search and assign a verdict with confidence score.
+
+Content Items:
+${inputs.contentItems.map((item, i) => `
+${i + 1}. [${item.platform}] ID: ${item.id}
+   Topic: ${item.topic}
+   Content: ${item.contentText}
+`).join('\n')}
+
+Return a JSON array with one FactCheckReport per content item.`
+
+  const systemPrompt = `${skill.systemPrompt}\n\n${skill.knowledgeContext}`
+
+  const result = await executeAgent<FactCheckReport[]>('fact-checker', {
+    prompt,
+    systemPrompt,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: z.array(factCheckReportSchema),
+    maxTurns: 20,
+  })
+
+  return result.outputs
+}
+
+export interface SensitivityReviewerInputs {
+  contentItems: Array<{
+    id: string
+    contentText: string
+    platform: string
+    targetAudience: string
+    region: string
+  }>
+}
+
+/**
+ * Run the Sensitivity Reviewer agent.
+ * Flags culturally insensitive, politically charged, or potentially offensive
+ * material with severity ratings and suggested revisions.
+ *
+ * Uses model: sonnet — nuanced classification requiring cultural understanding.
+ * Uses tools: Read — no web search needed, classification based on knowledge.
+ */
+export async function runSensitivityReviewer(
+  inputs: SensitivityReviewerInputs,
+): Promise<SensitivityReport[]> {
+  const skill = await loadSkill(join(agentsRoot(), 'quality', 'sensitivity-reviewer'))
+
+  const prompt = `Review the following content items for sensitivity issues.
+Flag any culturally insensitive, politically charged, or potentially offensive material.
+Consider the target audience and region when evaluating sensitivity.
+
+Content Items:
+${inputs.contentItems.map((item, i) => `
+${i + 1}. [${item.platform}] ID: ${item.id}
+   Target Audience: ${item.targetAudience}
+   Region: ${item.region}
+   Content: ${item.contentText}
+`).join('\n')}
+
+Return a JSON array with one SensitivityReport per content item.`
+
+  const systemPrompt = `${skill.systemPrompt}\n\n${skill.knowledgeContext}`
+
+  const result = await executeAgent<SensitivityReport[]>('sensitivity-reviewer', {
+    prompt,
+    systemPrompt,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: z.array(sensitivityReportSchema),
+    maxTurns: 15,
+  })
+
+  return result.outputs
+}
+
+/**
+ * Evaluate a combined quality gate decision from all quality agent reports.
+ *
+ * Decision matrix (worst-case wins):
+ * - Any report recommends 'block' OR any critical/high severity → BLOCK
+ * - Any report recommends 'needs-revision' → NEEDS-REVISION
+ * - Any report has medium severity or caveats → PASS-WITH-WARNINGS
+ * - Otherwise → PASS
+ *
+ * This function is synchronous — pure data evaluation with no I/O.
+ */
+export function evaluateCombinedQualityGate(params: {
+  contentItemId: string
+  factCheckReport?: FactCheckReport
+  sensitivityReport?: SensitivityReport
+  brandGuardianReport?: unknown
+  complianceReport?: unknown
+}): CombinedQualityReport {
+  const blockReasons: string[] = []
+  const warnings: string[] = []
+
+  // Check fact check report
+  if (params.factCheckReport) {
+    if (params.factCheckReport.recommendation === 'block') {
+      blockReasons.push(`Fact Check: ${params.factCheckReport.summary}`)
+    } else if (params.factCheckReport.recommendation === 'needs-revision') {
+      warnings.push(`Fact Check needs revision: ${params.factCheckReport.summary}`)
+    } else if (params.factCheckReport.recommendation === 'pass-with-caveats') {
+      warnings.push(`Fact Check: ${params.factCheckReport.summary}`)
+    }
+  }
+
+  // Check sensitivity report
+  if (params.sensitivityReport) {
+    if (
+      params.sensitivityReport.recommendation === 'block' ||
+      params.sensitivityReport.overallSeverity === 'critical' ||
+      params.sensitivityReport.overallSeverity === 'high'
+    ) {
+      blockReasons.push(`Sensitivity: ${params.sensitivityReport.summary}`)
+    } else if (params.sensitivityReport.recommendation === 'needs-revision') {
+      warnings.push(`Sensitivity needs revision: ${params.sensitivityReport.summary}`)
+    } else if (
+      params.sensitivityReport.recommendation === 'pass-with-warnings' ||
+      params.sensitivityReport.overallSeverity === 'medium'
+    ) {
+      warnings.push(`Sensitivity: ${params.sensitivityReport.summary}`)
+    }
+  }
+
+  // Determine overall recommendation (worst-case wins)
+  let overallRecommendation: 'pass' | 'pass-with-warnings' | 'needs-revision' | 'block'
+  if (blockReasons.length > 0) {
+    overallRecommendation = 'block'
+  } else if (warnings.some(w => w.includes('needs revision'))) {
+    overallRecommendation = 'needs-revision'
+  } else if (warnings.length > 0) {
+    overallRecommendation = 'pass-with-warnings'
+  } else {
+    overallRecommendation = 'pass'
+  }
+
+  return {
+    contentItemId: params.contentItemId,
+    factCheckReport: params.factCheckReport,
+    sensitivityReport: params.sensitivityReport,
+    brandGuardianReport: params.brandGuardianReport,
+    complianceReport: params.complianceReport,
+    overallRecommendation,
+    blockReasons,
+    warnings,
+  }
 }

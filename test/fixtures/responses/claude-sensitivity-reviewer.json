@@ -1,0 +1,26 @@
+[
+  {
+    "contentItemId": "item-001",
+    "flags": [
+      {
+        "flaggedText": "This product is a lifesaver for stressed moms",
+        "category": "gender",
+        "severity": "medium",
+        "explanation": "Assumes primary caregivers are mothers — excludes fathers and non-binary parents",
+        "suggestedRevision": "This product is a lifesaver for stressed parents",
+        "location": { "startIndex": 0, "endIndex": 46 }
+      },
+      {
+        "flaggedText": "Even your grandma can use it",
+        "category": "ageist",
+        "severity": "low",
+        "explanation": "Uses age-based stereotype implying older people struggle with technology",
+        "suggestedRevision": "Anyone can use it with ease",
+        "location": { "startIndex": 100, "endIndex": 128 }
+      }
+    ],
+    "overallSeverity": "medium",
+    "recommendation": "needs-revision",
+    "summary": "Two sensitivity flags detected: one gender and one ageist reference."
+  }
+]
