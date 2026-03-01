@@ -1,0 +1,26 @@
+[
+  {
+    "contentId": "tiktok-wellness-1",
+    "platform": "tiktok",
+    "body": "Start your morning with 5 minutes of guided meditation. Your mind will thank you!",
+    "hashtags": ["#morning", "#wellness"]
+  },
+  {
+    "contentId": "reddit-meditation-1",
+    "platform": "reddit",
+    "title": "My experience with morning meditation",
+    "body": "I have been meditating every morning for the past 3 months and wanted to share my experience with this community. The changes I have noticed are subtle but significant. My focus has improved, I feel less anxious throughout the day, and my sleep quality has gotten noticeably better."
+  },
+  {
+    "contentId": "facebook-wellness-1",
+    "platform": "facebook",
+    "body": "Ready to transform your mornings? Try our guided meditation app today!"
+  },
+  {
+    "contentId": "instagram-mindful-1",
+    "platform": "instagram",
+    "body": "Breathe in calm, breathe out stress. Our guided meditation sessions are designed to fit into your busy schedule. Start with just 5 minutes a day.",
+    "hashtags": ["#meditation", "#mindfulness", "#wellness"],
+    "altText": "Person meditating peacefully in a sunlit room"
+  }
+]

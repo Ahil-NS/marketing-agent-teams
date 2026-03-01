@@ -1,0 +1,89 @@
+{
+  "items": [
+    {
+      "contentId": "tiktok-wellness-1",
+      "platform": "tiktok",
+      "originalContent": {
+        "contentId": "tiktok-wellness-1",
+        "platform": "tiktok",
+        "body": "Start your morning with 5 minutes of guided meditation. Your mind will thank you!",
+        "hashtags": ["#morning", "#wellness"]
+      },
+      "optimizedContent": {
+        "contentId": "tiktok-wellness-1",
+        "platform": "tiktok",
+        "body": "Guided meditation transforms your mornings — 5 minutes to a calmer, more focused you",
+        "hashtags": ["#guidedmeditation", "#morningwellness", "#mindfulness", "#calmmorning"]
+      },
+      "appliedRules": [
+        {
+          "ruleType": "keyword-density",
+          "before": "Start your morning with 5 minutes of guided meditation.",
+          "after": "Guided meditation transforms your mornings — 5 minutes to a calmer, more focused you",
+          "rationale": "Front-loaded primary keyword 'guided meditation' in caption for TikTok search indexing"
+        },
+        {
+          "ruleType": "hashtag-count",
+          "before": "2 hashtags (#morning, #wellness)",
+          "after": "4 hashtags (#guidedmeditation, #morningwellness, #mindfulness, #calmmorning)",
+          "rationale": "Increased to 4 niche hashtags within TikTok optimal range (3-5)"
+        },
+        {
+          "ruleType": "indexable-layer",
+          "before": "No OCR text overlay keywords",
+          "after": "Recommend adding 'Guided Meditation' as on-screen text",
+          "rationale": "TikTok OCR layer indexes on-screen text for additional discoverability"
+        }
+      ],
+      "seoScore": 87,
+      "recommendations": [
+        "Add 'Guided Meditation' as OCR text overlay in the first frame",
+        "Say 'guided meditation' within the first 5 seconds of audio",
+        "Consider using a trending wellness sound for algorithm boost"
+      ]
+    },
+    {
+      "contentId": "reddit-meditation-1",
+      "platform": "reddit",
+      "originalContent": {
+        "contentId": "reddit-meditation-1",
+        "platform": "reddit",
+        "title": "My experience with morning meditation",
+        "body": "I have been meditating every morning for the past 3 months and wanted to share my experience with this community. The changes I have noticed are subtle but significant. My focus has improved, I feel less anxious throughout the day, and my sleep quality has gotten noticeably better."
+      },
+      "optimizedContent": {
+        "contentId": "reddit-meditation-1",
+        "platform": "reddit",
+        "title": "Morning Meditation Results: 3 Months of Daily Practice — Focus, Anxiety, and Sleep Improvements",
+        "body": "Morning meditation has transformed my daily routine over the past 3 months. I have been meditating every morning and wanted to share my experience with this community. The changes I have noticed are subtle but significant. My focus has improved, I feel less anxious throughout the day, and my sleep quality has gotten noticeably better."
+      },
+      "appliedRules": [
+        {
+          "ruleType": "keyword-density",
+          "before": "My experience with morning meditation",
+          "after": "Morning Meditation Results: 3 Months of Daily Practice — Focus, Anxiety, and Sleep Improvements",
+          "rationale": "Front-loaded 'Morning Meditation' keywords in title for Reddit search and Google SERP visibility"
+        },
+        {
+          "ruleType": "keyword-density",
+          "before": "I have been meditating every morning...",
+          "after": "Morning meditation has transformed my daily routine...",
+          "rationale": "Added keyword-rich first sentence for Google snippet extraction"
+        }
+      ],
+      "seoScore": 79,
+      "recommendations": [
+        "Expand body to 300-500 word optimal range for maximum engagement",
+        "Add specific metrics or data points for credibility"
+      ]
+    }
+  ],
+  "summary": {
+    "totalItems": 2,
+    "averageSeoScore": 83,
+    "platformBreakdown": {
+      "tiktok": { "count": 1, "averageScore": 87 },
+      "reddit": { "count": 1, "averageScore": 79 }
+    }
+  }
+}

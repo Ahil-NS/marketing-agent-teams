@@ -58,6 +58,33 @@ export {
 } from './creation-schema.js'
 export type {RedditContentPackage, TikTokContentPackage, FacebookContentPackage, InstagramContentPackage, ContentItem, CreationInputs, CreationStageOutput, HookWriterOutput, HookWriterInputs, ImagePrompt, VideoPrompt, EngagementMetrics, ViralContentItem, DerivativeContentItem, AtomizedContent, AtomizationInputs} from './creation-schema.js'
 export {
+  basePlatformSeoConfigSchema,
+  charLimitSchema,
+  hashtagRangeSchema,
+  tiktokSeoLayersSchema,
+  tiktokSeoConfigSchema,
+  redditSeoConfigSchema,
+  facebookSeoConfigSchema,
+  instagramSeoConfigSchema,
+  seoRuleApplicationSchema,
+  seoContentItemSchema,
+  seoOptimizationResultSchema,
+  seoOptimizationOutputSchema,
+  platformBreakdownEntrySchema,
+} from './seo-schema.js'
+export type {
+  PlatformSeoConfig,
+  TikTokSeoLayers,
+  TikTokSeoConfig,
+  RedditSeoConfig,
+  FacebookSeoConfig,
+  InstagramSeoConfig,
+  SeoRuleApplication,
+  SeoContentItem,
+  SeoOptimizationResult,
+  SeoOptimizationOutput,
+} from './seo-schema.js'
+export {
   pipelineErrorSchema,
   pipelineRunSchema,
   pipelineRunStatusSchema,

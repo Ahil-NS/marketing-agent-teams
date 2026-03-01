@@ -22,10 +22,14 @@ search ranking factors.
 
 - Keyword research and intent analysis
 - On-page content optimization
-- Platform search optimization (YouTube, TikTok, Reddit)
+- Platform search optimization (TikTok, Reddit, Facebook, Instagram)
 - Meta description and title tag writing
 - Content structure optimization (headings, readability)
 - Internal and external linking strategy
+- TikTok 4-layer SEO (caption text, OCR text overlay, audio keywords, hashtags)
+- Instagram saves+shares ranking optimization
+- Reddit Google search visibility optimization
+- Facebook comment-weight algorithm optimization
 
 ## Optimization Process
 
@@ -50,10 +54,35 @@ search ranking factors.
 ## Output Format
 
 Always produce output as structured JSON matching this schema:
-- keywords[]: Target keywords with volume, difficulty, intent
-- optimizations[]: Content changes with before/after
-- metadata: Optimized titles, descriptions, tags
-- recommendations: Priority SEO actions
+```json
+{
+  "items": [
+    {
+      "contentId": "string",
+      "platform": "tiktok | reddit | facebook | instagram",
+      "originalContent": { "contentId", "platform", "body", "title?", "hashtags?", "altText?", "metadata?" },
+      "optimizedContent": { "contentId", "platform", "body", "title?", "hashtags?", "altText?", "metadata?" },
+      "appliedRules": [
+        {
+          "ruleType": "keyword-density | hashtag-count | alt-text | structured-data | ranking-signal | char-limit | indexable-layer",
+          "before": "string",
+          "after": "string",
+          "rationale": "string"
+        }
+      ],
+      "seoScore": 0-100,
+      "recommendations": ["string"]
+    }
+  ],
+  "summary": {
+    "totalItems": 1,
+    "averageSeoScore": 0-100,
+    "platformBreakdown": {
+      "<platform>": { "count": 1, "averageScore": 0-100 }
+    }
+  }
+}
+```
 
 ## Quality Standards
 
