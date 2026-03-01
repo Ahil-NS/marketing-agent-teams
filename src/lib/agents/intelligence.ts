@@ -6,6 +6,8 @@ import {audienceProfileSchema} from '../schemas/audience-schema.js'
 import type {AudienceProfile, AudienceResearchInputs} from '../schemas/audience-schema.js'
 
 import {executeAgent} from './agent-executor.js'
+import {Deprioritizer} from './deprioritizer.js'
+import {AgentMemoryStore} from './memory-store.js'
 import {agentsRoot} from './paths.js'
 import {loadSkill} from './skill-loader.js'
 import type {AgentResult, ResearchInputs} from './types.js'
@@ -23,6 +25,13 @@ export async function runTrendScout(inputs: ResearchInputs): Promise<AgentResult
     ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
     : ''
 
+  // Inject deprioritization context from rejection history
+  const deprioritizer = new Deprioritizer(new AgentMemoryStore())
+  const deprioritizationContext = await deprioritizer.buildDeprioritizationContext('trend-scout')
+  const deprioritizationSection = deprioritizationContext
+    ? `\n\n${deprioritizationContext}`
+    : ''
+
   return executeAgent('trend-scout', {
     prompt: `Research current trends for brand "${inputs.brandName}" in domain "${inputs.productDomain}".
 Target audience: ${inputs.audienceType}
@@ -31,7 +40,7 @@ Timeframe: last ${timeframe} days
 
 Use your web search and research tools to find real, current trends.
 Produce a trend brief following your output format specification.`,
-    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}${deprioritizationSection}`,
     allowedTools: skill.tools,
     model: skill.model,
     outputSchema: trendBriefSchema,
@@ -52,6 +61,13 @@ export async function runCompetitorAnalyst(inputs: ResearchInputs): Promise<Agen
     ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
     : ''
 
+  // Inject deprioritization context from rejection history
+  const deprioritizer = new Deprioritizer(new AgentMemoryStore())
+  const deprioritizationContext = await deprioritizer.buildDeprioritizationContext('competitor-analyst')
+  const deprioritizationSection = deprioritizationContext
+    ? `\n\n${deprioritizationContext}`
+    : ''
+
   return executeAgent('competitor-analyst', {
     prompt: `Analyze competitor marketing strategies for brand "${inputs.brandName}" in domain "${inputs.productDomain}".
 Target audience: ${inputs.audienceType}
@@ -60,7 +76,7 @@ Timeframe: last ${timeframe} days
 
 Research competitor social media presence, posting frequency, engagement rates, and content types.
 Flag any viral competitor content. Produce a competitor report following your output format specification.`,
-    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}${deprioritizationSection}`,
     allowedTools: skill.tools,
     model: skill.model,
     outputSchema: competitorReportSchema,

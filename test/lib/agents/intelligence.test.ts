@@ -774,3 +774,132 @@ describe('runAudienceResearcher', () => {
     expect(callArgs.prompt).not.toContain('Competitor Data')
   })
 })
+
+describe('runTrendScout deprioritization integration', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.resetModules()
+  })
+
+  it('includes deprioritization context in system prompt when rejections exist', async () => {
+    // Mock AgentMemoryStore to return rejection entries — use a class so `new` works
+    vi.doMock('../../../src/lib/agents/memory-store.js', () => {
+      const state = {
+        agentName: 'trend-scout',
+        lastRunId: null,
+        lastRunAt: null,
+        entries: [
+          {
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            runId: 'rejection-test',
+            timestamp: '2026-03-01T10:00:00.000Z',
+            type: 'rejection',
+            content: JSON.stringify({
+              id: '550e8400-e29b-41d4-a716-446655440000',
+              contentItemId: 'item-1',
+              rejectedAngle: 'meditation benefits for corporate productivity',
+              rejectionReason: 'Too generic',
+              agentName: 'trend-scout',
+              timestamp: '2026-03-01T10:00:00.000Z',
+              keywords: ['meditation', 'benefits', 'corporate', 'productivity'],
+              confidence: 1.0,
+            }),
+            source: 'review-queue',
+            confidence: 1.0,
+          },
+        ],
+        metadata: {},
+      }
+      return {
+        AgentMemoryStore: class {
+          load = vi.fn().mockResolvedValue(state)
+        },
+      }
+    })
+
+    const mockQuery = createMockQuery([createSuccessMessage(validTrendBrief)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runTrendScout} = await import('../../../src/lib/agents/intelligence.js')
+    await runTrendScout(testInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).toContain('Previously Rejected Content Angles')
+    expect(callArgs.options.systemPrompt).toContain('meditation benefits for corporate productivity')
+    expect(callArgs.options.systemPrompt).toContain('DO NOT suggest content')
+  })
+
+  it('does not include deprioritization section when no rejections exist', async () => {
+    // Mock AgentMemoryStore to return empty state
+    vi.doMock('../../../src/lib/agents/memory-store.js', () => {
+      const state = {
+        agentName: 'trend-scout',
+        lastRunId: null,
+        lastRunAt: null,
+        entries: [],
+        metadata: {},
+      }
+      return {
+        AgentMemoryStore: class {
+          load = vi.fn().mockResolvedValue(state)
+        },
+      }
+    })
+
+    const mockQuery = createMockQuery([createSuccessMessage(validTrendBrief)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runTrendScout} = await import('../../../src/lib/agents/intelligence.js')
+    await runTrendScout(testInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).not.toContain('Previously Rejected Content Angles')
+  })
+
+  it('deprioritization context is appended to system prompt, not user prompt', async () => {
+    vi.doMock('../../../src/lib/agents/memory-store.js', () => {
+      const state = {
+        agentName: 'trend-scout',
+        lastRunId: null,
+        lastRunAt: null,
+        entries: [
+          {
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            runId: 'rejection-test',
+            timestamp: '2026-03-01T10:00:00.000Z',
+            type: 'rejection',
+            content: JSON.stringify({
+              id: '550e8400-e29b-41d4-a716-446655440000',
+              contentItemId: 'item-1',
+              rejectedAngle: 'competitor pricing comparison',
+              rejectionReason: 'Legal concerns',
+              agentName: 'trend-scout',
+              timestamp: '2026-03-01T10:00:00.000Z',
+              keywords: ['competitor', 'pricing', 'comparison'],
+              confidence: 1.0,
+            }),
+            source: 'review-queue',
+            confidence: 1.0,
+          },
+        ],
+        metadata: {},
+      }
+      return {
+        AgentMemoryStore: class {
+          load = vi.fn().mockResolvedValue(state)
+        },
+      }
+    })
+
+    const mockQuery = createMockQuery([createSuccessMessage(validTrendBrief)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runTrendScout} = await import('../../../src/lib/agents/intelligence.js')
+    await runTrendScout(testInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string; options: {systemPrompt: string}}
+    // Deprioritization should be in systemPrompt, NOT in prompt
+    expect(callArgs.options.systemPrompt).toContain('Previously Rejected Content Angles')
+    expect(callArgs.prompt).not.toContain('Previously Rejected Content Angles')
+  })
+})

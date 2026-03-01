@@ -175,3 +175,11 @@ export {
 export type {
   ContentItemAttribution,
 } from './content-item-schema.js'
+export {
+  rejectionPatternSchema,
+  rejectionMemorySchema,
+} from './rejection-schema.js'
+export type {
+  RejectionPattern,
+  RejectionMemory,
+} from './rejection-schema.js'
