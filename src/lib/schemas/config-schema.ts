@@ -9,11 +9,13 @@ export const brandVoiceSchema = z.object({
   communicationStyle: z.string().min(1).default('clear and direct'),
   brandPrinciples: z.array(z.string().min(1)).default([]),
   bannedPhrases: z.array(z.string().min(1)).default([]),
+  qualityThreshold: z.number().min(0).max(100).default(70),
 }).default({
   tone: 'professional',
   communicationStyle: 'clear and direct',
   brandPrinciples: [],
   bannedPhrases: [],
+  qualityThreshold: 70,
 })
 
 export type BrandVoiceConfig = z.infer<typeof brandVoiceSchema>

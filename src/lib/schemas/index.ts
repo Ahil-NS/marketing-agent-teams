@@ -133,3 +133,17 @@ export type {
   AbTestInputs,
   ContentVariation,
 } from './optimization-schema.js'
+export {
+  brandGuardianReviewSchema,
+  qualityGateResultSchema,
+  learnedPatternSchema,
+  brandGuardianOutputSchema,
+  brandGuardianInputsSchema,
+} from './quality-schema.js'
+export type {
+  BrandGuardianReview,
+  QualityGateResult,
+  LearnedPattern,
+  BrandGuardianOutput,
+  BrandGuardianInputs,
+} from './quality-schema.js'

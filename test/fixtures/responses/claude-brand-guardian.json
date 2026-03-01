@@ -1,0 +1,107 @@
+{
+  "reviews": [
+    {
+      "contentItemId": "content-1",
+      "qualityScore": 85,
+      "toneAlignment": 90,
+      "styleConsistency": 80,
+      "principleAdherence": 85,
+      "bannedPhraseViolations": [],
+      "issues": [
+        {
+          "category": "style",
+          "description": "Opening sentence could be more concise to match direct communication style",
+          "severity": "low",
+          "location": "first paragraph"
+        }
+      ],
+      "suggestions": [
+        {
+          "issue": "Opening sentence could be more concise",
+          "suggestedFix": "Replace 'In order to improve your wellness journey' with 'Improve your wellness journey'"
+        }
+      ]
+    },
+    {
+      "contentItemId": "content-2",
+      "qualityScore": 45,
+      "toneAlignment": 50,
+      "styleConsistency": 40,
+      "principleAdherence": 55,
+      "bannedPhraseViolations": ["guaranteed", "best in class"],
+      "issues": [
+        {
+          "category": "banned-phrase",
+          "description": "Contains banned phrase 'guaranteed'",
+          "severity": "high",
+          "location": "second sentence"
+        },
+        {
+          "category": "banned-phrase",
+          "description": "Contains banned phrase 'best in class'",
+          "severity": "high",
+          "location": "closing paragraph"
+        },
+        {
+          "category": "tone",
+          "description": "Tone is overly aggressive for a professional brand voice",
+          "severity": "medium"
+        }
+      ],
+      "suggestions": [
+        {
+          "issue": "Contains banned phrase 'guaranteed'",
+          "suggestedFix": "Replace 'guaranteed results' with 'proven approach'"
+        },
+        {
+          "issue": "Contains banned phrase 'best in class'",
+          "suggestedFix": "Replace 'best in class' with 'industry-leading'"
+        },
+        {
+          "issue": "Tone is overly aggressive",
+          "suggestedFix": "Soften calls-to-action using encouraging language rather than imperative commands"
+        }
+      ]
+    }
+  ],
+  "qualityGateResults": [
+    {
+      "contentItemId": "content-1",
+      "qualityScore": 85,
+      "threshold": 70,
+      "passed": true,
+      "blockedReasons": []
+    },
+    {
+      "contentItemId": "content-2",
+      "qualityScore": 45,
+      "threshold": 70,
+      "passed": false,
+      "blockedReasons": [
+        "Tone too aggressive for professional brand voice",
+        "Banned phrase 'guaranteed' detected",
+        "Banned phrase 'best in class' detected"
+      ]
+    }
+  ],
+  "overallAssessment": {
+    "averageScore": 65,
+    "totalReviewed": 2,
+    "totalPassed": 1,
+    "totalBlocked": 1
+  },
+  "learnedPatterns": [
+    {
+      "pattern": "User prefers conversational tone for Instagram posts over formal language",
+      "patternType": "tone-correction",
+      "confidence": 0.8,
+      "source": "content-review"
+    },
+    {
+      "pattern": "Replace superlative claims with evidence-based statements",
+      "patternType": "phrase-replacement",
+      "confidence": 0.9,
+      "source": "content-review"
+    }
+  ]
+}

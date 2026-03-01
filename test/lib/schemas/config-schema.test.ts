@@ -189,6 +189,91 @@ describe('brandVoiceSchema', () => {
     const mod = await import('../../../src/lib/schemas/config-schema.js')
     expect(mod.brandVoiceSchema).toBeDefined()
   })
+
+  it('accepts qualityThreshold field', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {
+        tone: 'professional',
+        communicationStyle: 'clear and direct',
+        brandPrinciples: [],
+        bannedPhrases: [],
+        qualityThreshold: 85,
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.brandVoice.qualityThreshold).toBe(85)
+    }
+  })
+
+  it('defaults qualityThreshold to 70 when omitted', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {
+        tone: 'friendly',
+        communicationStyle: 'conversational',
+        brandPrinciples: [],
+        bannedPhrases: [],
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.brandVoice.qualityThreshold).toBe(70)
+    }
+  })
+
+  it('defaults qualityThreshold to 70 when entire brandVoice omitted', () => {
+    const result = configSchema.safeParse(baseConfig)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.brandVoice.qualityThreshold).toBe(70)
+    }
+  })
+
+  it('rejects qualityThreshold below 0', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {qualityThreshold: -1},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects qualityThreshold above 100', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {qualityThreshold: 101},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts qualityThreshold at boundary 0', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {qualityThreshold: 0},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.brandVoice.qualityThreshold).toBe(0)
+    }
+  })
+
+  it('accepts qualityThreshold at boundary 100', () => {
+    const config = {
+      ...baseConfig,
+      brandVoice: {qualityThreshold: 100},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.brandVoice.qualityThreshold).toBe(100)
+    }
+  })
 })
 
 describe('agentTogglesSchema', () => {
