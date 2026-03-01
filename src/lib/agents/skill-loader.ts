@@ -244,6 +244,46 @@ export async function loadSkill(agentDir: string): Promise<SkillDefinition> {
 }
 
 /**
+ * Resolve an agent name (e.g., "trend-scout") to its directory path.
+ * Searches across all cluster directories under the agents root.
+ * Returns the full path to the agent directory containing SKILL.md.
+ */
+export async function resolveAgentDir(agentName: string): Promise<string> {
+  const agentsRoot = join(process.cwd(), 'src', 'agents')
+
+  let clusterEntries: import('node:fs').Dirent[]
+  try {
+    clusterEntries = await readdir(agentsRoot, {withFileTypes: true})
+  } catch {
+    throw new SkillLoadError(
+      agentsRoot,
+      'resolveAgentDir',
+      'SKILL_NOT_FOUND',
+      `Agents root directory not found at "${agentsRoot}"`,
+      'Ensure you are running from the project root directory',
+    )
+  }
+
+  for (const clusterEntry of clusterEntries.filter((e) => e.isDirectory())) {
+    const candidatePath = join(agentsRoot, clusterEntry.name, agentName)
+    try {
+      await access(join(candidatePath, 'SKILL.md'))
+      return candidatePath
+    } catch {
+      continue
+    }
+  }
+
+  throw new SkillLoadError(
+    agentsRoot,
+    agentName,
+    'SKILL_NOT_FOUND',
+    `No SKILL.md definition exists for agent "${agentName}" in src/agents/`,
+    'Run `mat agents list` to see available agents. Agent names use kebab-case (e.g., trend-scout, content-strategist)',
+  )
+}
+
+/**
  * Load all agent skills from the agents root directory.
  * Scans for <cluster>/<agent-name>/SKILL.md pattern.
  * Returns a Map keyed by agent name.

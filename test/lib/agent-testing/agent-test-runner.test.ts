@@ -8,6 +8,7 @@ import {AgentExecutionError} from '../../../src/lib/agents/errors.js'
 // Mock skill-loader
 vi.mock('../../../src/lib/agents/skill-loader.js', () => ({
   loadSkill: vi.fn(),
+  resolveAgentDir: vi.fn().mockResolvedValue('/mock/agents/intelligence/trend-scout'),
 }))
 
 // Mock agent-executor

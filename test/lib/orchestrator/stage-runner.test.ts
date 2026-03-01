@@ -8,6 +8,18 @@ vi.mock('../../../src/lib/agents/agent-executor.js', () => ({
   executeAgent: vi.fn(),
 }))
 
+// Mock skill-loader so stage-runner doesn't try to load real SKILL.md files
+vi.mock('../../../src/lib/agents/skill-loader.js', () => ({
+  resolveAgentDir: vi.fn().mockResolvedValue('/mock/agents/intelligence/trend-scout'),
+  loadSkill: vi.fn().mockResolvedValue({
+    name: 'mock-agent',
+    systemPrompt: 'Mock system prompt',
+    knowledgeContext: '',
+    tools: [],
+    model: 'haiku',
+  }),
+}))
+
 // Also mock the errors module since stage-runner imports AgentTimeoutError
 vi.mock('../../../src/lib/agents/errors.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../../src/lib/agents/errors.js')>()

@@ -68,7 +68,7 @@ Produce output as a JSON array with one `FactCheckReport` per content item:
         "confidence": 55,
         "evidence": "No primary source found for this specific statistic",
         "caveat": "According to internal surveys, approximately 90% of users...",
-        "sources": ["https://example.com/related-study"]
+        "sources": ["[source URL from web search]"]
       }
     ],
     "overallAccuracy": 72,

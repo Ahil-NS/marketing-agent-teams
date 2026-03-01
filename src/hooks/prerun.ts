@@ -17,7 +17,11 @@ import {MATError} from '../lib/utils/errors.js'
 
 const SKIP_AUTH_COMMANDS = new Set([
   'install', 'config', 'config:agents', 'config:platforms',
-  'config:voice', 'help',
+  'config:platforms:add', 'config:platforms:remove', 'config:voice',
+  'agents', 'agents:list', 'agents:validate', 'agents:lint', 'agents:trust',
+  'agents:add', 'agents:remove',
+  'review', 'review:show', 'review:approve', 'review:reject', 'review:edit',
+  'status', 'logs', 'attach', 'help',
 ])
 
 const BUDGET_CHECK_COMMANDS = new Set(['run', 'agents:test'])

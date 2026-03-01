@@ -1,3 +1,6 @@
+import {createLogger} from '../logging/logger.js'
+import type {Logger} from '../logging/logger.js'
+
 import {
   AllAgentsFailedError,
   PipelineExecutionError,
@@ -31,6 +34,7 @@ export class Orchestrator {
    * upstream StageExecutionResult objects to resolve agent inputs.
    */
   private stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {}
+  private logger: Logger | undefined
 
   constructor(
     private readonly config: OrchestratorConfig,
@@ -52,7 +56,13 @@ export class Orchestrator {
       {limit: config.budgetLimit},
       config.projectRoot,
     )
-    return new Orchestrator(config, stageRunner, sm, events)
+    const orchestrator = new Orchestrator(config, stageRunner, sm, events)
+    const matDir = `${config.projectRoot}/.mat`
+    orchestrator.logger = await createLogger({matDir, runId: sm.getRunId()})
+    await orchestrator.logger.info('orchestrator', `Pipeline created: ${sm.getRunId()}`, {
+      platforms: config.platforms, dryRun: config.dryRun, budgetLimit: config.budgetLimit,
+    })
+    return orchestrator
   }
 
   /**
@@ -76,6 +86,9 @@ export class Orchestrator {
     }
 
     const orchestrator = new Orchestrator(config, stageRunner, sm, events)
+    const matDir = `${config.projectRoot}/.mat`
+    orchestrator.logger = await createLogger({matDir, runId: sm.getRunId()})
+    await orchestrator.logger.info('orchestrator', `Pipeline resumed: ${sm.getRunId()}`)
     orchestrator.restoreStageResults(state)
     return orchestrator
   }
@@ -134,6 +147,7 @@ export class Orchestrator {
       }
 
       this.events?.onStageStart?.(stage)
+      await this.logger?.info('orchestrator', `Stage started: ${stage}`)
 
       // Build context for stage runner
       const context = this.buildStageRunnerContext()
@@ -143,9 +157,14 @@ export class Orchestrator {
 
       // Store typed results for downstream input resolution
       this.stageResults[stage] = executionResult
+      await this.logger?.info('orchestrator', `Stage completed: ${stage} (${executionResult.status})`, {
+        agentCount: Object.keys(executionResult.agentResults).length,
+        errors: executionResult.errors.length,
+      })
 
       // All agents failed: pipeline cannot continue
       if (executionResult.status === 'failed') {
+        await this.logger?.error('orchestrator', `All agents in stage '${stage}' failed`)
         const runId = this.stateMachine.getRunId()
         await this.stateMachine.fail({
           code: 'STAGE_ALL_AGENTS_FAILED',

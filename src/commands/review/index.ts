@@ -7,7 +7,9 @@ import {exportToCSV, exportToJSON, ReviewQueue} from '../../lib/review-queue/ind
 import type {ReviewFilter, ReviewItem} from '../../lib/review-queue/index.js'
 
 export default class Review extends Command {
+  static override args = {}
   static override description = 'View content review queue'
+  static override strict = true
 
   static enableJsonFlag = true
 

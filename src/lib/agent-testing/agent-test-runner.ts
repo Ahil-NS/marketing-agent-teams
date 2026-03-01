@@ -18,8 +18,9 @@ export async function runAgentTest(
 
   try {
     // Dynamic import to avoid hard dependency on skill-loader at module level
-    const {loadSkill} = await import('../agents/skill-loader.js')
-    skillDef = await loadSkill(agentName)
+    const {loadSkill, resolveAgentDir} = await import('../agents/skill-loader.js')
+    const agentDir = await resolveAgentDir(agentName)
+    skillDef = await loadSkill(agentDir)
   } catch (error) {
     if (error instanceof AgentNotFoundError) {
       throw error

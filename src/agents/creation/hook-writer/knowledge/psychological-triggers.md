@@ -136,7 +136,7 @@
 **Patterns**:
 - "I just discovered something about [topic] that nobody talks about"
 - "This changes everything about how we think about [topic]"
-- "Forget everything you know about [topic] — here's the truth"
+- "Set aside everything you know about [topic] — here's the truth"
 - "The counterintuitive approach to [goal] that actually works"
 
 **Platform-appropriate usage**:

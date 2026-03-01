@@ -2,6 +2,8 @@ import {z} from 'zod'
 
 import {executeAgent} from '../agents/agent-executor.js'
 import {AgentTimeoutError} from '../agents/errors.js'
+import {resolveAgentDir} from '../agents/skill-loader.js'
+import {loadSkill} from '../agents/skill-loader.js'
 import type {MATError} from '../utils/errors.js'
 
 import {resolveInputs} from './input-resolver.js'
@@ -196,11 +198,28 @@ export class StageRunner {
   ): Promise<StageAgentResult> {
     const startTime = Date.now()
 
+    // Load SKILL.md for agent (systemPrompt, tools, model)
+    let systemPrompt = ''
+    let allowedTools: string[] = []
+    let model: 'haiku' | 'sonnet' = 'haiku'
+    try {
+      const agentDir = await resolveAgentDir(assignment.agentName)
+      const skill = await loadSkill(agentDir)
+      systemPrompt = skill.systemPrompt
+      if (skill.knowledgeContext) {
+        systemPrompt += '\n\n---\n\n' + skill.knowledgeContext
+      }
+      allowedTools = skill.tools ?? []
+      model = skill.model ?? 'haiku'
+    } catch {
+      // Skill load failure — run with empty prompt (agent will still attempt)
+    }
+
     const agentPromise = executeAgent(assignment.agentName, {
       prompt: JSON.stringify(assignment.inputs),
-      systemPrompt: '', // Placeholder — skill-loader (Story 2.9) provides this
-      allowedTools: [], // Placeholder — skill-loader (Story 2.9) provides this
-      model: 'haiku', // Placeholder — skill-loader (Story 2.9) provides this
+      systemPrompt,
+      allowedTools,
+      model,
       outputSchema: z.record(z.string(), z.unknown()), // Permissive — agent-specific schemas applied downstream
     })
 

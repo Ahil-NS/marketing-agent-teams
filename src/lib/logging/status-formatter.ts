@@ -63,8 +63,8 @@ export function formatRunSummary(runs: PipelineRun[]): string {
   if (runs.length === 0) return 'No pipeline runs found. Run `mat run` to start a pipeline.'
 
   const lines: string[] = ['Pipeline Run History:', '']
-  lines.push('ID'.padEnd(40) + 'Status'.padEnd(12) + 'Started'.padEnd(22) + 'Stages')
-  lines.push('-'.repeat(80))
+  lines.push('ID'.padEnd(40) + 'Status'.padEnd(12) + 'Started'.padEnd(28) + 'Stages')
+  lines.push('-'.repeat(88))
   for (const run of runs) {
     const completedStages = STAGE_ORDER.filter(
       (s) => run.stages[s]?.status === 'completed',
@@ -72,7 +72,7 @@ export function formatRunSummary(runs: PipelineRun[]): string {
     lines.push(
       run.id.padEnd(40) +
       run.status.padEnd(12) +
-      run.startedAt.padEnd(22) +
+      run.startedAt.padEnd(28) +
       `${completedStages}/${STAGE_ORDER.length}`,
     )
   }

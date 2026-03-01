@@ -4,8 +4,10 @@ import {readConfig} from '../../lib/config/index.js'
 import type {Config as ProjectConfig} from '../../lib/schemas/index.js'
 
 export default class ConfigIndex extends Command {
+  static override args = {}
   static override description = 'Display current configuration'
   static override enableJsonFlag = true
+  static override strict = true
 
   async run(): Promise<ProjectConfig> {
     const {validated} = await readConfig(process.cwd())

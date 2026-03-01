@@ -1,6 +1,6 @@
 {
   "name": "marketing-agent-teams",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "AI-powered marketing automation platform with 23 agents across 7 clusters",
   "type": "module",
   "bin": {
@@ -28,6 +28,8 @@
   "oclif": {
     "bin": "mat",
     "dirname": "mat",
+    "flexibleTaxonomy": true,
+    "topicSeparator": " ",
     "commands": "./dist/commands",
     "hooks": {
       "init": "./dist/hooks/init",
