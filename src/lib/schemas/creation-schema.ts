@@ -139,6 +139,156 @@ export const tiktokContentPackageSchema = z.object({
 
 export type TikTokContentPackage = z.infer<typeof tiktokContentPackageSchema>
 
+// ── Sub-schemas for Facebook Content Package ─────────────────────────────────
+
+const facebookStoryFrameSchema = z.object({
+  frameNumber: z.number().int().positive(),
+  content: z.string().min(1),
+  visualDescription: z.string().min(1),
+  duration: z.number().positive().max(20),
+})
+
+const facebookPostSchema = z.object({
+  postId: z.string().min(1),
+  copy: z.string().min(5),
+  format: z.enum(['text', 'image', 'video', 'carousel', 'link']),
+  visualDescription: z.string().min(1),
+  engagementHook: z.string().min(5),
+  targetGroups: z.array(z.string()),
+})
+
+const facebookStorySchema = z.object({
+  storyId: z.string().min(1),
+  frames: z.array(facebookStoryFrameSchema).min(1),
+  interactions: z.array(z.string()).min(1),
+  duration: z.number().positive(),
+})
+
+const facebookVariationSchema = z.object({
+  postId: z.string().min(1),
+  altCopy: z.string().min(5),
+  altVisual: z.string(),
+  rationale: z.string().min(5),
+})
+
+const facebookPostingScheduleEntrySchema = z.object({
+  contentId: z.string().min(1),
+  date: z.string(),
+  time: z.string(),
+  timezone: z.string(),
+})
+
+const facebookMetadataSchema = z.object({
+  postingSchedule: z.array(facebookPostingScheduleEntrySchema),
+  groupTargets: z.array(z.string()),
+  boostRecommendations: z.string().min(1),
+  crossPostStrategy: z.string().min(1),
+})
+
+// ── FacebookContentPackage (output of facebook-creator) ─────────────────────
+
+export const facebookContentPackageSchema = z.object({
+  posts: z.array(facebookPostSchema).min(1),
+  stories: z.array(facebookStorySchema),
+  variations: z.array(facebookVariationSchema),
+  metadata: facebookMetadataSchema,
+  generatedBy: z.string(),
+  campaignId: z.string(),
+})
+
+export type FacebookContentPackage = z.infer<typeof facebookContentPackageSchema>
+
+// ── Sub-schemas for Instagram Content Package ────────────────────────────────
+
+const instagramPostSchema = z.object({
+  postId: z.string().min(1),
+  caption: z.string().min(10),
+  hashtags: z.array(z.string()).min(1),
+  visualConcept: z.string().min(10),
+  format: z.enum(['static', 'carousel', 'reel']),
+  artDirection: z.string().min(5),
+})
+
+const instagramReelSchema = z.object({
+  reelId: z.string().min(1),
+  hook: z.string().min(5),
+  script: z.string().min(10),
+  musicSuggestion: z.string().min(1),
+  visualDirections: z.string().min(10),
+  duration: z.number().positive().max(90),
+})
+
+const instagramStoryFrameSchema = z.object({
+  frameNumber: z.number().int().positive(),
+  content: z.string().min(1),
+  visualDescription: z.string().min(1),
+  duration: z.number().positive(),
+})
+
+const instagramStorySchema = z.object({
+  storyId: z.string().min(1),
+  frames: z.array(instagramStoryFrameSchema).min(1),
+  stickers: z.array(z.string()),
+  interactions: z.array(z.string()),
+})
+
+const instagramCarouselSlideSchema = z.object({
+  slideNumber: z.number().int().positive(),
+  content: z.string().min(1),
+  visualDescription: z.string().min(1),
+})
+
+const instagramCarouselSchema = z.object({
+  carouselId: z.string().min(1),
+  slides: z.array(instagramCarouselSlideSchema).min(2),
+  swipeNarrative: z.string().min(5),
+  coverSlide: z.string().min(5),
+})
+
+const instagramImagePromptSchema = z.object({
+  postId: z.string().min(1),
+  promptText: z.string().min(20),
+  style: z.enum(['photography', 'illustration', '3d-render', 'graphic-design']),
+  aspectRatio: z.enum(['1:1', '4:5', '9:16']),
+  generator: z.enum(['flux', 'ideogram', 'gpt-image']),
+})
+
+const instagramVariationSchema = z.object({
+  postId: z.string().min(1),
+  altCaption: z.string().min(10),
+  altVisual: z.string(),
+  rationale: z.string().min(5),
+})
+
+const instagramPostingScheduleEntrySchema = z.object({
+  contentId: z.string().min(1),
+  date: z.string(),
+  time: z.string(),
+  timezone: z.string(),
+})
+
+const instagramMetadataSchema = z.object({
+  postingSchedule: z.array(instagramPostingScheduleEntrySchema),
+  hashtagStrategy: z.string().min(1),
+  aestheticNotes: z.string().min(1),
+})
+
+// ── InstagramContentPackage (output of instagram-creator) ───────────────────
+
+export const instagramContentPackageSchema = z.object({
+  posts: z.array(instagramPostSchema).min(1),
+  reels: z.array(instagramReelSchema),
+  stories: z.array(instagramStorySchema),
+  carousels: z.array(instagramCarouselSchema),
+  imagePrompts: z.array(instagramImagePromptSchema),
+  variations: z.array(instagramVariationSchema),
+  metadata: instagramMetadataSchema,
+  generatedBy: z.string(),
+  campaignId: z.string(),
+})
+
+export type InstagramContentPackage = z.infer<typeof instagramContentPackageSchema>
+
 // ── ContentItem (canonical content unit for downstream pipeline stages) ──────
 
 export const contentItemSchema = z.object({
@@ -188,11 +338,14 @@ const stageMetadataSchema = z.object({
   agentsExecuted: z.array(z.string()),
   agentsSucceeded: z.array(z.string()),
   agentsFailed: z.array(z.string()),
+  agentErrors: z.record(z.string(), z.string()).optional(),
 })
 
 export const creationStageOutputSchema = z.object({
   redditPackage: redditContentPackageSchema.nullable(),
   tiktokPackage: tiktokContentPackageSchema.nullable(),
+  facebookPackage: facebookContentPackageSchema.nullable(),
+  instagramPackage: instagramContentPackageSchema.nullable(),
   contentItems: z.array(contentItemSchema),
   stageMetadata: stageMetadataSchema,
 })

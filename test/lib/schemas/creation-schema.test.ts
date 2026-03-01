@@ -3,6 +3,8 @@ import {describe, it, expect} from 'vitest'
 import {
   redditContentPackageSchema,
   tiktokContentPackageSchema,
+  facebookContentPackageSchema,
+  instagramContentPackageSchema,
   contentItemSchema,
   creationInputsSchema,
   creationStageOutputSchema,
@@ -10,6 +12,8 @@ import {
 
 import validRedditContent from '../../fixtures/responses/claude-reddit-content.json'
 import validTiktokContent from '../../fixtures/responses/claude-tiktok-content.json'
+import validFacebookContent from '../../fixtures/responses/claude-facebook-content.json'
+import validInstagramContent from '../../fixtures/responses/claude-instagram-content.json'
 import validCampaignPlan from '../../fixtures/responses/claude-campaign-plan.json'
 import validContentCalendar from '../../fixtures/responses/claude-content-calendar.json'
 import validChannelOptimization from '../../fixtures/responses/claude-channel-optimization.json'
@@ -235,6 +239,8 @@ describe('creationStageOutputSchema', () => {
     const output = {
       redditPackage: validRedditContent,
       tiktokPackage: validTiktokContent,
+      facebookPackage: validFacebookContent,
+      instagramPackage: validInstagramContent,
       contentItems: [{
         itemId: 'post-001',
         platform: 'reddit',
@@ -249,8 +255,8 @@ describe('creationStageOutputSchema', () => {
         createdAt: '2026-03-01T10:00:00Z',
       }],
       stageMetadata: {
-        agentsExecuted: ['reddit-creator', 'tiktok-creator'],
-        agentsSucceeded: ['reddit-creator', 'tiktok-creator'],
+        agentsExecuted: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
+        agentsSucceeded: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
         agentsFailed: [],
       },
     }
@@ -262,11 +268,13 @@ describe('creationStageOutputSchema', () => {
     const output = {
       redditPackage: null,
       tiktokPackage: validTiktokContent,
+      facebookPackage: validFacebookContent,
+      instagramPackage: null,
       contentItems: [],
       stageMetadata: {
-        agentsExecuted: ['reddit-creator', 'tiktok-creator'],
-        agentsSucceeded: ['tiktok-creator'],
-        agentsFailed: ['reddit-creator'],
+        agentsExecuted: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
+        agentsSucceeded: ['tiktok-creator', 'facebook-creator'],
+        agentsFailed: ['reddit-creator', 'instagram-creator'],
       },
     }
     const result = creationStageOutputSchema.safeParse(output)
@@ -277,14 +285,196 @@ describe('creationStageOutputSchema', () => {
     const output = {
       redditPackage: null,
       tiktokPackage: null,
+      facebookPackage: null,
+      instagramPackage: null,
       contentItems: [],
       stageMetadata: {
-        agentsExecuted: ['reddit-creator', 'tiktok-creator'],
+        agentsExecuted: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
         agentsSucceeded: [],
-        agentsFailed: ['reddit-creator', 'tiktok-creator'],
+        agentsFailed: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
       },
     }
     const result = creationStageOutputSchema.safeParse(output)
     expect(result.success).toBe(true)
+  })
+
+  it('validates output with all four platforms', () => {
+    const output = {
+      redditPackage: validRedditContent,
+      tiktokPackage: validTiktokContent,
+      facebookPackage: validFacebookContent,
+      instagramPackage: validInstagramContent,
+      contentItems: [],
+      stageMetadata: {
+        agentsExecuted: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
+        agentsSucceeded: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
+        agentsFailed: [],
+      },
+    }
+    const result = creationStageOutputSchema.safeParse(output)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.redditPackage).not.toBeNull()
+      expect(result.data.tiktokPackage).not.toBeNull()
+      expect(result.data.facebookPackage).not.toBeNull()
+      expect(result.data.instagramPackage).not.toBeNull()
+    }
+  })
+})
+
+describe('facebookContentPackageSchema', () => {
+  it('validates correct structure', () => {
+    const result = facebookContentPackageSchema.safeParse(validFacebookContent)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.posts).toHaveLength(2)
+      expect(result.data.posts[0].postId).toBe('fb-post-001')
+      expect(result.data.posts[0].format).toBe('text')
+      expect(result.data.posts[0].engagementHook.length).toBeGreaterThan(0)
+      expect(result.data.posts[0].targetGroups.length).toBeGreaterThanOrEqual(1)
+      expect(result.data.stories).toHaveLength(1)
+      expect(result.data.stories[0].frames.length).toBeGreaterThanOrEqual(1)
+      expect(result.data.stories[0].interactions.length).toBeGreaterThanOrEqual(1)
+      expect(result.data.variations.length).toBeGreaterThanOrEqual(1)
+      expect(result.data.metadata.groupTargets.length).toBeGreaterThanOrEqual(1)
+      expect(result.data.metadata.boostRecommendations.length).toBeGreaterThan(0)
+      expect(result.data.metadata.crossPostStrategy.length).toBeGreaterThan(0)
+      expect(result.data.generatedBy).toBe('facebook-creator')
+      expect(result.data.campaignId).toBe('plan-2026-03-wellness-spring')
+    }
+  })
+
+  it('rejects missing required fields (posts)', () => {
+    const invalid = {...validFacebookContent, posts: undefined}
+    const result = facebookContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing required fields (metadata)', () => {
+    const invalid = {...validFacebookContent, metadata: undefined}
+    const result = facebookContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty posts array', () => {
+    const invalid = {...validFacebookContent, posts: []}
+    const result = facebookContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid post format', () => {
+    const invalid = {
+      ...validFacebookContent,
+      posts: [{...validFacebookContent.posts[0], format: 'stories'}],
+    }
+    const result = facebookContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('validates group targeting in metadata', () => {
+    const result = facebookContentPackageSchema.safeParse(validFacebookContent)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.metadata.groupTargets).toContain('wellnesscommunity')
+      expect(result.data.posts[0].targetGroups.length).toBeGreaterThanOrEqual(1)
+    }
+  })
+})
+
+describe('instagramContentPackageSchema', () => {
+  it('validates correct structure', () => {
+    const result = instagramContentPackageSchema.safeParse(validInstagramContent)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.posts).toHaveLength(2)
+      expect(result.data.posts[0].postId).toBe('ig-post-001')
+      expect(result.data.posts[0].caption.length).toBeGreaterThan(0)
+      expect(result.data.posts[0].hashtags.length).toBeGreaterThanOrEqual(1)
+      expect(result.data.posts[0].format).toBe('carousel')
+      expect(result.data.posts[0].artDirection.length).toBeGreaterThan(0)
+      expect(result.data.reels).toHaveLength(1)
+      expect(result.data.reels[0].hook.length).toBeGreaterThan(0)
+      expect(result.data.reels[0].script.length).toBeGreaterThan(0)
+      expect(result.data.reels[0].musicSuggestion.length).toBeGreaterThan(0)
+      expect(result.data.stories).toHaveLength(1)
+      expect(result.data.carousels).toHaveLength(1)
+      expect(result.data.carousels[0].slides.length).toBeGreaterThanOrEqual(2)
+      expect(result.data.imagePrompts).toHaveLength(2)
+      expect(result.data.imagePrompts[0].promptText.length).toBeGreaterThanOrEqual(20)
+      expect(result.data.imagePrompts[0].style).toBe('photography')
+      expect(result.data.imagePrompts[0].aspectRatio).toBe('4:5')
+      expect(result.data.imagePrompts[0].generator).toBe('flux')
+      expect(result.data.variations.length).toBeGreaterThanOrEqual(1)
+      expect(result.data.metadata.hashtagStrategy.length).toBeGreaterThan(0)
+      expect(result.data.metadata.aestheticNotes.length).toBeGreaterThan(0)
+      expect(result.data.generatedBy).toBe('instagram-creator')
+      expect(result.data.campaignId).toBe('plan-2026-03-wellness-spring')
+    }
+  })
+
+  it('rejects missing required fields (posts)', () => {
+    const invalid = {...validInstagramContent, posts: undefined}
+    const result = instagramContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing required fields (metadata)', () => {
+    const invalid = {...validInstagramContent, metadata: undefined}
+    const result = instagramContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty posts array', () => {
+    const invalid = {...validInstagramContent, posts: []}
+    const result = instagramContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid post format', () => {
+    const invalid = {
+      ...validInstagramContent,
+      posts: [{...validInstagramContent.posts[0], format: 'video'}],
+    }
+    const result = instagramContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid image prompt style', () => {
+    const invalid = {
+      ...validInstagramContent,
+      imagePrompts: [{...validInstagramContent.imagePrompts[0], style: 'abstract'}],
+    }
+    const result = instagramContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid image prompt aspect ratio', () => {
+    const invalid = {
+      ...validInstagramContent,
+      imagePrompts: [{...validInstagramContent.imagePrompts[0], aspectRatio: '16:9'}],
+    }
+    const result = instagramContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid image prompt generator', () => {
+    const invalid = {
+      ...validInstagramContent,
+      imagePrompts: [{...validInstagramContent.imagePrompts[0], generator: 'dalle'}],
+    }
+    const result = instagramContentPackageSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('includes Reels scripts and image prompts', () => {
+    const result = instagramContentPackageSchema.safeParse(validInstagramContent)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.reels[0].hook).toBeTruthy()
+      expect(result.data.reels[0].script).toBeTruthy()
+      expect(result.data.reels[0].duration).toBeGreaterThan(0)
+      expect(result.data.imagePrompts[0].promptText.length).toBeGreaterThanOrEqual(20)
+      expect(result.data.imagePrompts[0].generator).toBeTruthy()
+    }
   })
 })

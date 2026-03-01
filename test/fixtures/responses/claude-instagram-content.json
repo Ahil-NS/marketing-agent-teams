@@ -1,0 +1,158 @@
+{
+  "posts": [
+    {
+      "postId": "ig-post-001",
+      "caption": "The one thing nobody tells you about building habits:\n\nIt's not about motivation. It's not about discipline.\n\nIt's about making the habit so small you can't say no.\n\n5 minutes of journaling. That's it. That's the start.\n\n90 days later, I'm sleeping better, feeling calmer, and actually wanting to wake up.\n\nWhat's one tiny habit that changed everything for you? 👇",
+      "hashtags": ["#morningroutine", "#wellnesstips", "#healthyhabits", "#selfimprovement", "#journaling", "#mindfulness", "#wellnessjourney", "#morningmotivation", "#habitbuilding", "#mentalwellness", "#selfcare", "#personaldevelopment", "#dailyhabits", "#growthmindset", "#WellnessApp", "#mindfulmornings", "#healthyliving", "#mentalhealthmatters", "#routinebuilding", "#smallchangesbigresults", "#morningritual"],
+      "visualConcept": "Person sitting cross-legged on a bed in warm morning light, writing in a leather journal. Shallow depth of field, sunlight creating warm amber tones. Clean, minimal bedroom setting. Mood: peaceful, intentional.",
+      "format": "carousel",
+      "artDirection": "Warm earth tones (amber, cream, sage green). Clean sans-serif typography (Inter or DM Sans). Consistent margins and padding. Each slide has one key message. Brand accent color: sage green for highlights."
+    },
+    {
+      "postId": "ig-post-002",
+      "caption": "Stop tracking your steps. Start tracking your mood.\n\nI tracked my mood for 30 days and discovered something surprising:\n\nTuesdays and Wednesdays were my worst days. Every. Single. Week.\n\nTurns out it was my meeting-heavy schedule draining me.\n\nOnce I could SEE the pattern, I could fix it.\n\nSave this as your reminder to track what actually matters 💾",
+      "hashtags": ["#mentalhealthawareness", "#moodtracking", "#selfawareness", "#wellnesstips", "#mentalhealthmatters", "#therapytips", "#mindfulness", "#emotionalintelligence", "#selfcaretips", "#burnoutrecovery", "#worklifebalance", "#WellnessApp", "#mindfulmoments", "#innerwork", "#healingjourney", "#mentalhealthadvocate", "#selfhelptools", "#dailywellness", "#psychologyoftiktok", "#mentalhealthtips", "#emotionalwellness"],
+      "visualConcept": "Data visualization showing a 30-day mood tracking chart with clear patterns visible. Clean, modern design with color-coded days. Highlighted problem days (Tues/Wed) in a contrasting color. Bottom: 'What's YOUR pattern?'",
+      "format": "static",
+      "artDirection": "Clean data visualization style. Background: off-white (#F8F6F3). Chart colors: sage green for good days, coral for difficult days, grey for neutral. Sans-serif font (Inter). Minimal decorative elements. Professional but approachable."
+    }
+  ],
+  "reels": [
+    {
+      "reelId": "ig-reel-001",
+      "hook": "I tried 3 simple habits for 90 days — here's the truth",
+      "script": "[0-2s] Text on screen: 'I tried 3 habits for 90 days.' Close-up face, genuine expression. [3-8s] Cut to overhead journal shot: '1. Journal 5 minutes.' Hand writing in journal. [9-14s] Walking shot outdoors: '2. Walk 10 minutes.' Golden hour lighting. [15-20s] Kitchen shot: '3. Water before coffee.' Pouring water, coffee in background. [21-25s] Side-by-side graphic: 'Sleep score: 62 → 78.' Genuine surprised expression. [26-30s] Face to camera: 'The hardest part? Week 3. But it gets easier.' Follow CTA.",
+      "musicSuggestion": "Trending lo-fi morning routine audio — soft, warm, not distracting. Something with gentle piano or acoustic guitar. If trending audio matches: 'That Morning Feeling remix 2026'.",
+      "visualDirections": "Open with close-up face shot, warm morning light from window. Cut to overhead desk shot (journal POV). Transition to outdoor walking scene, golden hour. Kitchen scene with clean countertop. Side-by-side data graphic (clean, minimal). End on medium face shot with genuine smile. All shots: warm color grading, shallow depth of field, natural light only.",
+      "duration": 30
+    }
+  ],
+  "stories": [
+    {
+      "storyId": "ig-story-001",
+      "frames": [
+        {
+          "frameNumber": 1,
+          "content": "Morning routine check ✅",
+          "visualDescription": "Bold white text on sage green background, energy emoji, casual feel",
+          "duration": 3
+        },
+        {
+          "frameNumber": 2,
+          "content": "Which habit should I add next?",
+          "visualDescription": "Poll sticker on warm gradient background (cream to amber)",
+          "duration": 5
+        },
+        {
+          "frameNumber": 3,
+          "content": "My 3 non-negotiables",
+          "visualDescription": "Numbered list on clean white background with sage green accents",
+          "duration": 5
+        },
+        {
+          "frameNumber": 4,
+          "content": "What's YOUR morning non-negotiable?",
+          "visualDescription": "Question sticker on lifestyle photo background (soft focus morning scene)",
+          "duration": 5
+        }
+      ],
+      "stickers": ["poll", "question"],
+      "interactions": ["poll: Cold shower vs Hot shower?", "question: What's your morning non-negotiable?"]
+    }
+  ],
+  "carousels": [
+    {
+      "carouselId": "ig-carousel-001",
+      "slides": [
+        {
+          "slideNumber": 1,
+          "content": "3 Morning Habits That Changed My Life",
+          "visualDescription": "Bold title text (sage green on cream background), 'Swipe →' indicator at bottom, minimalist design"
+        },
+        {
+          "slideNumber": 2,
+          "content": "Habit 1: Journal for 5 Minutes\n\nNot fancy. Just 'What do I want today?'\nThis was the gateway habit.",
+          "visualDescription": "Left-aligned text with journal icon. Sage green accent bar. Clean typography."
+        },
+        {
+          "slideNumber": 3,
+          "content": "Habit 2: Walk for 10 Minutes\n\nNo music. No podcast. Just walking.\nThis cleared my head better than meditation.",
+          "visualDescription": "Left-aligned text with walking icon. Consistent layout from slide 2. Earth tone accent."
+        },
+        {
+          "slideNumber": 4,
+          "content": "Habit 3: Water Before Coffee\n\nHarder than it sounds.\nBut my brain thanked me.",
+          "visualDescription": "Left-aligned text with water drop icon. Same template as previous slides."
+        },
+        {
+          "slideNumber": 5,
+          "content": "90 Days Later:\n• Sleep score: 62 → 78\n• Anxiety: down significantly\n• Morning motivation: completely different",
+          "visualDescription": "Results card with upward trend icon. Highlight numbers in sage green. Clean data presentation."
+        },
+        {
+          "slideNumber": 6,
+          "content": "The key: Make it so easy you can't say no.\n\n💾 Save this for your next Monday.\n📲 Share with someone who needs this.",
+          "visualDescription": "CTA slide with emoji accents. Slightly different background (sage green with cream text). Follow prompt at bottom."
+        }
+      ],
+      "swipeNarrative": "Hook (promise of transformation) → 3 specific habits with personal context → Results data → CTA (save + share). Each slide builds curiosity for the next.",
+      "coverSlide": "Bold 'Swipe →' with title '3 Morning Habits That Changed My Life'. Warm earth tone background, clean sans-serif font, miniature icons for journal/walk/water. Design for maximum thumb-stop in the feed."
+    }
+  ],
+  "imagePrompts": [
+    {
+      "postId": "ig-post-001",
+      "promptText": "A person in their late 20s sitting cross-legged on a bed in a bright modern bedroom, writing in a leather-bound journal. Warm golden morning sunlight streams through sheer linen curtains, creating soft amber lens flares. Earth-tone color palette: cream bedding, warm wood furniture, sage green plant in background. Editorial photography style, shallow depth of field focused on hands and journal. Mood: peaceful, intentional, calm morning energy. 4:5 portrait aspect ratio, high resolution.",
+      "style": "photography",
+      "aspectRatio": "4:5",
+      "generator": "flux"
+    },
+    {
+      "postId": "ig-post-002",
+      "promptText": "Clean data visualization infographic showing a 30-day mood tracking chart. X-axis: days of week repeating 4 times. Y-axis: mood score 1-10. Line chart with dots at data points. Tuesdays and Wednesdays highlighted in coral/red, other days in sage green. Background: off-white (#F8F6F3). Modern sans-serif font (Inter). Bottom text: 'What's YOUR pattern?' in small type. Minimal decorative elements, professional but approachable aesthetic. 1:1 square aspect ratio.",
+      "style": "graphic-design",
+      "aspectRatio": "1:1",
+      "generator": "ideogram"
+    }
+  ],
+  "variations": [
+    {
+      "postId": "ig-post-001",
+      "altCaption": "I stopped doing complicated morning routines.\n\nHere's my embarrassingly simple version:\n\n📓 Journal 5 min\n🚶 Walk 10 min\n💧 Water before coffee\n\n90 days later: better sleep, less anxiety, actually enjoying mornings.\n\nThe counterintuitive lesson? Doing less consistently beats doing more inconsistently.\n\nWhat's YOUR embarrassingly simple habit? 👇",
+      "altVisual": "Overhead flat-lay on a wooden surface: leather journal, glass of water, sneakers, and a small succulent. Warm morning light from the side. Clean, minimal aesthetic with natural textures.",
+      "rationale": "Tests a self-deprecating angle ('embarrassingly simple') which creates relatability. Flat-lay visual format is highly save-worthy on Instagram. CTA invites personal Stories which drives comment length."
+    },
+    {
+      "postId": "ig-post-002",
+      "altCaption": "Your mood has a pattern. You just can't see it yet.\n\nI tracked mine for 30 days and discovered my Tuesdays were consistently terrible.\n\nNot random. Not unlucky. Just too many meetings.\n\nOnce I could see it, I could fix it.\n\nThe data doesn't lie. Start tracking. 📊\n\n💾 Save this as your reminder.",
+      "altVisual": "Phone screen showing a mood tracking app with a weekly view. Subtle animation suggestion: highlights pulsing on problem days. Dark mode UI with sage green accent. Professional tech aesthetic.",
+      "rationale": "Tests a mystery/curiosity hook ('You just can't see it yet'). Phone mockup visual feels more actionable and modern. Save-prompt CTA optimized for the algorithm."
+    }
+  ],
+  "metadata": {
+    "postingSchedule": [
+      {
+        "contentId": "ig-post-001",
+        "date": "2026-04-15",
+        "time": "08:00",
+        "timezone": "EST"
+      },
+      {
+        "contentId": "ig-post-002",
+        "date": "2026-04-17",
+        "time": "12:00",
+        "timezone": "EST"
+      },
+      {
+        "contentId": "ig-reel-001",
+        "date": "2026-04-16",
+        "time": "07:30",
+        "timezone": "EST"
+      }
+    ],
+    "hashtagStrategy": "Mix of 3-5 broad (1M+ posts) + 10-15 niche (10K-500K) + 2-3 brand + 2-3 trending/seasonal. Total 20-25 per post. Rotate hashtag sets every 2-3 posts to avoid shadow-banning. Place hashtags in first comment for cleaner caption appearance.",
+    "aestheticNotes": "Campaign uses warm earth tones (amber, cream, sage green) across all posts. Clean sans-serif typography (Inter font family). Grid alternates between lifestyle photography and clean graphic/data posts. Consistent margins and visual weight across all carousel slides."
+  },
+  "generatedBy": "instagram-creator",
+  "campaignId": "plan-2026-03-wellness-spring"
+}

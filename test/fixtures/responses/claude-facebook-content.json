@@ -1,0 +1,76 @@
+{
+  "posts": [
+    {
+      "postId": "fb-post-001",
+      "copy": "Morning routines don't have to be complicated. After 90 days of doing just 3 simple things every morning, here's what changed for me 👇\n\nWhat's your go-to morning habit? Drop it below — I'm genuinely curious what works for you.",
+      "format": "text",
+      "visualDescription": "No visual needed for text-only post. If boosted, use a warm-toned lifestyle photo of someone journaling at a sunlit desk.",
+      "engagementHook": "What's your go-to morning habit? Drop it below — I'm genuinely curious what works for you.",
+      "targetGroups": ["wellnesscommunity", "morningroutineclub"]
+    },
+    {
+      "postId": "fb-post-002",
+      "copy": "Mental Health Awareness Month reminder: the smallest changes often make the biggest difference.\n\nFor me, it was tracking my mood patterns instead of just 'feeling bad' generally. Once I could SEE the patterns, I could actually do something about them.",
+      "format": "image",
+      "visualDescription": "Infographic showing a simple mood tracking chart over 30 days. Clean design with brand colors (sage green, warm beige). Chart shows upward trend line. Bottom text: 'Small changes. Big impact.' Include WellnessApp subtle logo in corner.",
+      "engagementHook": "What small change has made the biggest difference for your mental health? I'd love to hear your experience.",
+      "targetGroups": ["mentalhealthsupport", "wellnesscommunity"]
+    }
+  ],
+  "stories": [
+    {
+      "storyId": "fb-story-001",
+      "frames": [
+        {
+          "frameNumber": 1,
+          "content": "Quick question for you 👇",
+          "visualDescription": "Bold white text on brand sage green background, casual handwritten font style",
+          "duration": 3
+        },
+        {
+          "frameNumber": 2,
+          "content": "What's your #1 morning habit?",
+          "visualDescription": "Poll sticker on a warm-toned background with emoji accents",
+          "duration": 5
+        },
+        {
+          "frameNumber": 3,
+          "content": "My top 3: Journal, Walk, Water before coffee",
+          "visualDescription": "Numbered list on calming gradient background (cream to sage green)",
+          "duration": 5
+        }
+      ],
+      "interactions": ["poll", "question"],
+      "duration": 13
+    }
+  ],
+  "variations": [
+    {
+      "postId": "fb-post-001",
+      "altCopy": "I stopped overcomplicating my morning routine and tried something embarrassingly simple instead.\n\n3 things. Every day. No exceptions.\n\nJournal for 5 min. Walk for 10 min. Water before coffee.\n\n90 days later: better sleep, less anxiety, and I actually look forward to mornings.\n\nWhat's your 'embarrassingly simple' routine?",
+      "altVisual": "Overhead flat-lay photo of a journal, water glass, and sneakers on a wooden surface. Warm morning light. Minimal, clean aesthetic.",
+      "rationale": "Tests a self-deprecating hook ('embarrassingly simple') and adds a visual element. The vulnerability angle tends to drive more comments on Facebook."
+    }
+  ],
+  "metadata": {
+    "postingSchedule": [
+      {
+        "contentId": "fb-post-001",
+        "date": "2026-04-16",
+        "time": "09:00",
+        "timezone": "EST"
+      },
+      {
+        "contentId": "fb-post-002",
+        "date": "2026-04-20",
+        "time": "10:00",
+        "timezone": "EST"
+      }
+    ],
+    "groupTargets": ["wellnesscommunity", "morningroutineclub", "mentalhealthsupport"],
+    "boostRecommendations": "Boost fb-post-002 (Mental Health infographic) after 24h of organic performance. Budget: $25/day for 3 days. Target: Interest in wellness + mental health, ages 25-45.",
+    "crossPostStrategy": "Post to Page first. After 2-4 hours, share to Groups with a modified intro: 'Saw this on my Page and thought this community would relate — [topic]. What are your thoughts?' Stagger Group posts by 24 hours."
+  },
+  "generatedBy": "facebook-creator",
+  "campaignId": "plan-2026-03-wellness-spring"
+}

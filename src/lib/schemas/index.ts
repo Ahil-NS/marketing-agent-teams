@@ -29,11 +29,13 @@ export type {CampaignPlan, ContentCalendar, ChannelOptimizationPlan, StrategyInp
 export {
   redditContentPackageSchema,
   tiktokContentPackageSchema,
+  facebookContentPackageSchema,
+  instagramContentPackageSchema,
   contentItemSchema,
   creationInputsSchema,
   creationStageOutputSchema,
 } from './creation-schema.js'
-export type {RedditContentPackage, TikTokContentPackage, ContentItem, CreationInputs, CreationStageOutput} from './creation-schema.js'
+export type {RedditContentPackage, TikTokContentPackage, FacebookContentPackage, InstagramContentPackage, ContentItem, CreationInputs, CreationStageOutput} from './creation-schema.js'
 export {
   pipelineErrorSchema,
   pipelineRunSchema,
