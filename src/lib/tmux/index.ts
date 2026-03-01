@@ -21,3 +21,23 @@ export {
 } from './pane-layout.js'
 
 export type {PaneLayout} from './pane-layout.js'
+
+export {
+  TmuxStatusBar,
+  TmuxStatusBarError,
+  TMUX_STATUS_BAR_ERROR,
+  buildStageIndicators,
+  calculateBudgetPercentage,
+  formatElapsed,
+  formatTokens,
+  getCostColor,
+  renderStageIndicator,
+  renderStatusLine,
+} from './status-bar.js'
+
+export type {
+  StageIndicator,
+  StageIndicatorStatus,
+  StatusBarLines,
+  StatusBarState,
+} from './status-bar.js'
