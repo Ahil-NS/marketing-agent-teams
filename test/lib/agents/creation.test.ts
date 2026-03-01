@@ -179,6 +179,30 @@ describe('runRedditCreator', () => {
 
     await expect(runRedditCreator(creationInputs)).rejects.toThrow(AgentValidationError)
   })
+
+  it('includes vertical context in systemPrompt when provided', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validRedditContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runRedditCreator} = await import('../../../src/lib/agents/creation.js')
+    const inputsWithVertical = {...creationInputs, verticalContext: '# Wellness Compliance\n\nNo medical claims.'}
+    await runRedditCreator(inputsWithVertical)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).toContain('## Vertical Context')
+    expect(callArgs.options.systemPrompt).toContain('# Wellness Compliance')
+  })
+
+  it('does not include vertical context section when verticalContext is undefined', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validRedditContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runRedditCreator} = await import('../../../src/lib/agents/creation.js')
+    await runRedditCreator(creationInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).not.toContain('## Vertical Context')
+  })
 })
 
 describe('runTikTokCreator', () => {
@@ -303,6 +327,19 @@ describe('runTikTokCreator', () => {
     expect(result.usage.outputTokens).toBe(380)
     expect(result.usage.cost).toBe(0.0025)
   })
+
+  it('includes vertical context in systemPrompt when provided', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validTiktokContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runTikTokCreator} = await import('../../../src/lib/agents/creation.js')
+    const inputsWithVertical = {...creationInputs, verticalContext: '# Wellness Hooks\n\nHook patterns.'}
+    await runTikTokCreator(inputsWithVertical)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).toContain('## Vertical Context')
+    expect(callArgs.options.systemPrompt).toContain('# Wellness Hooks')
+  })
 })
 
 describe('runFacebookCreator', () => {
@@ -414,6 +451,19 @@ describe('runFacebookCreator', () => {
     expect(result.usage.inputTokens).toBe(450)
     expect(result.usage.outputTokens).toBe(380)
     expect(result.usage.cost).toBe(0.0025)
+  })
+
+  it('includes vertical context in systemPrompt when provided', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validFacebookContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runFacebookCreator} = await import('../../../src/lib/agents/creation.js')
+    const inputsWithVertical = {...creationInputs, verticalContext: '# Wellness Templates\n\nTemplates.'}
+    await runFacebookCreator(inputsWithVertical)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).toContain('## Vertical Context')
+    expect(callArgs.options.systemPrompt).toContain('# Wellness Templates')
   })
 })
 
@@ -540,6 +590,19 @@ describe('runInstagramCreator', () => {
     expect(result.usage.inputTokens).toBe(450)
     expect(result.usage.outputTokens).toBe(380)
     expect(result.usage.cost).toBe(0.0025)
+  })
+
+  it('includes vertical context in systemPrompt when provided', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validInstagramContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runInstagramCreator} = await import('../../../src/lib/agents/creation.js')
+    const inputsWithVertical = {...creationInputs, verticalContext: '# Wellness Audience\n\nAudience profiles.'}
+    await runInstagramCreator(inputsWithVertical)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).toContain('## Vertical Context')
+    expect(callArgs.options.systemPrompt).toContain('# Wellness Audience')
   })
 })
 
@@ -1153,5 +1216,29 @@ describe('runHookWriter', () => {
 
     const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
     expect(callArgs.options.systemPrompt).toContain('Knowledge Base')
+  })
+
+  it('includes vertical context in systemPrompt when provided', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHookWriterOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+    const inputsWithVertical = {...hookWriterInputs, verticalContext: '# Wellness Compliance\n\nNo medical claims in hooks.'}
+    await runHookWriter(inputsWithVertical)
+
+    const callArgs2 = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs2.options.systemPrompt).toContain('## Vertical Context')
+    expect(callArgs2.options.systemPrompt).toContain('# Wellness Compliance')
+  })
+
+  it('does not include vertical context when verticalContext is undefined', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHookWriterOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+    await runHookWriter(hookWriterInputs)
+
+    const callArgs2 = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs2.options.systemPrompt).not.toContain('## Vertical Context')
   })
 })

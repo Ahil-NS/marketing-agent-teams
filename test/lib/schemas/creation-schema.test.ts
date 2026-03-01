@@ -241,6 +241,53 @@ describe('creationInputsSchema', () => {
     const result = creationInputsSchema.safeParse(inputs)
     expect(result.success).toBe(false)
   })
+
+  it('accepts optional verticalContext string', () => {
+    const inputs = {
+      campaignPlan: validCampaignPlan,
+      contentCalendar: validContentCalendar,
+      channelOptimizationPlan: validChannelOptimization,
+      brandVoiceConfig: {
+        tone: 'professional',
+        communicationStyle: 'clear and direct',
+        brandPrinciples: ['authenticity'],
+        bannedPhrases: ['guaranteed'],
+      },
+      trendBrief: {
+        trends: [],
+        recommendations: 'none',
+      },
+      verticalContext: '# Wellness Hooks\n\nHook content here.',
+    }
+    const result = creationInputsSchema.safeParse(inputs)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.verticalContext).toBe('# Wellness Hooks\n\nHook content here.')
+    }
+  })
+
+  it('accepts undefined verticalContext (generic defaults)', () => {
+    const inputs = {
+      campaignPlan: validCampaignPlan,
+      contentCalendar: validContentCalendar,
+      channelOptimizationPlan: validChannelOptimization,
+      brandVoiceConfig: {
+        tone: 'professional',
+        communicationStyle: 'clear',
+        brandPrinciples: [],
+        bannedPhrases: [],
+      },
+      trendBrief: {
+        trends: [],
+        recommendations: 'none',
+      },
+    }
+    const result = creationInputsSchema.safeParse(inputs)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.verticalContext).toBeUndefined()
+    }
+  })
 })
 
 describe('creationStageOutputSchema', () => {
@@ -701,6 +748,71 @@ describe('hookWriterInputsSchema', () => {
     }
     const result = hookWriterInputsSchema.safeParse(inputs)
     expect(result.success).toBe(false)
+  })
+
+  it('accepts optional verticalContext string', () => {
+    const inputs = {
+      contentItems: [
+        {
+          itemId: 'post-001',
+          platform: 'reddit',
+          contentType: 'post',
+          title: 'Test Post',
+          body: 'Body content',
+          agentName: 'reddit-creator',
+          generatedBy: 'reddit-creator',
+          campaignId: 'plan-001',
+          status: 'draft',
+          metadata: {},
+          createdAt: '2026-03-15T10:00:00Z',
+        },
+      ],
+      brandVoiceConfig: {
+        tone: 'professional',
+        communicationStyle: 'clear',
+        brandPrinciples: ['authenticity'],
+        bannedPhrases: ['guaranteed'],
+      },
+      campaignPlan: validCampaignPlan,
+      verticalContext: '# Wellness Compliance\n\nNo medical claims in hooks.',
+    }
+    const result = hookWriterInputsSchema.safeParse(inputs)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.verticalContext).toBe('# Wellness Compliance\n\nNo medical claims in hooks.')
+    }
+  })
+
+  it('accepts undefined verticalContext (generic defaults)', () => {
+    const inputs = {
+      contentItems: [
+        {
+          itemId: 'post-001',
+          platform: 'reddit',
+          contentType: 'post',
+          title: 'Test Post',
+          body: 'Body content',
+          agentName: 'reddit-creator',
+          generatedBy: 'reddit-creator',
+          campaignId: 'plan-001',
+          status: 'draft',
+          metadata: {},
+          createdAt: '2026-03-15T10:00:00Z',
+        },
+      ],
+      brandVoiceConfig: {
+        tone: 'professional',
+        communicationStyle: 'clear',
+        brandPrinciples: ['authenticity'],
+        bannedPhrases: ['guaranteed'],
+      },
+      campaignPlan: validCampaignPlan,
+    }
+    const result = hookWriterInputsSchema.safeParse(inputs)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.verticalContext).toBeUndefined()
+    }
   })
 })
 

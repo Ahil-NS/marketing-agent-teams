@@ -63,6 +63,7 @@ export const configSchema = z.object({
   brandVoice: brandVoiceSchema,
   agents: agentsSchema,
   viralThreshold: viralThresholdSchema,
+  vertical: z.string().min(1).optional(),
 })
 
 export type Config = z.infer<typeof configSchema>

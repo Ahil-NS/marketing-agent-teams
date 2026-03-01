@@ -981,3 +981,58 @@ describe('platformAlgorithmReportSchema', () => {
     expect(platformAlgorithmReportSchema.safeParse({platforms: [], algorithmPriorities: [], rankingSignals: [], optimizationStrategies: []}).success).toBe(false)
   })
 })
+
+describe('verticalDefinitionSchema', () => {
+  let verticalDefinitionSchema: typeof import('../../../src/lib/schemas/agent-schema.js').verticalDefinitionSchema
+
+  it('loads verticalDefinitionSchema', async () => {
+    const mod = await import('../../../src/lib/schemas/agent-schema.js')
+    verticalDefinitionSchema = mod.verticalDefinitionSchema
+    expect(verticalDefinitionSchema).toBeDefined()
+  })
+
+  it('validates a complete vertical definition', async () => {
+    const mod = await import('../../../src/lib/schemas/agent-schema.js')
+    const validDef = {
+      name: 'wellness',
+      description: 'Wellness vertical module',
+      version: '1.0.0',
+      complianceRules: ['No medical claims', 'Use approved language'],
+      knowledgeFiles: ['knowledge/hooks.md', 'knowledge/compliance.md'],
+    }
+    const result = mod.verticalDefinitionSchema.safeParse(validDef)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.name).toBe('wellness')
+      expect(result.data.complianceRules).toHaveLength(2)
+      expect(result.data.knowledgeFiles).toHaveLength(2)
+    }
+  })
+
+  it('requires name, description, and version', async () => {
+    const mod = await import('../../../src/lib/schemas/agent-schema.js')
+    expect(mod.verticalDefinitionSchema.safeParse({}).success).toBe(false)
+    expect(mod.verticalDefinitionSchema.safeParse({name: 'wellness'}).success).toBe(false)
+    expect(mod.verticalDefinitionSchema.safeParse({name: 'wellness', description: 'test'}).success).toBe(false)
+  })
+
+  it('defaults complianceRules and knowledgeFiles to empty arrays', async () => {
+    const mod = await import('../../../src/lib/schemas/agent-schema.js')
+    const minimalDef = {
+      name: 'minimal',
+      description: 'A minimal vertical',
+      version: '0.1.0',
+    }
+    const result = mod.verticalDefinitionSchema.safeParse(minimalDef)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.complianceRules).toEqual([])
+      expect(result.data.knowledgeFiles).toEqual([])
+    }
+  })
+
+  it('is re-exported from schemas/index.ts', async () => {
+    const mod = await import('../../../src/lib/schemas/index.js')
+    expect(mod.verticalDefinitionSchema).toBeDefined()
+  })
+})

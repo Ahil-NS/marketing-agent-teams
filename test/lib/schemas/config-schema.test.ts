@@ -401,6 +401,45 @@ describe('viralThresholdSchema', () => {
   })
 })
 
+describe('vertical config field', () => {
+  const baseConfig = {
+    productName: 'TestProduct',
+    platforms: ['reddit'] as const,
+    skillLevel: 'intermediate' as const,
+  }
+
+  it('accepts optional vertical field', () => {
+    const config = {...baseConfig, vertical: 'wellness'}
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.vertical).toBe('wellness')
+    }
+  })
+
+  it('accepts undefined vertical (default behavior)', () => {
+    const result = configSchema.safeParse(baseConfig)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.vertical).toBeUndefined()
+    }
+  })
+
+  it('accepts various vertical names', () => {
+    for (const name of ['wellness', 'saas', 'ecommerce', 'fitness', 'fintech']) {
+      const config = {...baseConfig, vertical: name}
+      const result = configSchema.safeParse(config)
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects empty string vertical', () => {
+    const config = {...baseConfig, vertical: ''}
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+})
+
 describe('schemas/index.ts re-export', () => {
   it('re-exports configSchema from index', async () => {
     const {configSchema: schema} = await import('../../../src/lib/schemas/index.js')

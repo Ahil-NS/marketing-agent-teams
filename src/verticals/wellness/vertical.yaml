@@ -1,0 +1,25 @@
+name: wellness
+description: >
+  Domain-specific vertical module for wellness, health, mindfulness, and self-improvement content.
+  Provides content templates, hook patterns, seasonal calendars, audience profiles, and compliance
+  rules tailored to the wellness industry. Designed for apps like Champ and other wellness platforms.
+version: 1.0.0
+
+complianceRules:
+  - Never claim to cure, treat, or diagnose any medical condition
+  - Never provide specific medical advice or dosage recommendations
+  - Always include appropriate disclaimers for health-related content
+  - Avoid unverified health claims — cite reputable sources when referencing studies
+  - Do not promote specific supplements or medications without FDA-compliant language
+  - Respect platform-specific health content policies (TikTok, Reddit, Facebook, Instagram)
+  - Use "may help" or "some people find" instead of definitive health claims
+  - Never guarantee specific health outcomes or results
+  - Distinguish between general wellness tips and medical advice
+  - Include "consult your healthcare provider" when discussing health changes
+
+knowledgeFiles:
+  - knowledge/wellness-content-templates.md
+  - knowledge/wellness-hooks.md
+  - knowledge/wellness-seasonal.md
+  - knowledge/wellness-compliance.md
+  - knowledge/wellness-audience.md

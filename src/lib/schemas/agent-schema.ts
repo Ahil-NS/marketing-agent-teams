@@ -275,3 +275,13 @@ export const platformAlgorithmReportSchema = z.object({
 })
 
 export type PlatformAlgorithmReport = z.infer<typeof platformAlgorithmReportSchema>
+
+export const verticalDefinitionSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1),
+  version: z.string().min(1),
+  complianceRules: z.array(z.string()).default([]),
+  knowledgeFiles: z.array(z.string()).default([]),
+})
+
+export type VerticalDefinitionData = z.infer<typeof verticalDefinitionSchema>

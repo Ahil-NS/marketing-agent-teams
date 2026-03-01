@@ -366,6 +366,7 @@ export const creationInputsSchema = z.object({
     })),
     recommendations: z.string(),
   }).passthrough(),
+  verticalContext: z.string().optional(),
 })
 
 export type CreationInputs = z.infer<typeof creationInputsSchema>
@@ -428,6 +429,7 @@ export const hookWriterInputsSchema = z.object({
     productName: z.string().optional(),
   }),
   campaignPlan: campaignPlanSchema,
+  verticalContext: z.string().optional(),
 })
 
 export type HookWriterInputs = z.infer<typeof hookWriterInputsSchema>

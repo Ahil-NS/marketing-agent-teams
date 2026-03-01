@@ -30,6 +30,17 @@ import {loadSkill} from './skill-loader.js'
 import type {AgentResult} from './types.js'
 
 /**
+ * Build the vertical context section for agent system prompts.
+ * Returns a vertical knowledge section if verticalContext is provided, empty string otherwise.
+ * Injection order: Agent SKILL.md → Agent knowledge/ → Vertical knowledge/ (vertical is last).
+ */
+function buildVerticalSection(verticalContext?: string): string {
+  return verticalContext
+    ? `\n\n## Vertical Context\n\n${verticalContext}`
+    : ''
+}
+
+/**
  * Run the Reddit Creator agent.
  * Produces a full Reddit content package from campaign plan and calendar inputs.
  *
@@ -79,7 +90,7 @@ ${JSON.stringify(inputs.trendBrief, null, 2)}
 - Optionally include AI image generation prompts when content strategy warrants visual assets (infographics, data visualizations, before/after images)
 
 Follow your output format specification exactly. Output valid JSON.`,
-    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}${buildVerticalSection(inputs.verticalContext)}`,
     allowedTools: skill.tools,
     model: skill.model,
     outputSchema: redditContentPackageSchema,
@@ -137,7 +148,7 @@ ${JSON.stringify(inputs.trendBrief, null, 2)}
 - Captions must include 4-6 hashtags: trending + niche + brand
 
 Follow your output format specification exactly. Output valid JSON.`,
-    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}${buildVerticalSection(inputs.verticalContext)}`,
     allowedTools: skill.tools,
     model: skill.model,
     outputSchema: tiktokContentPackageSchema,
@@ -270,7 +281,7 @@ ${JSON.stringify(inputs.trendBrief, null, 2)}
 - NEVER use engagement bait patterns (tag a friend, like if you agree, share to win)
 
 Follow your output format specification exactly. Output valid JSON.`,
-    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}${buildVerticalSection(inputs.verticalContext)}`,
     allowedTools: skill.tools,
     model: skill.model,
     outputSchema: facebookContentPackageSchema,
@@ -331,7 +342,7 @@ ${JSON.stringify(inputs.trendBrief, null, 2)}
 - Optimize for saves and shares — the key algorithm signals
 
 Follow your output format specification exactly. Output valid JSON.`,
-    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}${buildVerticalSection(inputs.verticalContext)}`,
     allowedTools: skill.tools,
     model: skill.model,
     outputSchema: instagramContentPackageSchema,
@@ -550,7 +561,7 @@ ${JSON.stringify(inputs.campaignPlan, null, 2)}
 - All hooks must align with brand voice and be truthful (no clickbait)
 
 Follow your output format specification exactly. Output valid JSON.`,
-    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}${buildVerticalSection(inputs.verticalContext)}`,
     allowedTools: skill.tools,
     model: skill.model,
     outputSchema: hookWriterOutputSchema,
@@ -617,6 +628,7 @@ export async function runCreationStage(inputs: CreationInputs): Promise<Creation
         contentItems,
         brandVoiceConfig: inputs.brandVoiceConfig,
         campaignPlan: inputs.campaignPlan,
+        verticalContext: inputs.verticalContext,
       })
       hookWriterOutput = hookResult.outputs
       succeededAgents.push('hook-writer')

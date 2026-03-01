@@ -15,8 +15,9 @@ export {
   platformAlgorithmReportSchema,
   VALID_SDK_TOOLS,
   VALID_DATA_SCOPES,
+  verticalDefinitionSchema,
 } from './agent-schema.js'
-export type {AgentDefinition, MemoryEntryValidated, MemoryStateValidated, PermissionsBlock, TrendBrief, CompetitorReport, ResearchInputsData, ViralPatternReport, PlatformAlgorithmReport} from './agent-schema.js'
+export type {AgentDefinition, MemoryEntryValidated, MemoryStateValidated, PermissionsBlock, TrendBrief, CompetitorReport, ResearchInputsData, ViralPatternReport, PlatformAlgorithmReport, VerticalDefinitionData} from './agent-schema.js'
 export {
   campaignPlanSchema,
   contentCalendarSchema,
