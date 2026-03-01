@@ -49,6 +49,13 @@ export const skillPermissionsSchema = permissionsBlockSchema
 
 export type PermissionsBlock = z.infer<typeof permissionsBlockSchema>
 
+/**
+ * Current SKILL.md schema version.
+ * Bump according to semver: patch for docs/optional fields, minor for new required fields, major for breaking changes.
+ * See docs/agent-skill-schema.md for version bump policy.
+ */
+export const CURRENT_SCHEMA_VERSION = '1.0.0'
+
 export const agentDefinitionSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
@@ -64,6 +71,7 @@ export const agentDefinitionSchema = z.object({
   model: z.enum(['haiku', 'sonnet']).default('haiku'),
   tools: z.array(z.string()).default([]),
   trustTier: z.enum(['builtin', 'verified', 'community']).default('builtin'),
+  schemaVersion: z.string().regex(/^\d+\.\d+\.\d+$/, 'schemaVersion must be valid semver (e.g., 1.0.0)').default(CURRENT_SCHEMA_VERSION),
   permissions: permissionsBlockSchema,
   examples: z.array(exampleInputsSchema).optional(),
 }).refine(

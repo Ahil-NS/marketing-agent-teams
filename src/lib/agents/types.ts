@@ -53,6 +53,8 @@ export interface SkillDefinition {
   tools: string[]
   /** Trust tier — determines credential access and publishing capability */
   trustTier: TrustTier
+  /** Schema version the SKILL.md conforms to (semver) */
+  schemaVersion: string
   /** Permission boundaries — credentials, data scopes, tool scopes (defaults to deny-all if omitted) */
   permissions?: SkillPermissions
   /** Full SKILL.md content (YAML front matter stripped) used as system prompt */

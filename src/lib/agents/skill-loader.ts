@@ -2,7 +2,7 @@ import {readFile, readdir, access} from 'node:fs/promises'
 import {join, basename} from 'node:path'
 import {parse as parseYaml} from 'yaml'
 
-import {agentDefinitionSchema} from '../schemas/agent-schema.js'
+import {agentDefinitionSchema, CURRENT_SCHEMA_VERSION} from '../schemas/agent-schema.js'
 import {SkillLoadError} from './errors.js'
 import type {SkillDefinition} from './types.js'
 
@@ -204,6 +204,16 @@ export async function loadSkill(agentDir: string): Promise<SkillDefinition> {
     )
   }
 
+  // 3b. Version compatibility check
+  const loadedMajor = result.data.schemaVersion.split('.')[0]
+  const currentMajor = CURRENT_SCHEMA_VERSION.split('.')[0]
+  if (loadedMajor !== currentMajor) {
+    console.warn(
+      `[WARN] SKILL.md at "${agentDir}" uses schema version ${result.data.schemaVersion} but current is ${CURRENT_SCHEMA_VERSION}. ` +
+      `Major version mismatch — see docs/schema-migrations/ for migration guides.`,
+    )
+  }
+
   // 4. Load knowledge directory
   const knowledgeContext = await loadKnowledgeDir(join(agentDir, 'knowledge'))
 
@@ -224,6 +234,7 @@ export async function loadSkill(agentDir: string): Promise<SkillDefinition> {
     model: result.data.model,
     tools: result.data.tools,
     trustTier: result.data.trustTier,
+    schemaVersion: result.data.schemaVersion,
     permissions: result.data.permissions,
     systemPrompt: body,
     knowledgeContext,

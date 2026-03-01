@@ -3,7 +3,7 @@ import {join} from 'node:path'
 
 import {describe, it, expect} from 'vitest'
 
-import {agentDefinitionSchema, trendBriefSchema, competitorReportSchema, researchInputsSchema, viralPatternReportSchema, platformAlgorithmReportSchema} from '../../../src/lib/schemas/agent-schema.js'
+import {agentDefinitionSchema, trendBriefSchema, competitorReportSchema, researchInputsSchema, viralPatternReportSchema, platformAlgorithmReportSchema, CURRENT_SCHEMA_VERSION} from '../../../src/lib/schemas/agent-schema.js'
 
 describe('agentDefinitionSchema', () => {
   it('validates a complete agent definition', () => {
@@ -144,6 +144,66 @@ describe('agentDefinitionSchema', () => {
       examples: [
         {description: '', inputs: {key: 'value'}},
       ],
+    }
+    const result = agentDefinitionSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('applies default schemaVersion when not provided', () => {
+    const minimal = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'creation',
+    }
+    const result = agentDefinitionSchema.safeParse(minimal)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.schemaVersion).toBe('1.0.0')
+    }
+  })
+
+  it('accepts valid semver schemaVersion', () => {
+    const withVersion = {
+      name: 'test-agent',
+      description: 'A test agent',
+      cluster: 'intelligence',
+      schemaVersion: '2.1.3',
+    }
+    const result = agentDefinitionSchema.safeParse(withVersion)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.schemaVersion).toBe('2.1.3')
+    }
+  })
+
+  it('rejects invalid schemaVersion format', () => {
+    const invalid = {
+      name: 'test-agent',
+      description: 'test',
+      cluster: 'intelligence',
+      schemaVersion: 'v1.0',
+    }
+    const result = agentDefinitionSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects schemaVersion with non-numeric parts', () => {
+    const invalid = {
+      name: 'test-agent',
+      description: 'test',
+      cluster: 'intelligence',
+      schemaVersion: 'one.two.three',
+    }
+    const result = agentDefinitionSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects schemaVersion with only two parts', () => {
+    const invalid = {
+      name: 'test-agent',
+      description: 'test',
+      cluster: 'intelligence',
+      schemaVersion: '1.0',
     }
     const result = agentDefinitionSchema.safeParse(invalid)
     expect(result.success).toBe(false)
@@ -1034,5 +1094,65 @@ describe('verticalDefinitionSchema', () => {
   it('is re-exported from schemas/index.ts', async () => {
     const mod = await import('../../../src/lib/schemas/index.js')
     expect(mod.verticalDefinitionSchema).toBeDefined()
+  })
+})
+
+describe('CURRENT_SCHEMA_VERSION', () => {
+  it('exports CURRENT_SCHEMA_VERSION as 1.0.0', () => {
+    expect(CURRENT_SCHEMA_VERSION).toBe('1.0.0')
+  })
+
+  it('is a valid semver string', () => {
+    expect(CURRENT_SCHEMA_VERSION).toMatch(/^\d+\.\d+\.\d+$/)
+  })
+})
+
+describe('all existing agents pass schema validation (regression)', () => {
+  it('validates all 26 agent SKILL.md files in src/agents/', async () => {
+    const {readdirSync, existsSync, readFileSync} = await import('node:fs')
+    const {parseSkillMd} = await import('../../../src/lib/agents/skill-loader.js')
+
+    const agentsRoot = join(process.cwd(), 'src', 'agents')
+    if (!existsSync(agentsRoot)) return
+
+    const clusters = readdirSync(agentsRoot, {withFileTypes: true})
+      .filter((e) => e.isDirectory())
+
+    const results: Array<{agent: string; valid: boolean; error?: string}> = []
+
+    for (const cluster of clusters) {
+      const clusterPath = join(agentsRoot, cluster.name)
+      const agents = readdirSync(clusterPath, {withFileTypes: true})
+        .filter((e) => e.isDirectory())
+
+      for (const agent of agents) {
+        const skillPath = join(clusterPath, agent.name, 'SKILL.md')
+        if (!existsSync(skillPath)) continue
+
+        const content = readFileSync(skillPath, 'utf-8')
+        try {
+          const {frontMatter} = parseSkillMd(content, join(clusterPath, agent.name))
+          const result = agentDefinitionSchema.safeParse(frontMatter)
+          if (result.success) {
+            results.push({agent: agent.name, valid: true})
+          } else {
+            const issues = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')
+            results.push({agent: agent.name, valid: false, error: issues})
+          }
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : String(error)
+          results.push({agent: agent.name, valid: false, error: msg})
+        }
+      }
+    }
+
+    const failures = results.filter((r) => !r.valid)
+    if (failures.length > 0) {
+      const summary = failures.map((f) => `  ${f.agent}: ${f.error}`).join('\n')
+      throw new Error(`${failures.length} agent(s) failed schema validation:\n${summary}`)
+    }
+
+    expect(results.length).toBeGreaterThanOrEqual(26)
+    expect(failures).toHaveLength(0)
   })
 })

@@ -16,6 +16,7 @@ export {
   VALID_SDK_TOOLS,
   VALID_DATA_SCOPES,
   verticalDefinitionSchema,
+  CURRENT_SCHEMA_VERSION,
 } from './agent-schema.js'
 export type {AgentDefinition, MemoryEntryValidated, MemoryStateValidated, PermissionsBlock, TrendBrief, CompetitorReport, ResearchInputsData, ViralPatternReport, PlatformAlgorithmReport, VerticalDefinitionData} from './agent-schema.js'
 export {
