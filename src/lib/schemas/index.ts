@@ -34,8 +34,10 @@ export {
   contentItemSchema,
   creationInputsSchema,
   creationStageOutputSchema,
+  hookWriterOutputSchema,
+  hookWriterInputsSchema,
 } from './creation-schema.js'
-export type {RedditContentPackage, TikTokContentPackage, FacebookContentPackage, InstagramContentPackage, ContentItem, CreationInputs, CreationStageOutput} from './creation-schema.js'
+export type {RedditContentPackage, TikTokContentPackage, FacebookContentPackage, InstagramContentPackage, ContentItem, CreationInputs, CreationStageOutput, HookWriterOutput, HookWriterInputs} from './creation-schema.js'
 export {
   pipelineErrorSchema,
   pipelineRunSchema,

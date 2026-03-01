@@ -6,6 +6,8 @@ import {
   tiktokContentPackageSchema,
   facebookContentPackageSchema,
   instagramContentPackageSchema,
+  hookWriterOutputSchema,
+  hookWriterInputsSchema,
 } from '../schemas/creation-schema.js'
 import type {
   RedditContentPackage,
@@ -15,6 +17,8 @@ import type {
   ContentItem,
   CreationInputs,
   CreationStageOutput,
+  HookWriterInputs,
+  HookWriterOutput,
 } from '../schemas/creation-schema.js'
 
 import {executeAgent} from './agent-executor.js'
@@ -447,15 +451,71 @@ function instagramPackageToContentItems(pkg: InstagramContentPackage): ContentIt
 }
 
 /**
- * Run the creation stage — executes all four platform agents in PARALLEL (FR63).
- * Uses Promise.allSettled() for partial failure handling (FR3, degraded mode).
+ * Run the Hook Writer agent.
+ * Processes ContentItem[] from platform agents and generates platform-tailored
+ * hook variations with A/B pairs and confidence scoring.
  *
- * If any agent fails, the others' results are still collected and returned.
- * The combined output includes per-platform packages and a flattened ContentItem[]
- * array for downstream stages (optimization → quality → review → distribution).
+ * Sequential execution: Runs AFTER platform agents complete (Phase 2 of creation stage).
+ * Inputs: ContentItem[] + BrandVoiceConfig + CampaignPlan
+ * Output: HookWriterOutput (hooks, topPicks, abPairs, analysis)
+ */
+export async function runHookWriter(inputs: HookWriterInputs): Promise<AgentResult<HookWriterOutput>> {
+  const parsed = hookWriterInputsSchema.safeParse(inputs)
+  if (!parsed.success) {
+    throw new AgentValidationError('hook-writer', parsed.error)
+  }
+
+  const skill = await loadSkill(join(agentsRoot(), 'creation', 'hook-writer'))
+
+  const knowledgeSection = skill.knowledgeContext
+    ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  return executeAgent('hook-writer', {
+    prompt: `Generate platform-tailored hook variations for the following content items:
+
+## Content Items
+${JSON.stringify(inputs.contentItems, null, 2)}
+
+## Brand Voice
+- Tone: ${inputs.brandVoiceConfig.tone}
+- Communication Style: ${inputs.brandVoiceConfig.communicationStyle}
+- Brand Principles: ${inputs.brandVoiceConfig.brandPrinciples.join(', ')}
+- Banned Phrases: ${inputs.brandVoiceConfig.bannedPhrases.join(', ')}
+
+## Campaign Plan
+${JSON.stringify(inputs.campaignPlan, null, 2)}
+
+## Requirements
+- Generate 3-5 hook variations for EACH content item
+- Each hook must use a clear psychological trigger from the taxonomy
+- Each hook must respect platform-specific constraints (character limits, norms)
+- Score each hook with a confidence score between 0.0 and 1.0
+- Generate at least one A/B pair per content item with meaningful variation
+- Select a top pick per content item per platform with rationale
+- Include analysis summary with platform breakdown and trigger distribution
+- All hooks must align with brand voice and be truthful (no clickbait)
+
+Follow your output format specification exactly. Output valid JSON.`,
+    systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: hookWriterOutputSchema,
+    maxTurns: 20,
+  })
+}
+
+/**
+ * Run the creation stage — TWO-PHASE execution:
+ *   Phase 1 (parallel): All four platform agents via Promise.allSettled() (FR63)
+ *   Phase 2 (sequential): Hook writer processes ContentItem[] from Phase 1
+ *
+ * Uses Promise.allSettled() for partial failure handling (FR3, degraded mode).
+ * If any platform agent fails, the others' results are still collected.
+ * Hook writer runs ONLY if at least one platform agent produced content items.
  */
 export async function runCreationStage(inputs: CreationInputs): Promise<CreationStageOutput> {
-  // Run all four platform agents in PARALLEL (FR63)
+  // Phase 1: Platform agents in PARALLEL (FR63)
   const [redditResult, tiktokResult, facebookResult, instagramResult] = await Promise.allSettled([
     runRedditCreator(inputs),
     runTikTokCreator(inputs),
@@ -477,18 +537,45 @@ export async function runCreationStage(inputs: CreationInputs): Promise<Creation
     ...(instagramPackage ? instagramPackageToContentItems(instagramPackage) : []),
   ]
 
-  const allAgents = ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator']
-  const results = [redditResult, tiktokResult, facebookResult, instagramResult]
+  const platformAgents = ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator']
+  const agentsExecuted = [...platformAgents]
+  const platformResults = [redditResult, tiktokResult, facebookResult, instagramResult]
 
   // Capture error reasons for debugging (M1: don't silently discard failure info)
   const agentErrors: Record<string, string> = {}
-  for (const [i, agent] of allAgents.entries()) {
-    const result = results[i]
+  for (const [i, agent] of platformAgents.entries()) {
+    const result = platformResults[i]
     if (result.status === 'rejected') {
       agentErrors[agent] = result.reason instanceof Error
         ? result.reason.message
         : String(result.reason)
     }
+  }
+
+  const succeededAgents = platformAgents.filter((_, i) => platformResults[i].status === 'fulfilled')
+  const failedAgents = platformAgents.filter((_, i) => platformResults[i].status === 'rejected')
+
+  // Phase 2: Hook writer runs AFTER platform agents, only if content items exist
+  let hookWriterOutput: HookWriterOutput | null = null
+  if (contentItems.length > 0) {
+    agentsExecuted.push('hook-writer')
+    try {
+      const hookResult = await runHookWriter({
+        contentItems,
+        brandVoiceConfig: inputs.brandVoiceConfig,
+        campaignPlan: inputs.campaignPlan,
+      })
+      hookWriterOutput = hookResult.outputs
+      succeededAgents.push('hook-writer')
+    } catch (error) {
+      failedAgents.push('hook-writer')
+      agentErrors['hook-writer'] = error instanceof Error
+        ? error.message
+        : String(error)
+    }
+  } else {
+    // No content items — hook writer skipped (not executed, not failed)
+    agentErrors['hook-writer'] = 'Skipped: no content items from platform agents'
   }
 
   return {
@@ -497,10 +584,11 @@ export async function runCreationStage(inputs: CreationInputs): Promise<Creation
     facebookPackage,
     instagramPackage,
     contentItems,
+    hookWriterOutput,
     stageMetadata: {
-      agentsExecuted: allAgents,
-      agentsSucceeded: allAgents.filter((_, i) => results[i].status === 'fulfilled'),
-      agentsFailed: allAgents.filter((_, i) => results[i].status === 'rejected'),
+      agentsExecuted,
+      agentsSucceeded: succeededAgents,
+      agentsFailed: failedAgents,
       ...(Object.keys(agentErrors).length > 0 ? {agentErrors} : {}),
     },
   }

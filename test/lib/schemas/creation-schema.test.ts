@@ -8,11 +8,14 @@ import {
   contentItemSchema,
   creationInputsSchema,
   creationStageOutputSchema,
+  hookWriterOutputSchema,
+  hookWriterInputsSchema,
 } from '../../../src/lib/schemas/creation-schema.js'
 
 import validRedditContent from '../../fixtures/responses/claude-reddit-content.json'
 import validTiktokContent from '../../fixtures/responses/claude-tiktok-content.json'
 import validFacebookContent from '../../fixtures/responses/claude-facebook-content.json'
+import validHookWriterOutput from '../../fixtures/responses/claude-hook-writer.json'
 import validInstagramContent from '../../fixtures/responses/claude-instagram-content.json'
 import validCampaignPlan from '../../fixtures/responses/claude-campaign-plan.json'
 import validContentCalendar from '../../fixtures/responses/claude-content-calendar.json'
@@ -254,6 +257,7 @@ describe('creationStageOutputSchema', () => {
         campaignId: 'plan-2026-03-wellness-spring',
         createdAt: '2026-03-01T10:00:00Z',
       }],
+      hookWriterOutput: null,
       stageMetadata: {
         agentsExecuted: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
         agentsSucceeded: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
@@ -271,6 +275,7 @@ describe('creationStageOutputSchema', () => {
       facebookPackage: validFacebookContent,
       instagramPackage: null,
       contentItems: [],
+      hookWriterOutput: null,
       stageMetadata: {
         agentsExecuted: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
         agentsSucceeded: ['tiktok-creator', 'facebook-creator'],
@@ -288,6 +293,7 @@ describe('creationStageOutputSchema', () => {
       facebookPackage: null,
       instagramPackage: null,
       contentItems: [],
+      hookWriterOutput: null,
       stageMetadata: {
         agentsExecuted: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
         agentsSucceeded: [],
@@ -305,6 +311,7 @@ describe('creationStageOutputSchema', () => {
       facebookPackage: validFacebookContent,
       instagramPackage: validInstagramContent,
       contentItems: [],
+      hookWriterOutput: null,
       stageMetadata: {
         agentsExecuted: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
         agentsSucceeded: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator'],
@@ -476,5 +483,217 @@ describe('instagramContentPackageSchema', () => {
       expect(result.data.imagePrompts[0].promptText.length).toBeGreaterThanOrEqual(20)
       expect(result.data.imagePrompts[0].generator).toBeTruthy()
     }
+  })
+})
+
+describe('hookWriterOutputSchema', () => {
+  it('validates correct structure', () => {
+    const result = hookWriterOutputSchema.safeParse(validHookWriterOutput)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.hooks.length).toBeGreaterThanOrEqual(1)
+      expect(result.data.topPicks.length).toBeGreaterThanOrEqual(1)
+      expect(result.data.abPairs.length).toBeGreaterThanOrEqual(1)
+      expect(result.data.analysis).toBeDefined()
+    }
+  })
+
+  it('validates hook fields: hookId, platform, triggerType, hookArchetype, confidenceScore', () => {
+    const result = hookWriterOutputSchema.safeParse(validHookWriterOutput)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      const hook = result.data.hooks[0]
+      expect(hook.hookId).toBeDefined()
+      expect(['reddit', 'tiktok', 'facebook', 'instagram']).toContain(hook.platform)
+      expect(hook.triggerType).toBeDefined()
+      expect(hook.hookArchetype).toBeDefined()
+      expect(hook.confidenceScore).toBeGreaterThanOrEqual(0)
+      expect(hook.confidenceScore).toBeLessThanOrEqual(1)
+      expect(hook.characterCount).toBeGreaterThanOrEqual(1)
+      expect(hook.hookText.length).toBeGreaterThanOrEqual(1)
+      expect(hook.contentItemId).toBeDefined()
+    }
+  })
+
+  it('validates A/B pair fields: hookA, hookB, variationStrategy, rationale', () => {
+    const result = hookWriterOutputSchema.safeParse(validHookWriterOutput)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      const pair = result.data.abPairs[0]
+      expect(pair.pairId).toBeDefined()
+      expect(pair.contentItemId).toBeDefined()
+      expect(pair.platform).toBeDefined()
+      expect(pair.hookA).toBeDefined()
+      expect(pair.hookB).toBeDefined()
+      expect(pair.variationStrategy).toBeDefined()
+      expect(pair.rationale.length).toBeGreaterThanOrEqual(1)
+    }
+  })
+
+  it('validates topPick fields: contentItemId, platform, recommendedHookId, rationale', () => {
+    const result = hookWriterOutputSchema.safeParse(validHookWriterOutput)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      const pick = result.data.topPicks[0]
+      expect(pick.contentItemId).toBeDefined()
+      expect(pick.platform).toBeDefined()
+      expect(pick.recommendedHookId).toBeDefined()
+      expect(pick.rationale.length).toBeGreaterThanOrEqual(1)
+    }
+  })
+
+  it('rejects missing hooks array', () => {
+    const invalid = {...validHookWriterOutput, hooks: undefined}
+    const result = hookWriterOutputSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty hooks array', () => {
+    const invalid = {...validHookWriterOutput, hooks: []}
+    const result = hookWriterOutputSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing topPicks array', () => {
+    const invalid = {...validHookWriterOutput, topPicks: undefined}
+    const result = hookWriterOutputSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing abPairs array', () => {
+    const invalid = {...validHookWriterOutput, abPairs: undefined}
+    const result = hookWriterOutputSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects confidence score above 1', () => {
+    const invalid = {
+      ...validHookWriterOutput,
+      hooks: [{
+        ...validHookWriterOutput.hooks[0],
+        confidenceScore: 1.5,
+      }],
+    }
+    const result = hookWriterOutputSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects confidence score below 0', () => {
+    const invalid = {
+      ...validHookWriterOutput,
+      hooks: [{
+        ...validHookWriterOutput.hooks[0],
+        confidenceScore: -0.1,
+      }],
+    }
+    const result = hookWriterOutputSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid platform value', () => {
+    const invalid = {
+      ...validHookWriterOutput,
+      hooks: [{
+        ...validHookWriterOutput.hooks[0],
+        platform: 'linkedin',
+      }],
+    }
+    const result = hookWriterOutputSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid trigger type', () => {
+    const invalid = {
+      ...validHookWriterOutput,
+      hooks: [{
+        ...validHookWriterOutput.hooks[0],
+        triggerType: 'invalid-trigger',
+      }],
+    }
+    const result = hookWriterOutputSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid hook archetype', () => {
+    const invalid = {
+      ...validHookWriterOutput,
+      hooks: [{
+        ...validHookWriterOutput.hooks[0],
+        hookArchetype: 'invalid-archetype',
+      }],
+    }
+    const result = hookWriterOutputSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('hookWriterInputsSchema', () => {
+  it('validates correct inputs', () => {
+    const inputs = {
+      contentItems: [
+        {
+          itemId: 'post-001',
+          platform: 'reddit',
+          contentType: 'post',
+          title: 'Test Post',
+          body: 'Body content',
+          agentName: 'reddit-creator',
+          generatedBy: 'reddit-creator',
+          campaignId: 'plan-2026-03-wellness-spring',
+          status: 'draft',
+          metadata: {},
+          createdAt: '2026-03-15T10:00:00Z',
+        },
+      ],
+      brandVoiceConfig: {
+        tone: 'professional',
+        communicationStyle: 'clear',
+        brandPrinciples: ['authenticity'],
+        bannedPhrases: ['guaranteed results'],
+        productName: 'TestApp',
+      },
+      campaignPlan: validCampaignPlan,
+    }
+    const result = hookWriterInputsSchema.safeParse(inputs)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects empty contentItems array', () => {
+    const inputs = {
+      contentItems: [],
+      brandVoiceConfig: {
+        tone: 'professional',
+        communicationStyle: 'clear',
+        brandPrinciples: ['authenticity'],
+        bannedPhrases: ['guaranteed results'],
+        productName: 'TestApp',
+      },
+      campaignPlan: validCampaignPlan,
+    }
+    const result = hookWriterInputsSchema.safeParse(inputs)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing brandVoiceConfig', () => {
+    const inputs = {
+      contentItems: [
+        {
+          itemId: 'post-001',
+          platform: 'reddit',
+          contentType: 'post',
+          title: 'Test Post',
+          body: 'Body content',
+          agentName: 'reddit-creator',
+          generatedBy: 'reddit-creator',
+          campaignId: 'plan-001',
+          status: 'draft',
+          metadata: {},
+          createdAt: '2026-03-15T10:00:00Z',
+        },
+      ],
+      campaignPlan: validCampaignPlan,
+    }
+    const result = hookWriterInputsSchema.safeParse(inputs)
+    expect(result.success).toBe(false)
   })
 })

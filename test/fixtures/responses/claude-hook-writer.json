@@ -1,0 +1,208 @@
+{
+  "hooks": [
+    {
+      "hookId": "hook-001",
+      "contentItemId": "post-001",
+      "platform": "reddit",
+      "hookText": "[Guide] The science-backed morning routine that changed my entire productivity — here's the data",
+      "triggerType": "authority",
+      "hookArchetype": "how-to",
+      "confidenceScore": 0.88,
+      "characterCount": 89
+    },
+    {
+      "hookId": "hook-002",
+      "contentItemId": "post-001",
+      "platform": "reddit",
+      "hookText": "After 3 years of experimenting, I finally found the morning routine that actually sticks",
+      "triggerType": "curiosity",
+      "hookArchetype": "story",
+      "confidenceScore": 0.82,
+      "characterCount": 84
+    },
+    {
+      "hookId": "hook-003",
+      "contentItemId": "post-001",
+      "platform": "reddit",
+      "hookText": "Why 90% of morning routine advice is wrong — and what actually works",
+      "triggerType": "novelty",
+      "hookArchetype": "contrarian",
+      "confidenceScore": 0.79,
+      "characterCount": 65
+    },
+    {
+      "hookId": "hook-004",
+      "contentItemId": "script-001",
+      "platform": "tiktok",
+      "hookText": "Stop doing your morning routine like this",
+      "triggerType": "loss-aversion",
+      "hookArchetype": "warning",
+      "confidenceScore": 0.91,
+      "characterCount": 41
+    },
+    {
+      "hookId": "hook-005",
+      "contentItemId": "script-001",
+      "platform": "tiktok",
+      "hookText": "POV: you just discovered the 2-minute trick that changes everything",
+      "triggerType": "curiosity",
+      "hookArchetype": "transformation",
+      "confidenceScore": 0.86,
+      "characterCount": 65
+    },
+    {
+      "hookId": "hook-006",
+      "contentItemId": "script-001",
+      "platform": "tiktok",
+      "hookText": "Only 3% of people know about this wellness hack",
+      "triggerType": "social-proof",
+      "hookArchetype": "statistic",
+      "confidenceScore": 0.83,
+      "characterCount": 48
+    },
+    {
+      "hookId": "hook-007",
+      "contentItemId": "fb-post-001",
+      "platform": "facebook",
+      "hookText": "What would you change about your morning if you had just 5 extra minutes?",
+      "triggerType": "curiosity",
+      "hookArchetype": "question",
+      "confidenceScore": 0.84,
+      "characterCount": 71
+    },
+    {
+      "hookId": "hook-008",
+      "contentItemId": "fb-post-001",
+      "platform": "facebook",
+      "hookText": "I never thought a small change could make this big a difference in my energy levels",
+      "triggerType": "identity",
+      "hookArchetype": "confession",
+      "confidenceScore": 0.80,
+      "characterCount": 82
+    },
+    {
+      "hookId": "hook-009",
+      "contentItemId": "fb-post-001",
+      "platform": "facebook",
+      "hookText": "We surveyed 1,000 wellness enthusiasts — the #1 morning habit wasn't what we expected",
+      "triggerType": "authority",
+      "hookArchetype": "statistic",
+      "confidenceScore": 0.87,
+      "characterCount": 87
+    },
+    {
+      "hookId": "hook-010",
+      "contentItemId": "ig-post-001",
+      "platform": "instagram",
+      "hookText": "Save this: 5 morning micro-habits that actually stick",
+      "triggerType": "curiosity",
+      "hookArchetype": "list",
+      "confidenceScore": 0.89,
+      "characterCount": 49
+    },
+    {
+      "hookId": "hook-011",
+      "contentItemId": "ig-post-001",
+      "platform": "instagram",
+      "hookText": "This one change increased my morning energy by 340%",
+      "triggerType": "social-proof",
+      "hookArchetype": "statistic",
+      "confidenceScore": 0.85,
+      "characterCount": 51
+    },
+    {
+      "hookId": "hook-012",
+      "contentItemId": "ig-post-001",
+      "platform": "instagram",
+      "hookText": "Your morning routine is missing this — and it's costing you",
+      "triggerType": "loss-aversion",
+      "hookArchetype": "warning",
+      "confidenceScore": 0.81,
+      "characterCount": 56
+    }
+  ],
+  "topPicks": [
+    {
+      "contentItemId": "post-001",
+      "platform": "reddit",
+      "recommendedHookId": "hook-001",
+      "rationale": "Combines authority trigger with Guide bracket convention. Data-backed framing aligns with Reddit's preference for substantive content. High specificity increases click-through."
+    },
+    {
+      "contentItemId": "script-001",
+      "platform": "tiktok",
+      "recommendedHookId": "hook-004",
+      "rationale": "Warning archetype with loss-aversion trigger is the strongest pattern interrupt for TikTok. Short text works as both on-screen overlay and spoken hook within 2-second window."
+    },
+    {
+      "contentItemId": "fb-post-001",
+      "platform": "facebook",
+      "recommendedHookId": "hook-009",
+      "rationale": "Statistic hook with authority trigger drives shares on Facebook. Survey framing provides social proof. Surprise element ('wasn't what we expected') creates curiosity gap."
+    },
+    {
+      "contentItemId": "ig-post-001",
+      "platform": "instagram",
+      "recommendedHookId": "hook-010",
+      "rationale": "List archetype with explicit 'Save this' CTA optimizes for Instagram's save signal. Under 125-char preview limit. Micro-habits framing makes it actionable and save-worthy."
+    }
+  ],
+  "abPairs": [
+    {
+      "pairId": "pair-001",
+      "contentItemId": "post-001",
+      "platform": "reddit",
+      "hookA": "hook-001",
+      "hookB": "hook-002",
+      "variationStrategy": "trigger-type",
+      "rationale": "Hook A uses authority trigger (data-backed) while Hook B uses curiosity trigger (personal story). Tests whether Reddit users respond more to data or narrative framing for wellness content."
+    },
+    {
+      "pairId": "pair-002",
+      "contentItemId": "script-001",
+      "platform": "tiktok",
+      "hookA": "hook-004",
+      "hookB": "hook-005",
+      "variationStrategy": "structure",
+      "rationale": "Hook A uses direct imperative ('Stop doing...') while Hook B uses POV format. Tests whether negative framing (warning) outperforms positive framing (transformation) for hook completion rate."
+    },
+    {
+      "pairId": "pair-003",
+      "contentItemId": "fb-post-001",
+      "platform": "facebook",
+      "hookA": "hook-007",
+      "hookB": "hook-009",
+      "variationStrategy": "tone",
+      "rationale": "Hook A uses personal question format (drives comments) while Hook B uses survey data (drives shares). Tests whether engagement comes from conversation or authority on Facebook."
+    },
+    {
+      "pairId": "pair-004",
+      "contentItemId": "ig-post-001",
+      "platform": "instagram",
+      "hookA": "hook-010",
+      "hookB": "hook-012",
+      "variationStrategy": "framing",
+      "rationale": "Hook A uses positive framing (save-worthy tips) while Hook B uses negative framing (loss-aversion warning). Tests whether Instagram users respond more to gain or loss framing."
+    }
+  ],
+  "analysis": {
+    "totalHooksGenerated": 12,
+    "avgConfidenceScore": 0.85,
+    "platformBreakdown": {
+      "reddit": 3,
+      "tiktok": 3,
+      "facebook": 3,
+      "instagram": 3
+    },
+    "triggerDistribution": {
+      "curiosity": 3,
+      "authority": 2,
+      "social-proof": 2,
+      "loss-aversion": 2,
+      "identity": 1,
+      "novelty": 1,
+      "fomo": 0,
+      "urgency": 0
+    }
+  }
+}

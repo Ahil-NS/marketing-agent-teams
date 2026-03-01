@@ -7,6 +7,7 @@ import validRedditContent from '../../fixtures/responses/claude-reddit-content.j
 import validTiktokContent from '../../fixtures/responses/claude-tiktok-content.json'
 import validFacebookContent from '../../fixtures/responses/claude-facebook-content.json'
 import validInstagramContent from '../../fixtures/responses/claude-instagram-content.json'
+import validHookWriterOutput from '../../fixtures/responses/claude-hook-writer.json'
 import validCampaignPlan from '../../fixtures/responses/claude-campaign-plan.json'
 import validContentCalendar from '../../fixtures/responses/claude-content-calendar.json'
 import validChannelOptimization from '../../fixtures/responses/claude-channel-optimization.json'
@@ -451,17 +452,71 @@ describe('runCreationStage', () => {
     vi.resetModules()
   })
 
-  it('runs all four agents in parallel via Promise.allSettled', async () => {
-    const mockQuery = vi.fn((args: {prompt: string}) => {
+  /** Helper: create a mock query that routes by prompt content, including hook writer */
+  function createStageQuery(options: {
+    reddit?: boolean
+    tiktok?: boolean
+    facebook?: boolean
+    instagram?: boolean
+    hookWriter?: boolean
+  } = {reddit: true, tiktok: true, facebook: true, instagram: true, hookWriter: true}) {
+    return vi.fn((args: {prompt: string}) => {
+      // Hook writer detection
+      if (args.prompt.includes('Generate platform-tailored hook variations')) {
+        if (options.hookWriter === false) {
+          return (async function* () {
+            yield {
+              type: 'result' as const,
+              subtype: 'error_during_execution' as const,
+              result: '',
+              total_cost_usd: 0.001,
+              usage: {input_tokens: 100, output_tokens: 0},
+              errors: ['Agent failed during execution'],
+            }
+          })()
+        }
+        return (async function* () {
+          yield {
+            type: 'result' as const,
+            subtype: 'success' as const,
+            result: JSON.stringify(validHookWriterOutput),
+            total_cost_usd: 0.0025,
+            usage: {input_tokens: 450, output_tokens: 380},
+          }
+        })()
+      }
+
+      // Platform agents
       let output: unknown
+      let shouldFail = false
       if (args.prompt.includes('genuine community member')) {
         output = validRedditContent
+        shouldFail = options.reddit === false
       } else if (args.prompt.includes('stops the scroll within 2 seconds')) {
         output = validTiktokContent
+        shouldFail = options.tiktok === false
       } else if (args.prompt.includes('meaningful interactions (comments, shares)')) {
         output = validFacebookContent
+        shouldFail = options.facebook === false
+      } else if (args.prompt.includes('saves and shares')) {
+        output = validInstagramContent
+        shouldFail = options.instagram === false
       } else {
         output = validInstagramContent
+        shouldFail = options.instagram === false
+      }
+
+      if (shouldFail) {
+        return (async function* () {
+          yield {
+            type: 'result' as const,
+            subtype: 'error_during_execution' as const,
+            result: '',
+            total_cost_usd: 0.001,
+            usage: {input_tokens: 100, output_tokens: 0},
+            errors: ['Agent failed during execution'],
+          }
+        })()
       }
 
       return (async function* () {
@@ -474,41 +529,24 @@ describe('runCreationStage', () => {
         }
       })()
     })
+  }
+
+  it('runs all four platform agents plus hook writer (Phase 1 + Phase 2)', async () => {
+    const mockQuery = createStageQuery()
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
     const result = await runCreationStage(creationInputs)
 
-    // All four agents were called
-    expect(mockQuery).toHaveBeenCalledTimes(4)
+    // 4 platform agents + 1 hook writer = 5 calls
+    expect(mockQuery).toHaveBeenCalledTimes(5)
     expect(result.stageMetadata.agentsExecuted).toEqual([
-      'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator',
+      'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'hook-writer',
     ])
   })
 
-  it('returns combined CreationStageOutput on all success', async () => {
-    const mockQuery = vi.fn((args: {prompt: string}) => {
-      let output: unknown
-      if (args.prompt.includes('genuine community member')) {
-        output = validRedditContent
-      } else if (args.prompt.includes('stops the scroll within 2 seconds')) {
-        output = validTiktokContent
-      } else if (args.prompt.includes('meaningful interactions (comments, shares)')) {
-        output = validFacebookContent
-      } else {
-        output = validInstagramContent
-      }
-
-      return (async function* () {
-        yield {
-          type: 'result' as const,
-          subtype: 'success' as const,
-          result: JSON.stringify(output),
-          total_cost_usd: 0.0025,
-          usage: {input_tokens: 450, output_tokens: 380},
-        }
-      })()
-    })
+  it('returns combined CreationStageOutput on all success (including hook writer)', async () => {
+    const mockQuery = createStageQuery()
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
@@ -522,51 +560,21 @@ describe('runCreationStage', () => {
     expect(result.tiktokPackage!.scripts).toHaveLength(2)
     expect(result.facebookPackage!.posts).toHaveLength(2)
     expect(result.instagramPackage!.posts).toHaveLength(2)
-    expect(result.stageMetadata.agentsSucceeded).toEqual([
-      'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator',
-    ])
+    expect(result.hookWriterOutput).not.toBeNull()
+    expect(result.hookWriterOutput!.hooks.length).toBeGreaterThanOrEqual(1)
+    expect(result.hookWriterOutput!.topPicks.length).toBeGreaterThanOrEqual(1)
+    expect(result.hookWriterOutput!.abPairs.length).toBeGreaterThanOrEqual(1)
+    expect(result.stageMetadata.agentsSucceeded).toEqual(
+      expect.arrayContaining([
+        'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'hook-writer',
+      ]),
+    )
     expect(result.stageMetadata.agentsFailed).toEqual([])
   })
 
-  it('returns partial results when one agent fails (degraded mode)', async () => {
-    const mockQuery = vi.fn((args: {prompt: string}) => {
-      // Reddit and Facebook succeed, TikTok and Instagram fail
-      if (args.prompt.includes('genuine community member')) {
-        return (async function* () {
-          yield {
-            type: 'result' as const,
-            subtype: 'success' as const,
-            result: JSON.stringify(validRedditContent),
-            total_cost_usd: 0.0025,
-            usage: {input_tokens: 450, output_tokens: 380},
-          }
-        })()
-      }
-
-      if (args.prompt.includes('meaningful interactions (comments, shares)')) {
-        return (async function* () {
-          yield {
-            type: 'result' as const,
-            subtype: 'success' as const,
-            result: JSON.stringify(validFacebookContent),
-            total_cost_usd: 0.0025,
-            usage: {input_tokens: 450, output_tokens: 380},
-          }
-        })()
-      }
-
-      // TikTok and Instagram fail
-      return (async function* () {
-        yield {
-          type: 'result' as const,
-          subtype: 'error_during_execution' as const,
-          result: '',
-          total_cost_usd: 0.001,
-          usage: {input_tokens: 100, output_tokens: 0},
-          errors: ['Agent failed during execution'],
-        }
-      })()
-    })
+  it('returns partial results when some platform agents fail (degraded mode)', async () => {
+    // Reddit and Facebook succeed, TikTok and Instagram fail, hook writer still runs
+    const mockQuery = createStageQuery({reddit: true, tiktok: false, facebook: true, instagram: false, hookWriter: true})
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
@@ -577,8 +585,11 @@ describe('runCreationStage', () => {
     expect(result.facebookPackage).not.toBeNull()
     expect(result.tiktokPackage).toBeNull()
     expect(result.instagramPackage).toBeNull()
+    // Hook writer still runs on available content items
+    expect(result.hookWriterOutput).not.toBeNull()
     expect(result.stageMetadata.agentsSucceeded).toContain('reddit-creator')
     expect(result.stageMetadata.agentsSucceeded).toContain('facebook-creator')
+    expect(result.stageMetadata.agentsSucceeded).toContain('hook-writer')
     expect(result.stageMetadata.agentsFailed).toContain('tiktok-creator')
     expect(result.stageMetadata.agentsFailed).toContain('instagram-creator')
     // agentErrors should capture failure reasons (M1)
@@ -594,33 +605,9 @@ describe('runCreationStage', () => {
     expect(platforms.has('instagram')).toBe(false)
   })
 
-  it('handles partial failure: 3 agents fail, 1 succeeds', async () => {
-    const mockQuery = vi.fn((args: {prompt: string}) => {
-      // Only Instagram succeeds
-      if (args.prompt.includes('saves and shares')) {
-        return (async function* () {
-          yield {
-            type: 'result' as const,
-            subtype: 'success' as const,
-            result: JSON.stringify(validInstagramContent),
-            total_cost_usd: 0.0025,
-            usage: {input_tokens: 450, output_tokens: 380},
-          }
-        })()
-      }
-
-      // All others fail
-      return (async function* () {
-        yield {
-          type: 'result' as const,
-          subtype: 'error_during_execution' as const,
-          result: '',
-          total_cost_usd: 0.001,
-          usage: {input_tokens: 100, output_tokens: 0},
-          errors: ['Agent failed during execution'],
-        }
-      })()
-    })
+  it('handles partial failure: 3 agents fail, 1 succeeds, hook writer runs on remaining', async () => {
+    // Only Instagram succeeds, hook writer runs on Instagram content
+    const mockQuery = createStageQuery({reddit: false, tiktok: false, facebook: false, instagram: true, hookWriter: true})
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
@@ -630,7 +617,9 @@ describe('runCreationStage', () => {
     expect(result.tiktokPackage).toBeNull()
     expect(result.facebookPackage).toBeNull()
     expect(result.instagramPackage).not.toBeNull()
-    expect(result.stageMetadata.agentsSucceeded).toEqual(['instagram-creator'])
+    expect(result.hookWriterOutput).not.toBeNull()
+    expect(result.stageMetadata.agentsSucceeded).toContain('instagram-creator')
+    expect(result.stageMetadata.agentsSucceeded).toContain('hook-writer')
     expect(result.stageMetadata.agentsFailed).toHaveLength(3)
     // agentErrors should capture failure reasons (M1)
     expect(result.stageMetadata.agentErrors).toBeDefined()
@@ -638,7 +627,7 @@ describe('runCreationStage', () => {
     expect(result.contentItems.every((i) => i.platform === 'instagram')).toBe(true)
   })
 
-  it('returns failed status when all agents fail', async () => {
+  it('returns failed status when all platform agents fail (hook writer skipped)', async () => {
     const mockQuery = createMockQuery([createErrorMessage('error_during_execution')])
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
@@ -649,18 +638,44 @@ describe('runCreationStage', () => {
     expect(result.tiktokPackage).toBeNull()
     expect(result.facebookPackage).toBeNull()
     expect(result.instagramPackage).toBeNull()
+    expect(result.hookWriterOutput).toBeNull()
     expect(result.contentItems).toEqual([])
     expect(result.stageMetadata.agentsSucceeded).toEqual([])
-    expect(result.stageMetadata.agentsFailed).toEqual([
+    // hook-writer is skipped (not executed) when no content items — should NOT appear in agentsExecuted or agentsFailed
+    expect(result.stageMetadata.agentsExecuted).toEqual([
       'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator',
     ])
-    // agentErrors should capture all failure reasons (M1)
+    expect(result.stageMetadata.agentsFailed).toEqual(
+      expect.arrayContaining([
+        'reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator',
+      ]),
+    )
+    expect(result.stageMetadata.agentsFailed).not.toContain('hook-writer')
+    // agentErrors should capture all failure reasons + hook-writer skip reason
     expect(result.stageMetadata.agentErrors).toBeDefined()
-    expect(Object.keys(result.stageMetadata.agentErrors!)).toHaveLength(4)
+    expect(result.stageMetadata.agentErrors!['hook-writer']).toContain('no content items')
   })
 
-  it('converts platform packages to ContentItem[] array including all four platforms', async () => {
+  it('hook writer runs AFTER platform agents (receives ContentItem[] from Phase 1)', async () => {
+    const callOrder: string[] = []
     const mockQuery = vi.fn((args: {prompt: string}) => {
+      if (args.prompt.includes('Generate platform-tailored hook variations')) {
+        callOrder.push('hook-writer')
+        // Verify the hook writer receives content item IDs from platform agents
+        expect(args.prompt).toContain('Content Items')
+        return (async function* () {
+          yield {
+            type: 'result' as const,
+            subtype: 'success' as const,
+            result: JSON.stringify(validHookWriterOutput),
+            total_cost_usd: 0.0025,
+            usage: {input_tokens: 450, output_tokens: 380},
+          }
+        })()
+      }
+
+      // Platform agents
+      callOrder.push('platform-agent')
       let output: unknown
       if (args.prompt.includes('genuine community member')) {
         output = validRedditContent
@@ -682,6 +697,66 @@ describe('runCreationStage', () => {
         }
       })()
     })
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
+    await runCreationStage(creationInputs)
+
+    // Hook writer call must come AFTER all platform agent calls
+    const hookWriterIndex = callOrder.lastIndexOf('hook-writer')
+    expect(hookWriterIndex).toBe(callOrder.length - 1) // Last call
+    expect(callOrder.filter((c) => c === 'platform-agent').length).toBe(4)
+  })
+
+  it('hook writer receives ContentItem[] from platform agents', async () => {
+    const mockQuery = vi.fn((args: {prompt: string}) => {
+      if (args.prompt.includes('Generate platform-tailored hook variations')) {
+        // Verify content items are passed as JSON in the prompt
+        expect(args.prompt).toContain('post-001') // Reddit post ID
+        expect(args.prompt).toContain('script-001') // TikTok script ID
+        return (async function* () {
+          yield {
+            type: 'result' as const,
+            subtype: 'success' as const,
+            result: JSON.stringify(validHookWriterOutput),
+            total_cost_usd: 0.0025,
+            usage: {input_tokens: 450, output_tokens: 380},
+          }
+        })()
+      }
+
+      let output: unknown
+      if (args.prompt.includes('genuine community member')) {
+        output = validRedditContent
+      } else if (args.prompt.includes('stops the scroll within 2 seconds')) {
+        output = validTiktokContent
+      } else if (args.prompt.includes('meaningful interactions (comments, shares)')) {
+        output = validFacebookContent
+      } else {
+        output = validInstagramContent
+      }
+
+      return (async function* () {
+        yield {
+          type: 'result' as const,
+          subtype: 'success' as const,
+          result: JSON.stringify(output),
+          total_cost_usd: 0.0025,
+          usage: {input_tokens: 450, output_tokens: 380},
+        }
+      })()
+    })
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
+    const result = await runCreationStage(creationInputs)
+
+    expect(result.hookWriterOutput).not.toBeNull()
+    expect(result.hookWriterOutput!.hooks.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('converts platform packages to ContentItem[] array including all four platforms', async () => {
+    const mockQuery = createStageQuery()
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
 
     const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
@@ -728,11 +803,9 @@ describe('runCreationStage', () => {
     // Check Instagram content items (posts + reels + stories + carousels)
     const instagramItems = result.contentItems.filter((i) => i.platform === 'instagram')
     expect(instagramItems.length).toBe(5) // 2 posts + 1 reel + 1 story + 1 carousel
-    // Posts are identified by having 'hashtags' in metadata (vs carousel objects which have 'slides')
     const instagramPosts = instagramItems.filter((i) => 'hashtags' in (i.metadata as Record<string, unknown>))
     const instagramReels = instagramItems.filter((i) => i.contentType === 'reel')
     const instagramStories = instagramItems.filter((i) => i.contentType === 'story')
-    // Carousel content items have 'slides' metadata (distinct from posts with format='carousel')
     const instagramCarousels = instagramItems.filter((i) => 'slides' in (i.metadata as Record<string, unknown>))
     expect(instagramPosts.length).toBe(2)
     expect(instagramReels.length).toBe(1)
@@ -747,5 +820,169 @@ describe('runCreationStage', () => {
     expect(instagramStories[0].metadata).toHaveProperty('interactions')
     expect(instagramCarousels[0].metadata).toHaveProperty('slides')
     expect(instagramCarousels[0].metadata).toHaveProperty('swipeNarrative')
+  })
+})
+
+describe('runHookWriter', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.resetModules()
+  })
+
+  const hookWriterInputs = {
+    contentItems: [
+      {
+        itemId: 'post-001',
+        platform: 'reddit' as const,
+        contentType: 'post',
+        title: 'Test Reddit Post',
+        body: 'Test body content for a Reddit post about wellness.',
+        agentName: 'reddit-creator',
+        generatedBy: 'reddit-creator',
+        campaignId: 'plan-2026-03-wellness-spring',
+        status: 'draft' as const,
+        metadata: {},
+        createdAt: '2026-03-15T10:00:00Z',
+      },
+      {
+        itemId: 'script-001',
+        platform: 'tiktok' as const,
+        contentType: 'video-script',
+        title: 'Test TikTok Script',
+        body: 'Test TikTok script body about morning routines.',
+        agentName: 'tiktok-creator',
+        generatedBy: 'tiktok-creator',
+        campaignId: 'plan-2026-03-wellness-spring',
+        status: 'draft' as const,
+        metadata: {},
+        createdAt: '2026-03-15T10:00:00Z',
+      },
+    ],
+    brandVoiceConfig: creationInputs.brandVoiceConfig,
+    campaignPlan: validCampaignPlan,
+  }
+
+  it('returns valid HookWriterOutput on success', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHookWriterOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+    const result = await runHookWriter(hookWriterInputs)
+
+    expect(result.agentName).toBe('hook-writer')
+    expect(result.status).toBe('success')
+    expect(result.outputs.hooks).toBeDefined()
+    expect(result.outputs.hooks.length).toBeGreaterThanOrEqual(1)
+    expect(result.outputs.topPicks).toBeDefined()
+    expect(result.outputs.topPicks.length).toBeGreaterThanOrEqual(1)
+    expect(result.outputs.abPairs).toBeDefined()
+    expect(result.outputs.abPairs.length).toBeGreaterThanOrEqual(1)
+    expect(result.outputs.analysis).toBeDefined()
+  })
+
+  it('generates hooks labelled with platform, trigger type, and archetype', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHookWriterOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+    const result = await runHookWriter(hookWriterInputs)
+
+    for (const hook of result.outputs.hooks) {
+      expect(hook.platform).toBeDefined()
+      expect(['reddit', 'tiktok', 'facebook', 'instagram']).toContain(hook.platform)
+      expect(hook.triggerType).toBeDefined()
+      expect(hook.hookArchetype).toBeDefined()
+      expect(hook.hookText.length).toBeGreaterThanOrEqual(1)
+      expect(hook.confidenceScore).toBeGreaterThanOrEqual(0)
+      expect(hook.confidenceScore).toBeLessThanOrEqual(1)
+      expect(hook.characterCount).toBeGreaterThanOrEqual(1)
+    }
+  })
+
+  it('produces A/B pairs with variation strategy and rationale', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHookWriterOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+    const result = await runHookWriter(hookWriterInputs)
+
+    for (const pair of result.outputs.abPairs) {
+      expect(pair.pairId).toBeDefined()
+      expect(pair.contentItemId).toBeDefined()
+      expect(pair.platform).toBeDefined()
+      expect(pair.hookA).toBeDefined()
+      expect(pair.hookB).toBeDefined()
+      expect(pair.hookA).not.toBe(pair.hookB)
+      expect(pair.variationStrategy).toBeDefined()
+      expect(pair.rationale.length).toBeGreaterThanOrEqual(1)
+    }
+  })
+
+  it('includes confidence scores between 0 and 1 on hooks', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHookWriterOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+    const result = await runHookWriter(hookWriterInputs)
+
+    for (const hook of result.outputs.hooks) {
+      expect(hook.confidenceScore).toBeGreaterThanOrEqual(0)
+      expect(hook.confidenceScore).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('throws AgentExecutionError on agent failure', async () => {
+    const mockQuery = createMockQuery([createErrorMessage('error_during_execution')])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+
+    await expect(runHookWriter(hookWriterInputs)).rejects.toThrow()
+  })
+
+  it('throws AgentValidationError when contentItems is empty', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHookWriterOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+    const invalidInputs = {...hookWriterInputs, contentItems: []}
+
+    await expect(runHookWriter(invalidInputs)).rejects.toThrow()
+  })
+
+  it('includes cost and usage metadata', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHookWriterOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+    const result = await runHookWriter(hookWriterInputs)
+
+    expect(result.usage.cost).toBeGreaterThan(0)
+    expect(result.usage.inputTokens).toBeGreaterThan(0)
+    expect(result.usage.outputTokens).toBeGreaterThan(0)
+  })
+
+  it('passes correct tools to query() (Read)', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHookWriterOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+    await runHookWriter(hookWriterInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {allowedTools: string[]}}
+    expect(callArgs.options.allowedTools).toEqual(
+      expect.arrayContaining(['Read']),
+    )
+  })
+
+  it('includes knowledge context in systemPrompt', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHookWriterOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runHookWriter} = await import('../../../src/lib/agents/creation.js')
+    await runHookWriter(hookWriterInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).toContain('Knowledge Base')
   })
 })

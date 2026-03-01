@@ -332,6 +332,68 @@ export const creationInputsSchema = z.object({
 
 export type CreationInputs = z.infer<typeof creationInputsSchema>
 
+// ── HookWriterOutput (output of hook-writer agent) ──────────────────────────
+
+const hookSchema = z.object({
+  hookId: z.string().min(1),
+  contentItemId: z.string().min(1),
+  platform: z.enum(['reddit', 'tiktok', 'facebook', 'instagram']),
+  hookText: z.string().min(1),
+  triggerType: z.enum(['curiosity', 'urgency', 'social-proof', 'fomo', 'authority', 'identity', 'loss-aversion', 'novelty']),
+  hookArchetype: z.enum(['question', 'statistic', 'story', 'contrarian', 'how-to', 'list', 'challenge', 'confession', 'transformation', 'prediction', 'analogy', 'warning']),
+  confidenceScore: z.number().min(0).max(1),
+  characterCount: z.number().int().nonnegative(),
+})
+
+const topPickSchema = z.object({
+  contentItemId: z.string().min(1),
+  platform: z.enum(['reddit', 'tiktok', 'facebook', 'instagram']),
+  recommendedHookId: z.string().min(1),
+  rationale: z.string().min(1),
+})
+
+const abPairSchema = z.object({
+  pairId: z.string().min(1),
+  contentItemId: z.string().min(1),
+  platform: z.enum(['reddit', 'tiktok', 'facebook', 'instagram']),
+  hookA: z.string().min(1),
+  hookB: z.string().min(1),
+  variationStrategy: z.string().min(1),
+  rationale: z.string().min(1),
+})
+
+const hookAnalysisSchema = z.object({
+  totalHooksGenerated: z.number().int().nonnegative(),
+  avgConfidenceScore: z.number().min(0).max(1),
+  platformBreakdown: z.record(z.string(), z.number().int().nonnegative()),
+  triggerDistribution: z.record(z.string(), z.number().int().nonnegative()),
+})
+
+export const hookWriterOutputSchema = z.object({
+  hooks: z.array(hookSchema).min(1),
+  topPicks: z.array(topPickSchema).min(1),
+  abPairs: z.array(abPairSchema).min(1),
+  analysis: hookAnalysisSchema,
+})
+
+export type HookWriterOutput = z.infer<typeof hookWriterOutputSchema>
+
+// ── HookWriterInputs (typed inputs for hook-writer agent) ───────────────────
+
+export const hookWriterInputsSchema = z.object({
+  contentItems: z.array(contentItemSchema).min(1),
+  brandVoiceConfig: z.object({
+    tone: z.string().min(1),
+    communicationStyle: z.string().min(1),
+    brandPrinciples: z.array(z.string().min(1)),
+    bannedPhrases: z.array(z.string().min(1)),
+    productName: z.string().optional(),
+  }),
+  campaignPlan: campaignPlanSchema,
+})
+
+export type HookWriterInputs = z.infer<typeof hookWriterInputsSchema>
+
 // ── CreationStageOutput (combined output of the creation stage) ──────────────
 
 const stageMetadataSchema = z.object({
@@ -347,6 +409,7 @@ export const creationStageOutputSchema = z.object({
   facebookPackage: facebookContentPackageSchema.nullable(),
   instagramPackage: instagramContentPackageSchema.nullable(),
   contentItems: z.array(contentItemSchema),
+  hookWriterOutput: hookWriterOutputSchema.nullable(),
   stageMetadata: stageMetadataSchema,
 })
 
