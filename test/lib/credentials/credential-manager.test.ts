@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { CredentialManager } from '../../../src/lib/credentials/index.js'
 import { CredentialNotFoundError, CredentialStoreError, TrustViolationError, CredentialAccessDeniedError } from '../../../src/lib/credentials/errors.js'
-import type { KeychainAdapter, Platform, TokenData } from '../../../src/lib/credentials/types.js'
+import type { KeychainAdapter, TokenData } from '../../../src/lib/credentials/types.js'
 import { createTestDir, removeTestDir } from '../../helpers/test-project.js'
 
 function createMockKeychain(): KeychainAdapter & {

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { getPlatformOAuthConfig, PLATFORM_OAUTH_DEFAULTS } from '../../../src/lib/credentials/platform-oauth-config.js'
 

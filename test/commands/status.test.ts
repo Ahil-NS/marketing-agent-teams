@@ -1,4 +1,3 @@
-import {join} from 'node:path'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
 
 import {createTestPipelineRun} from '../helpers/pipeline-state-factory.js'

@@ -20,12 +20,13 @@ describe('mat --help', () => {
     expect(stdout).toContain('marketing')
   })
 
-  it('each command stub logs not-yet-implemented', async () => {
-    const commands = ['run', 'review', 'status', 'config', 'agents:list', 'logs']
+  it('each implemented command runs without crashing', async () => {
+    // Commands that can run without arguments or .mat/ directory
+    const commands = ['review', 'agents:list']
 
     for (const cmd of commands) {
-      const {stdout} = await runCommand([cmd], {root: import.meta.url})
-      expect(stdout).toContain('Not yet implemented')
+      const {error} = await runCommand([cmd], {root: import.meta.url})
+      expect(error).toBeUndefined()
     }
   })
 })

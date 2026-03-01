@@ -54,7 +54,7 @@ describe('StageRunner', () => {
 
       expect(result.status).toBe('completed')
       expect(result.stage).toBe('research')
-      expect(Object.keys(result.agentResults)).toHaveLength(3)
+      expect(Object.keys(result.agentResults)).toHaveLength(5)
       expect(result.errors).toHaveLength(0)
     })
 
@@ -111,7 +111,7 @@ describe('StageRunner', () => {
       const result = await resultPromise
 
       expect(result.status).toBe('failed')
-      expect(result.errors).toHaveLength(3)
+      expect(result.errors).toHaveLength(5)
       for (const agentResult of Object.values(result.agentResults)) {
         expect(agentResult.status).toBe('failed')
       }
@@ -230,9 +230,9 @@ describe('StageRunner', () => {
       const elapsed = Date.now() - startTime
 
       expect(result.status).toBe('completed')
-      // 3 agents at 50ms each in parallel should take ~50ms, not 150ms
+      // 5 agents at 50ms each in parallel should take ~50ms, not 250ms
       expect(elapsed).toBeLessThan(300)
-      expect(mockExecuteAgent).toHaveBeenCalledTimes(3)
+      expect(mockExecuteAgent).toHaveBeenCalledTimes(5)
     })
   })
 
@@ -292,7 +292,7 @@ describe('StageRunner', () => {
       // Status is 'failed' (not 'partial') because continueOnFailure is false
       expect(result.status).toBe('failed')
       // All agents still ran (NFR14 — never abort remaining agents)
-      expect(Object.keys(result.agentResults)).toHaveLength(3)
+      expect(Object.keys(result.agentResults)).toHaveLength(5)
       expect(result.agentResults['trend-scout'].status).toBe('success')
       expect(result.agentResults['competitor-analyst'].status).toBe('failed')
     })
@@ -325,8 +325,8 @@ describe('StageRunner', () => {
       const result = await resultPromise
 
       expect(result.status).toBe('completed')
-      expect(Object.keys(result.agentResults)).toHaveLength(3)
-      expect(mockExecuteAgent).toHaveBeenCalledTimes(3)
+      expect(Object.keys(result.agentResults)).toHaveLength(5)
+      expect(mockExecuteAgent).toHaveBeenCalledTimes(5)
     })
 
     it('handles concurrencyLimit of 1 (sequential execution)', async () => {
@@ -341,8 +341,8 @@ describe('StageRunner', () => {
       const result = await resultPromise
 
       expect(result.status).toBe('completed')
-      expect(Object.keys(result.agentResults)).toHaveLength(3)
-      expect(mockExecuteAgent).toHaveBeenCalledTimes(3)
+      expect(Object.keys(result.agentResults)).toHaveLength(5)
+      expect(mockExecuteAgent).toHaveBeenCalledTimes(5)
     })
   })
 })

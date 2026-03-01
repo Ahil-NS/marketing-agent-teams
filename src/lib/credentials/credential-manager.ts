@@ -106,7 +106,7 @@ export class CredentialManager {
   }
 
   async resolveForAgent(
-    agentName: string,
+    _agentName: string,
     permissions?: { credentials?: string[] },
   ): Promise<CredentialContext> {
     const declaredCredentials = permissions?.credentials ?? []

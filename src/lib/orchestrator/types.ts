@@ -48,9 +48,9 @@ export const DERIVATIVE_PIPELINE_STAGES = Object.freeze([
  * The 'review' stage is a pause point — no agents, human review only.
  */
 export const STAGE_AGENT_MAP: Record<PipelineStage, readonly string[]> = {
-  research: ['trend-scout', 'audience-researcher', 'competitor-analyst'],
+  research: ['trend-scout', 'audience-researcher', 'competitor-analyst', 'viral-pattern-decoder', 'platform-algorithm'],
   strategy: ['content-strategist', 'campaign-planner', 'channel-optimizer'],
-  creation: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'hook-writer'],
+  creation: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'hook-writer', 'content-atomizer'],
   optimization: ['seo-optimizer', 'ab-test-designer', 'timing-optimizer', 'hashtag-strategist'],
   quality: ['brand-guardian', 'fact-checker', 'platform-compliance', 'sensitivity-reviewer'],
   review: [], // Human review — pipeline pauses, no agent execution

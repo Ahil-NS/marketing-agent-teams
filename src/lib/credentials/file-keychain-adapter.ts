@@ -7,7 +7,6 @@ import type { KeychainAdapter } from './types.js'
 const ALGORITHM = 'aes-256-gcm'
 const SALT_LENGTH = 32
 const IV_LENGTH = 16
-const AUTH_TAG_LENGTH = 16
 const KEY_LENGTH = 32
 
 interface EncryptedStore {

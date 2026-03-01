@@ -1,4 +1,3 @@
-import {join} from 'node:path'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
 
 import type {LogEntry} from '../../src/lib/logging/types.js'
@@ -190,7 +189,7 @@ describe('mat logs command', () => {
 
     // Command catches MATError and calls this.error() which throws oclif Error
     let caughtError: Error | undefined
-    const originalError = cmd.error.bind(cmd)
+    const _originalError = cmd.error.bind(cmd)
     cmd.error = ((msg: string) => {
       caughtError = new Error(msg)
       throw caughtError

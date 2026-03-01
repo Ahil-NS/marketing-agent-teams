@@ -63,7 +63,7 @@ export async function promptWizard(): Promise<WizardAnswers> {
       {value: 'facebook', name: 'Facebook'},
       {value: 'instagram', name: 'Instagram'},
     ],
-    validate: (value: string[]) => value.length > 0 || 'Select at least one platform',
+    validate: (value: readonly { value: string }[]) => value.length > 0 || 'Select at least one platform',
   })
 
   const skillLevel = await select({

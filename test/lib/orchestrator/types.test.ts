@@ -30,9 +30,9 @@ describe('orchestrator/types', () => {
       }
     })
 
-    it('research stage has 3 agents', async () => {
+    it('research stage has 5 agents', async () => {
       const {STAGE_AGENT_MAP} = await import('../../../src/lib/orchestrator/types.js')
-      expect(STAGE_AGENT_MAP.research).toEqual(['trend-scout', 'audience-researcher', 'competitor-analyst'])
+      expect(STAGE_AGENT_MAP.research).toEqual(['trend-scout', 'audience-researcher', 'competitor-analyst', 'viral-pattern-decoder', 'platform-algorithm'])
     })
 
     it('review stage has no agents (human review)', async () => {

@@ -4,7 +4,6 @@ import {PermissionEnforcer} from '../../../src/lib/agents/permission-enforcer.js
 import {PermissionDeniedError} from '../../../src/lib/agents/errors.js'
 import {TrustViolationError} from '../../../src/lib/credentials/errors.js'
 import type {SkillDefinition} from '../../../src/lib/agents/types.js'
-import type {TrustTier} from '../../../src/lib/credentials/types.js'
 
 function createSkillDef(overrides?: Partial<SkillDefinition>): SkillDefinition {
   return {

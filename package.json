@@ -14,7 +14,7 @@
     "oclif.manifest.json"
   ],
   "scripts": {
-    "build": "tsup && oclif manifest",
+    "build": "tsup && npx oclif manifest",
     "dev": "bin/dev",
     "test": "vitest run",
     "lint": "eslint .",

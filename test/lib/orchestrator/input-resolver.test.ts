@@ -21,7 +21,6 @@ function makeStageResult(
 describe('resolveInputs', () => {
   let resolveInputs: typeof import('../../../src/lib/orchestrator/input-resolver.js').resolveInputs
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   beforeAll(async () => {
     const mod = await import('../../../src/lib/orchestrator/input-resolver.js')
     resolveInputs = mod.resolveInputs

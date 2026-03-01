@@ -1,4 +1,4 @@
-import {describe, expect, it, vi} from 'vitest'
+import {describe, expect, it} from 'vitest'
 
 import Run from '../../src/commands/run.js'
 
@@ -6,7 +6,7 @@ describe('mat run --dry-run flag', () => {
   it('parses --dry-run flag as true when provided', async () => {
     const cmd = new Run(['--dry-run', '--platforms', 'reddit'], {} as any)
     // We mock parse to verify the flag is defined and parseable
-    const originalParse = cmd.parse.bind(cmd)
+    const _originalParse = cmd.parse.bind(cmd)
 
     // Access the static flags definition directly
     expect(Run.flags).toHaveProperty('dry-run')

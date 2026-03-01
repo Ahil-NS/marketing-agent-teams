@@ -45,7 +45,7 @@ export default class PlatformsAdd extends Command {
     const handler = new OAuthFlowHandler(platform, oauthSettings.config)
 
     this.log(`Starting OAuth flow for ${platform}...`)
-    const port = await handler.startCallbackServer()
+    await handler.startCallbackServer()
     const authUrl = handler.getAuthorizationUrl()
     this.log(`Open this URL in your browser to authorize:\n${authUrl}`)
     this.log('Waiting for authorization (5 minute timeout)...')

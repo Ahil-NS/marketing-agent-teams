@@ -1,3 +1,5 @@
+import {z} from 'zod'
+
 import {executeAgent} from '../agents/agent-executor.js'
 import {AgentTimeoutError} from '../agents/errors.js'
 import type {MATError} from '../utils/errors.js'
@@ -179,7 +181,7 @@ export class StageRunner {
       systemPrompt: '', // Placeholder — skill-loader (Story 2.9) provides this
       allowedTools: [], // Placeholder — skill-loader (Story 2.9) provides this
       model: 'haiku', // Placeholder — skill-loader (Story 2.9) provides this
-      outputSchema: undefined as any, // Agent-specific, resolved at execution time
+      outputSchema: z.record(z.string(), z.unknown()), // Permissive — agent-specific schemas applied downstream
     })
 
     let timeoutId: ReturnType<typeof setTimeout>

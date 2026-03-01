@@ -4,7 +4,6 @@ import {join} from 'node:path'
 
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 
-import type {StageExecutionResult, StageRunnerContext} from '../../../src/lib/orchestrator/types.js'
 import {createMockAgentResult} from '../../helpers/mock-agent-executor.js'
 
 // Mock executeAgent so StageRunner doesn't call real agent infrastructure
@@ -20,7 +19,6 @@ vi.mock('../../../src/lib/agents/errors.js', async (importOriginal) => {
 import {executeAgent} from '../../../src/lib/agents/agent-executor.js'
 import {AllAgentsFailedError, PipelineExecutionError} from '../../../src/lib/orchestrator/errors.js'
 import {Orchestrator} from '../../../src/lib/orchestrator/orchestrator.js'
-import {PipelineStateMachine} from '../../../src/lib/orchestrator/pipeline-state.js'
 import {savePipelineRun} from '../../../src/lib/orchestrator/state-serializer.js'
 import {StageRunner} from '../../../src/lib/orchestrator/stage-runner.js'
 import {createTestPipelineRun} from '../../helpers/pipeline-state-factory.js'

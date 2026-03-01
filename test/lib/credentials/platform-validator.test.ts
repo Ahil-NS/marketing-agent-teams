@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { PlatformValidator } from '../../../src/lib/credentials/platform-validator.js'
-import type { AuthResult } from '../../../src/lib/credentials/types.js'
 
 // Mock global fetch
 const mockFetch = vi.fn()

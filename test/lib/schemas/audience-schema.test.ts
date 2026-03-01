@@ -41,7 +41,6 @@ describe('audienceProfileSchema', () => {
 
   it('requires segment demographics to have ageRange', () => {
     const profile = structuredClone(validAudienceProfile)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (profile.segments[0].demographics as any).ageRange
     const result = audienceProfileSchema.safeParse(profile)
     expect(result.success).toBe(false)
@@ -49,7 +48,6 @@ describe('audienceProfileSchema', () => {
 
   it('requires segment psychographics to have valsType', () => {
     const profile = structuredClone(validAudienceProfile)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (profile.segments[0].psychographics as any).valsType
     const result = audienceProfileSchema.safeParse(profile)
     expect(result.success).toBe(false)
@@ -83,7 +81,6 @@ describe('audienceProfileSchema', () => {
 
   it('validates platform enum in platformUsage', () => {
     const profile = structuredClone(validAudienceProfile)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     profile.platformUsage[0].platform = 'twitter' as any
     const result = audienceProfileSchema.safeParse(profile)
     expect(result.success).toBe(false)

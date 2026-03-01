@@ -897,16 +897,16 @@ describe('imagePromptSchema', () => {
   })
 
   it('rejects missing required fields', () => {
-    const {promptId, ...withoutPromptId} = validImagePrompt
+    const {promptId: _promptId, ...withoutPromptId} = validImagePrompt
     expect(imagePromptSchema.safeParse(withoutPromptId).success).toBe(false)
 
-    const {contentItemId, ...withoutContentItemId} = validImagePrompt
+    const {contentItemId: _contentItemId, ...withoutContentItemId} = validImagePrompt
     expect(imagePromptSchema.safeParse(withoutContentItemId).success).toBe(false)
 
-    const {generator, ...withoutGenerator} = validImagePrompt
+    const {generator: _generator, ...withoutGenerator} = validImagePrompt
     expect(imagePromptSchema.safeParse(withoutGenerator).success).toBe(false)
 
-    const {visualConcept, ...withoutVisualConcept} = validImagePrompt
+    const {visualConcept: _visualConcept, ...withoutVisualConcept} = validImagePrompt
     expect(imagePromptSchema.safeParse(withoutVisualConcept).success).toBe(false)
   })
 
@@ -976,16 +976,16 @@ describe('videoPromptSchema', () => {
   })
 
   it('rejects missing required fields', () => {
-    const {sceneDescription, ...withoutScene} = validVideoPrompt
+    const {sceneDescription: _sceneDescription, ...withoutScene} = validVideoPrompt
     expect(videoPromptSchema.safeParse(withoutScene).success).toBe(false)
 
-    const {cameraMovement, ...withoutCamera} = validVideoPrompt
+    const {cameraMovement: _cameraMovement, ...withoutCamera} = validVideoPrompt
     expect(videoPromptSchema.safeParse(withoutCamera).success).toBe(false)
 
-    const {audioMusic, ...withoutAudio} = validVideoPrompt
+    const {audioMusic: _audioMusic, ...withoutAudio} = validVideoPrompt
     expect(videoPromptSchema.safeParse(withoutAudio).success).toBe(false)
 
-    const {duration, ...withoutDuration} = validVideoPrompt
+    const {duration: _duration, ...withoutDuration} = validVideoPrompt
     expect(videoPromptSchema.safeParse(withoutDuration).success).toBe(false)
   })
 

@@ -3,7 +3,7 @@ import {
   PipelineExecutionError,
 } from './errors.js'
 import {PipelineStateMachine} from './pipeline-state.js'
-import {StageRunner} from './stage-runner.js'
+import type {StageRunner} from './stage-runner.js'
 import type {
   OrchestratorConfig,
   OrchestratorEvents,
@@ -87,7 +87,6 @@ export class Orchestrator {
    * Returns the final PipelineRun state.
    */
   async execute(): Promise<PipelineRun> {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
       const state = this.stateMachine.getState()
 

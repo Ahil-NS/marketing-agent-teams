@@ -1,9 +1,8 @@
-import {existsSync} from 'node:fs'
 import {mkdir, writeFile} from 'node:fs/promises'
 import {join} from 'node:path'
 
 import YAML from 'yaml'
-import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
+import {afterEach, beforeEach, describe, expect, it} from 'vitest'
 
 import {shouldSkipValidation, validateProject} from '../../src/hooks/init.js'
 import {createTestDir, removeTestDir} from '../helpers/test-project.js'

@@ -6,7 +6,6 @@ import {describe, it, expect, beforeEach, afterEach} from 'vitest'
 
 import {loadVertical, getVerticalContext} from '../../../src/lib/agents/vertical-loader.js'
 import {SkillLoadError} from '../../../src/lib/agents/errors.js'
-import type {VerticalDefinition} from '../../../src/lib/agents/vertical-loader.js'
 
 describe('loadVertical', () => {
   let tempDir: string

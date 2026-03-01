@@ -2,23 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import http from 'node:http'
 
 import { OAuthFlowHandler } from '../../../src/lib/credentials/oauth-server.js'
-import type { KeychainAdapter, Platform, TokenData } from '../../../src/lib/credentials/types.js'
-
-function createMockKeychain(): KeychainAdapter & { store: Map<string, string> } {
-  const store = new Map<string, string>()
-  return {
-    store,
-    async setPassword(_service: string, account: string, password: string) {
-      store.set(account, password)
-    },
-    async getPassword(_service: string, account: string) {
-      return store.get(account) ?? null
-    },
-    async deletePassword(_service: string, account: string) {
-      return store.delete(account)
-    },
-  }
-}
 
 // Helper to make HTTP request to localhost
 function makeRequest(url: string): Promise<{ statusCode: number; body: string }> {
