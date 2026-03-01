@@ -102,8 +102,14 @@ export default class ConfigVoice extends Command {
       this.log(`  Banned Phrases:      ${bannedPhrases.length > 0 ? bannedPhrases.join(', ') : '(none)'}`)
     } catch (error) {
       if (error instanceof MATError) throw error
-      // @inquirer/prompts throws on Ctrl+C
-      this.log('\nBrand voice configuration cancelled.')
+      // @inquirer/prompts throws ExitPromptError on Ctrl+C or non-interactive terminal
+      const {isExitPromptError} = await import('../../lib/utils/index.js')
+      if (isExitPromptError(error)) {
+        this.log('\nBrand voice configuration cancelled.')
+        return
+      }
+
+      throw error
     }
   }
 }

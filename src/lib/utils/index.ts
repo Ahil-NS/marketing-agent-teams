@@ -1,5 +1,6 @@
 export {MATError} from './errors.js'
 export type {ErrorSeverity} from './errors.js'
+export {isExitPromptError, isInteractiveTerminal} from './prompt.js'
 export {
   extractRetryAfter,
   isPermanentError,

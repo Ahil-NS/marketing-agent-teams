@@ -2,4 +2,7 @@
 
 import {execute} from '@oclif/core'
 
-await execute({dir: import.meta.url})
+execute({dir: import.meta.url}).catch((error) => {
+  console.error(error.message ?? error)
+  process.exitCode = 1
+})

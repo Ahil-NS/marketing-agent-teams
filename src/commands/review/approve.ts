@@ -68,10 +68,20 @@ export default class ReviewApprove extends Command {
     // Confirm unless --yes
     if (!flags.yes) {
       const {confirm} = await import('@inquirer/prompts')
-      const proceed = await confirm({message: `Approve ${pendingItems.length} items?`})
-      if (!proceed) {
-        this.log('Bulk approve cancelled')
-        return []
+      try {
+        const proceed = await confirm({message: `Approve ${pendingItems.length} items?`})
+        if (!proceed) {
+          this.log('Bulk approve cancelled')
+          return []
+        }
+      } catch (error) {
+        const {isExitPromptError} = await import('../../lib/utils/index.js')
+        if (isExitPromptError(error)) {
+          this.log('\nBulk approve cancelled')
+          return []
+        }
+
+        throw error
       }
     }
 

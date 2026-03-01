@@ -3,6 +3,7 @@ import {input} from '@inquirer/prompts'
 
 import {ReviewQueue} from '../../lib/review-queue/index.js'
 import type {ReviewItem} from '../../lib/review-queue/index.js'
+import {isExitPromptError} from '../../lib/utils/index.js'
 
 export default class ReviewEdit extends Command {
   static override args = {
@@ -23,6 +24,19 @@ export default class ReviewEdit extends Command {
     const queue = new ReviewQueue(projectRoot)
     const current = await queue.getById(args.id)
 
+    try {
+      return await this.promptEdits(current, queue, flags.notes)
+    } catch (error) {
+      if (isExitPromptError(error)) {
+        this.log('\nEdit cancelled.')
+        return current
+      }
+
+      throw error
+    }
+  }
+
+  private async promptEdits(current: ReviewItem, queue: ReviewQueue, notes?: string): Promise<ReviewItem> {
     // Present current editable content fields
     this.log(`\nEditing item: ${current.id}`)
     this.log(`Platform: ${current.platform}`)
@@ -76,7 +90,7 @@ export default class ReviewEdit extends Command {
       this.log(`  ${field}: "${String(original)}" → "${newValue}"`)
     }
 
-    const item = await queue.edit(args.id, edits, flags.notes)
+    const item = await queue.edit(current.id, edits, notes)
     this.log(`\nEdited and approved item ${item.id}`)
     return item
   }

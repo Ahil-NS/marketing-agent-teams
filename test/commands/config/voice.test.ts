@@ -181,7 +181,9 @@ describe('mat config voice', () => {
 
   it('handles Ctrl+C cancellation gracefully', async () => {
     const prompts = await import('@inquirer/prompts')
-    vi.mocked(prompts.select).mockRejectedValueOnce(new Error('User force closed the prompt'))
+    const exitError = new Error('User force closed the prompt')
+    exitError.name = 'ExitPromptError'
+    vi.mocked(prompts.select).mockRejectedValueOnce(exitError)
 
     const {default: ConfigVoice} = await import('../../../src/commands/config/voice.js')
     const cmd = new ConfigVoice([], {} as never)
