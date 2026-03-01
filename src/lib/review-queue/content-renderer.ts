@@ -51,6 +51,7 @@ export class ContentRenderer {
       cmd.log(`Compliance flags: ${flaggedCount} items flagged`)
     }
 
+    cmd.log(`Run 'mat review show <id>' to see full platform preview`)
     cmd.log(`Run 'mat review approve <id>' to approve items`)
   }
 

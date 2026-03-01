@@ -160,6 +160,16 @@ describe('ContentRenderer', () => {
       const output = cmd.logs.join('\n')
       expect(output).toContain("Run 'mat review approve <id>' to approve items")
     })
+
+    it('shows guidance to view full platform preview', () => {
+      const cmd = mockCommand()
+      const items = [makeItem({id: 'item-001'})]
+
+      ContentRenderer.renderQueueTable(cmd as any, items)
+
+      const output = cmd.logs.join('\n')
+      expect(output).toContain("Run 'mat review show <id>' to see full platform preview")
+    })
   })
 
   describe('renderEmptyState()', () => {
