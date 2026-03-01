@@ -7,6 +7,7 @@ import {InstalledAgentsRegistry} from '../../lib/agents/installed-agents.js'
 import type {InstalledAgent} from '../../lib/agents/installed-agents.js'
 import {parseSkillMd} from '../../lib/agents/skill-loader.js'
 import {validateSkillMdSafety} from '../../lib/agents/sandbox-validator.js'
+import {runSecurityLint} from '../../lib/agents/security-lint.js'
 import {agentDefinitionSchema} from '../../lib/schemas/agent-schema.js'
 import {MATError} from '../../lib/utils/errors.js'
 
@@ -122,6 +123,38 @@ export default class AgentsAdd extends Command {
         `No valid agents found in plugin "${packageName}"\n\nReason: All SKILL.md files failed validation\nResolution: Contact the package author to fix the agent definitions`,
         {exit: 1},
       )
+    }
+
+    // Step 5b: Run security lint on all agent directories
+    const lintWarnings: string[] = []
+    const lintErrors: string[] = []
+
+    for (const skillPath of skillPaths) {
+      const agentDir = skillPath.replace(/\/SKILL\.md$/, '')
+      const lintResult = await runSecurityLint(agentDir)
+
+      for (const finding of lintResult.findings) {
+        const msg = `[${finding.rule}] ${skillPath}:${finding.line} — ${finding.message}`
+        if (finding.severity === 'error') {
+          lintErrors.push(msg)
+        } else {
+          lintWarnings.push(msg)
+        }
+      }
+    }
+
+    if (lintErrors.length > 0) {
+      await this.uninstallPlugin(packageName)
+      this.error(
+        `Community agent "${packageName}" failed security lint and was not installed:\n\n${lintErrors.join('\n')}\n\nReason: Security lint found error-severity violations\nResolution: Contact the package author to fix the security issues listed above`,
+        {exit: 1},
+      )
+    }
+
+    if (lintWarnings.length > 0) {
+      this.warn(`Security lint warnings for "${packageName}":\n${lintWarnings.join('\n')}`)
+      this.log('\nProceeding with install — warnings do not block installation.')
+      this.log('⚠️  Review the warnings above. Community agents run in a restricted sandbox.\n')
     }
 
     // Step 6: Register agent in .mat/config/installed-agents.json

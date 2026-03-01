@@ -1,0 +1,28 @@
+# Schema validation and security lint for agent SKILL.md files
+# Story 8.3/8.6: Runs automatically on PRs that modify SKILL.md definitions
+name: Agent Schema & Security Validation
+
+on:
+  pull_request:
+    paths:
+      - 'src/agents/**/SKILL.md'
+      - 'src/agents/**/knowledge/*.md'
+
+jobs:
+  lint-agents:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run agent security lint
+        run: npx mat agents lint --format github
+
+      - name: Run agent schema validation
+        run: npx mat agents validate
