@@ -257,3 +257,11 @@ export type {
   RateLimitStatusData,
   PlatformMetricsData,
 } from './platform-adapter-schema.js'
+export {
+  installedAgentSchema,
+  installedAgentsRegistrySchema,
+} from '../agents/installed-agents.js'
+export type {
+  InstalledAgent,
+  InstalledAgentsRegistryData,
+} from '../agents/installed-agents.js'

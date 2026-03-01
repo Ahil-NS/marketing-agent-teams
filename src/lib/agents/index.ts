@@ -28,6 +28,8 @@ export type {SandboxFinding, SandboxValidationResult} from './sandbox-validator.
 export {loadSkill, loadAllSkills} from './skill-loader.js'
 export {loadVertical, getVerticalContext} from './vertical-loader.js'
 export type {VerticalDefinition} from './vertical-loader.js'
+export {InstalledAgentsRegistry, installedAgentSchema, installedAgentsRegistrySchema, InstalledAgentRegistryError} from './installed-agents.js'
+export type {InstalledAgent, InstalledAgentsRegistryData} from './installed-agents.js'
 export {buildAttributionEntry, appendToAttributionChain} from './attribution.js'
 export type {AgentResult, AgentInputs, ResearchInputs, SkillDefinition, SkillPermissions, PermissionEnforcementResult, ExampleInputs, MemoryEntry, AgentMemoryState, AgentMemoryOptions} from './types.js'
 export {AgentExecutionError, AgentTimeoutError, AgentValidationError, MemoryStoreError, MemoryCorruptionError, SkillLoadError, PermissionDeniedError, SandboxViolationError} from './errors.js'
