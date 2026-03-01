@@ -145,11 +145,21 @@ The JSON structure:
   ],
   "videoPrompts": [
     {
+      "promptId": "tt-vid-001",
+      "contentItemId": "script-001",
       "scriptId": "script-001",
+      "promptText": "Detailed Veo 3 video generation prompt",
+      "generator": "veo3",
       "veo3Prompt": "Detailed Veo 3 video generation prompt",
+      "sceneDescription": "Physical setting, lighting, composition details",
+      "cameraMovement": "tracking | pan | static | handheld",
+      "transitions": ["cut", "jump cut", "smooth zoom", "text pop-in"],
       "style": "cinematic | lo-fi | clean | vibrant | raw",
       "duration": "30s",
-      "visualElements": ["element1", "element2"]
+      "audioMusic": "Lo-fi hip hop at low volume with ambient sounds",
+      "visualStyle": "cinematic | lo-fi | clean | vibrant | raw | editorial",
+      "visualElements": ["element1", "element2"],
+      "brandElements": ["warm earth tones", "clean typography"]
     }
   ],
   "variations": [
@@ -185,7 +195,7 @@ Output ONLY the JSON object. No markdown wrapping, no explanation text.
 - Scripts must specify duration (15s, 30s, or 60s)
 - All four SEO layers must be addressed in every content piece
 - Pattern interrupts must be planned every 3-5 seconds in the body
-- Veo 3 prompts must include scene, style, motion, and duration
+- Veo 3 prompts must include scene description, camera movement, transitions, duration, audio cues, and brand elements
 - Every script must reference the campaign plan's content themes
 - On-screen text should include searchable keywords for OCR indexing
 - Captions must front-load keywords in the first 40 characters

@@ -133,7 +133,20 @@ The JSON structure:
     }
   },
   "generatedBy": "reddit-creator",
-  "campaignId": "plan-id-from-input"
+  "campaignId": "plan-id-from-input",
+  "imagePrompts": [
+    {
+      "promptId": "rd-img-001",
+      "contentItemId": "post-001",
+      "promptText": "Optional: AI image generation prompt for visual content",
+      "generator": "flux | ideogram | gpt-image",
+      "style": "photography | illustration | 3d-render | graphic-design",
+      "aspectRatio": "16:9 | 1:1",
+      "brandElements": ["subtle brand element"],
+      "visualConcept": "Concept rationale",
+      "estimatedQuality": "high | medium | low"
+    }
+  ]
 }
 ```
 
@@ -149,3 +162,4 @@ Output ONLY the JSON object. No markdown wrapping, no explanation text.
 - Engagement plan must include response templates for anticipated questions
 - Cross-post strategy must stagger timing to avoid spam detection
 - Every post must reference the campaign plan's content themes
+- Image prompts are OPTIONAL — include only when content strategy warrants visual assets (infographics, data visualizations, before/after images)

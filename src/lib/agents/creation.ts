@@ -19,6 +19,8 @@ import type {
   CreationStageOutput,
   HookWriterInputs,
   HookWriterOutput,
+  ImagePrompt,
+  VideoPrompt,
 } from '../schemas/creation-schema.js'
 
 import {executeAgent} from './agent-executor.js'
@@ -74,6 +76,7 @@ ${JSON.stringify(inputs.trendBrief, null, 2)}
 - Include title variants, humanized body text, first-comment strategy, engagement plan
 - Respect subreddit-specific norms and anti-spam rules
 - Apply the 90/10 rule: 90% value, 10% promotion
+- Optionally include AI image generation prompts when content strategy warrants visual assets (infographics, data visualizations, before/after images)
 
 Follow your output format specification exactly. Output valid JSON.`,
     systemPrompt: `${skill.systemPrompt}${knowledgeSection}`,
@@ -129,7 +132,7 @@ ${JSON.stringify(inputs.trendBrief, null, 2)}
 - Generate TikTok content packages for each content calendar entry targeting TikTok
 - Every script must have a hook that stops the scroll within 2 seconds
 - Apply 4-layer SEO: caption keywords, OCR text optimization, audio keyword density, hashtag strategy
-- Include Veo 3 video generation prompts for each script
+- Include Veo 3 video generation prompts for EVERY script with promptId, contentItemId, sceneDescription, cameraMovement, transitions, duration, audioMusic, visualStyle, brandElements
 - Create pattern interrupts every 3-5 seconds in scripts
 - Captions must include 4-6 hashtags: trending + niche + brand
 
@@ -176,6 +179,21 @@ function tiktokPackageToContentItems(pkg: TikTokContentPackage): ContentItem[] {
   return pkg.scripts.map((script) => {
     const caption = pkg.captions.find((c) => c.scriptId === script.scriptId)
     const videoPrompt = pkg.videoPrompts.find((v) => v.scriptId === script.scriptId)
+    const videoPrompts: VideoPrompt[] = videoPrompt
+      ? [{
+        promptId: script.scriptId + '-vid',
+        contentItemId: script.scriptId,
+        promptText: videoPrompt.veo3Prompt,
+        generator: 'veo3' as const,
+        sceneDescription: videoPrompt.veo3Prompt,
+        cameraMovement: 'tracking',
+        transitions: ['cut', 'jump cut'],
+        duration: videoPrompt.duration,
+        audioMusic: pkg.metadata.trendingSounds[0]?.name ?? 'background music',
+        visualStyle: (videoPrompt.style === 'editorial' ? 'editorial' : videoPrompt.style) as VideoPrompt['visualStyle'],
+        brandElements: videoPrompt.visualElements,
+      }]
+      : []
     return {
       itemId: script.scriptId,
       platform: 'tiktok' as const,
@@ -190,6 +208,7 @@ function tiktokPackageToContentItems(pkg: TikTokContentPackage): ContentItem[] {
         hashtags: caption?.hashtags ?? [],
         suggestedSound: pkg.metadata.trendingSounds[0]?.name ?? '',
       },
+      videoPrompts,
       status: 'draft' as const,
       generatedBy: pkg.generatedBy,
       agentName: 'tiktok-creator',
@@ -247,6 +266,7 @@ ${JSON.stringify(inputs.trendBrief, null, 2)}
 - Design Group-specific content respecting each group's culture and norms
 - Include Stories with interactive frames (polls, quizzes, questions)
 - Plan boost and cross-posting strategies
+- Generate AI image prompts for posts with visual content (format: image, video, carousel) with promptId, contentItemId, generator, style, aspectRatio, brandElements, visualConcept, estimatedQuality
 - NEVER use engagement bait patterns (tag a friend, like if you agree, share to win)
 
 Follow your output format specification exactly. Output valid JSON.`,
@@ -304,7 +324,8 @@ ${JSON.stringify(inputs.trendBrief, null, 2)}
 - Every post must be visual-first with detailed art direction
 - Include carousel structures with swipe narratives and save-worthy content
 - Reels scripts must have hooks, visual concepts, and music suggestions
-- Write image generation prompts for each visual concept (Flux, Ideogram, or GPT Image)
+- Write AI image generation prompts for EVERY post (Flux, Ideogram, or GPT Image) with promptId, contentItemId, style, aspectRatio, generator, brandElements, visualConcept, estimatedQuality
+- Write Veo 3 video generation prompts for EVERY Reel with promptId, contentItemId, sceneDescription, cameraMovement, transitions, duration, audioMusic, visualStyle, brandElements
 - Apply hashtag strategy: 20-25 per post (broad + niche + brand)
 - Design Stories with interactive stickers and engagement elements
 - Optimize for saves and shares — the key algorithm signals
@@ -373,6 +394,24 @@ function facebookPackageToContentItems(pkg: FacebookContentPackage): ContentItem
 function instagramPackageToContentItems(pkg: InstagramContentPackage): ContentItem[] {
   const now = new Date().toISOString()
 
+  // Build imagePrompts lookup: postId -> ImagePrompt[]
+  const imagePromptsByPost = new Map<string, ImagePrompt[]>()
+  for (const ip of pkg.imagePrompts) {
+    const existing = imagePromptsByPost.get(ip.postId) ?? []
+    existing.push({
+      promptId: ip.postId + '-img',
+      contentItemId: ip.postId,
+      promptText: ip.promptText,
+      generator: ip.generator,
+      style: ip.style,
+      aspectRatio: ip.aspectRatio,
+      brandElements: [],
+      visualConcept: ip.promptText.slice(0, 80),
+      estimatedQuality: 'medium' as const,
+    })
+    imagePromptsByPost.set(ip.postId, existing)
+  }
+
   const postItems: ContentItem[] = pkg.posts.map((post) => ({
     itemId: post.postId,
     platform: 'instagram' as const,
@@ -385,6 +424,7 @@ function instagramPackageToContentItems(pkg: InstagramContentPackage): ContentIt
       visualConcept: post.visualConcept,
       artDirection: post.artDirection,
     },
+    imagePrompts: imagePromptsByPost.get(post.postId) ?? [],
     status: 'draft' as const,
     generatedBy: pkg.generatedBy,
     agentName: 'instagram-creator',
@@ -404,6 +444,19 @@ function instagramPackageToContentItems(pkg: InstagramContentPackage): ContentIt
       musicSuggestion: reel.musicSuggestion,
       visualDirections: reel.visualDirections,
     },
+    videoPrompts: [{
+      promptId: reel.reelId + '-vid',
+      contentItemId: reel.reelId,
+      promptText: reel.visualDirections,
+      generator: 'veo3' as const,
+      sceneDescription: reel.visualDirections,
+      cameraMovement: 'tracking',
+      transitions: ['cut'],
+      duration: `${reel.duration}s`,
+      audioMusic: reel.musicSuggestion,
+      visualStyle: 'cinematic' as const,
+      brandElements: [],
+    }],
     status: 'draft' as const,
     generatedBy: pkg.generatedBy,
     agentName: 'instagram-creator',

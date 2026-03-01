@@ -148,11 +148,30 @@ The JSON structure:
   ],
   "imagePrompts": [
     {
-      "postId": "ig-post-001",
+      "promptId": "ig-img-001",
+      "contentItemId": "ig-post-001",
       "promptText": "Detailed prompt for AI image generation",
+      "generator": "flux | ideogram | gpt-image",
       "style": "photography | illustration | 3d-render | graphic-design",
       "aspectRatio": "1:1 | 4:5 | 9:16",
-      "generator": "flux | ideogram | gpt-image"
+      "brandElements": ["sage green palette", "clean sans-serif typography"],
+      "visualConcept": "Brief concept rationale for the visual",
+      "estimatedQuality": "high | medium | low"
+    }
+  ],
+  "videoPrompts": [
+    {
+      "promptId": "ig-vid-001",
+      "contentItemId": "ig-reel-001",
+      "promptText": "Detailed Veo 3 video generation prompt for Reel",
+      "generator": "veo3",
+      "sceneDescription": "Physical setting, lighting, composition",
+      "cameraMovement": "tracking | pan | static | handheld",
+      "transitions": ["cut", "smooth zoom", "text pop-in"],
+      "duration": "30s",
+      "audioMusic": "Lo-fi hip hop background, trending audio suggestion",
+      "visualStyle": "cinematic | lo-fi | clean | vibrant | raw | editorial",
+      "brandElements": ["warm earth tones", "sage green accents"]
     }
   ],
   "variations": [
@@ -186,6 +205,7 @@ The JSON structure:
 - Captions must include engagement hook, value body, and relevant hashtags
 - Reels must have first-frame hook concept that stops the scroll within 1 second
 - Carousels must tell a complete story with swipe progression and a strong cover slide
-- Image prompts must include style, aspect ratio, and generator specification
+- Image prompts must include style, aspect ratio, generator specification, brand elements, and visual concept rationale
+- Video prompts (Veo 3) must be generated for every Reel with scene description, camera movement, transitions, and audio cues
 - Hashtag strategy: 20-25 per post, mix of 3-5 broad + 10-15 niche + 2-3 brand
 - Content should optimize for saves and shares — the key algorithm signals for Explore page

@@ -130,6 +130,31 @@ describe('runRedditCreator', () => {
     expect(callArgs.prompt).toContain('Trend Intelligence')
   })
 
+  it('prompt optionally includes image prompts for visual content', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validRedditContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runRedditCreator} = await import('../../../src/lib/agents/creation.js')
+    await runRedditCreator(creationInputs)
+
+    // AC3: Reddit image prompts are optional
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('Optionally include AI image generation prompts')
+  })
+
+  it('does not require imagePrompts in output (text-first platform)', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validRedditContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runRedditCreator} = await import('../../../src/lib/agents/creation.js')
+    const result = await runRedditCreator(creationInputs)
+
+    // Reddit output should still be valid without imagePrompts
+    expect(result.agentName).toBe('reddit-creator')
+    expect(result.status).toBe('success')
+    expect(result.outputs.posts.length).toBeGreaterThanOrEqual(1)
+  })
+
   it('tracks token usage and cost from SDKResultMessage', async () => {
     const mockQuery = createMockQuery([createSuccessMessage(validRedditContent)])
     vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
@@ -205,6 +230,36 @@ describe('runTikTokCreator', () => {
     expect(result.outputs.videoPrompts[0].veo3Prompt.length).toBeGreaterThanOrEqual(20)
     expect(result.outputs.videoPrompts[0].style).toBe('lo-fi')
     expect(result.outputs.videoPrompts[0].visualElements.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('includes videoPrompts (Veo 3) for every script', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validTiktokContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runTikTokCreator} = await import('../../../src/lib/agents/creation.js')
+    const result = await runTikTokCreator(creationInputs)
+
+    // AC2: Every script must have a corresponding video prompt
+    expect(result.outputs.videoPrompts.length).toBeGreaterThanOrEqual(result.outputs.scripts.length)
+    for (const prompt of result.outputs.videoPrompts) {
+      expect(prompt.veo3Prompt.length).toBeGreaterThanOrEqual(20)
+      expect(['cinematic', 'lo-fi', 'clean', 'vibrant', 'raw', 'editorial']).toContain(prompt.style)
+      expect(prompt.duration).toBeTruthy()
+      expect(prompt.visualElements.length).toBeGreaterThanOrEqual(1)
+    }
+  })
+
+  it('prompt explicitly requests Veo 3 video generation prompts for every script', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validTiktokContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runTikTokCreator} = await import('../../../src/lib/agents/creation.js')
+    await runTikTokCreator(creationInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('Veo 3 video generation prompts for EVERY script')
+    expect(callArgs.prompt).toContain('sceneDescription')
+    expect(callArgs.prompt).toContain('cameraMovement')
   })
 
   it('includes 4-layer SEO in captions', async () => {
@@ -299,6 +354,19 @@ describe('runFacebookCreator', () => {
     expect(result.outputs.posts[0].targetGroups).toContain('wellnesscommunity')
     expect(result.outputs.metadata.groupTargets).toContain('wellnesscommunity')
     expect(result.outputs.metadata.crossPostStrategy.length).toBeGreaterThan(0)
+  })
+
+  it('prompt requests image prompts when visual content is planned', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validFacebookContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runFacebookCreator} = await import('../../../src/lib/agents/creation.js')
+    await runFacebookCreator(creationInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('image prompts for posts with visual content')
+    expect(callArgs.prompt).toContain('brandElements')
+    expect(callArgs.prompt).toContain('visualConcept')
   })
 
   it('throws AgentValidationError on invalid output', async () => {
@@ -397,6 +465,35 @@ describe('runInstagramCreator', () => {
     expect(result.outputs.imagePrompts[0].style).toBe('photography')
     expect(result.outputs.imagePrompts[0].aspectRatio).toBe('4:5')
     expect(result.outputs.imagePrompts[0].generator).toBe('flux')
+  })
+
+  it('includes imagePrompts for every post', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validInstagramContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runInstagramCreator} = await import('../../../src/lib/agents/creation.js')
+    const result = await runInstagramCreator(creationInputs)
+
+    // AC1: Every visual platform agent produces image prompts
+    expect(result.outputs.imagePrompts.length).toBeGreaterThanOrEqual(1)
+    for (const prompt of result.outputs.imagePrompts) {
+      expect(prompt.promptText.length).toBeGreaterThanOrEqual(20)
+      expect(['flux', 'ideogram', 'gpt-image']).toContain(prompt.generator)
+      expect(['photography', 'illustration', '3d-render', 'graphic-design']).toContain(prompt.style)
+      expect(prompt.aspectRatio.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('prompt explicitly requests image generation prompts for every post and video prompts for Reels', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validInstagramContent)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runInstagramCreator} = await import('../../../src/lib/agents/creation.js')
+    await runInstagramCreator(creationInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('image generation prompts for EVERY post')
+    expect(callArgs.prompt).toContain('video generation prompts for EVERY Reel')
   })
 
   it('throws AgentExecutionError on failure', async () => {
@@ -820,6 +917,78 @@ describe('runCreationStage', () => {
     expect(instagramStories[0].metadata).toHaveProperty('interactions')
     expect(instagramCarousels[0].metadata).toHaveProperty('slides')
     expect(instagramCarousels[0].metadata).toHaveProperty('swipeNarrative')
+  })
+
+  it('ContentItem metadata contains imagePrompts for Instagram posts', async () => {
+    const mockQuery = createStageQuery()
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
+    const result = await runCreationStage(creationInputs)
+
+    // AC5: Instagram posts should have imagePrompts
+    const instagramPosts = result.contentItems.filter(
+      (i) => i.platform === 'instagram' && i.contentType !== 'reel' && i.contentType !== 'story' && i.contentType !== 'carousel',
+    )
+    for (const post of instagramPosts) {
+      expect(post.imagePrompts).toBeDefined()
+      expect(Array.isArray(post.imagePrompts)).toBe(true)
+    }
+  })
+
+  it('ContentItem metadata contains videoPrompts for Instagram Reels', async () => {
+    const mockQuery = createStageQuery()
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
+    const result = await runCreationStage(creationInputs)
+
+    // AC5: Instagram Reels should have videoPrompts
+    const instagramReels = result.contentItems.filter(
+      (i) => i.platform === 'instagram' && i.contentType === 'reel',
+    )
+    expect(instagramReels.length).toBeGreaterThanOrEqual(1)
+    for (const reel of instagramReels) {
+      expect(reel.videoPrompts).toBeDefined()
+      expect(Array.isArray(reel.videoPrompts)).toBe(true)
+      expect(reel.videoPrompts!.length).toBeGreaterThanOrEqual(1)
+      expect(reel.videoPrompts![0].generator).toBe('veo3')
+    }
+  })
+
+  it('ContentItem metadata contains videoPrompts for TikTok scripts', async () => {
+    const mockQuery = createStageQuery()
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
+    const result = await runCreationStage(creationInputs)
+
+    // AC5: TikTok scripts should have videoPrompts
+    const tiktokItems = result.contentItems.filter((i) => i.platform === 'tiktok')
+    expect(tiktokItems.length).toBeGreaterThanOrEqual(1)
+    for (const item of tiktokItems) {
+      expect(item.videoPrompts).toBeDefined()
+      expect(Array.isArray(item.videoPrompts)).toBe(true)
+      expect(item.videoPrompts!.length).toBeGreaterThanOrEqual(1)
+      expect(item.videoPrompts![0].generator).toBe('veo3')
+    }
+  })
+
+  it('Reddit ContentItems do not require imagePrompts (optional)', async () => {
+    const mockQuery = createStageQuery()
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runCreationStage} = await import('../../../src/lib/agents/creation.js')
+    const result = await runCreationStage(creationInputs)
+
+    // AC3: Reddit imagePrompts are optional
+    const redditItems = result.contentItems.filter((i) => i.platform === 'reddit')
+    expect(redditItems.length).toBeGreaterThanOrEqual(1)
+    // Should be valid regardless of whether imagePrompts is present
+    for (const item of redditItems) {
+      expect(item.itemId).toBeDefined()
+      expect(item.platform).toBe('reddit')
+    }
   })
 })
 

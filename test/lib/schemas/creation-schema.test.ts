@@ -10,6 +10,10 @@ import {
   creationStageOutputSchema,
   hookWriterOutputSchema,
   hookWriterInputsSchema,
+  imagePromptSchema,
+  videoPromptSchema,
+  imageGeneratorEnum,
+  videoGeneratorEnum,
 } from '../../../src/lib/schemas/creation-schema.js'
 
 import validRedditContent from '../../fixtures/responses/claude-reddit-content.json'
@@ -694,6 +698,312 @@ describe('hookWriterInputsSchema', () => {
       campaignPlan: validCampaignPlan,
     }
     const result = hookWriterInputsSchema.safeParse(inputs)
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('imagePromptSchema', () => {
+  const validImagePrompt = {
+    promptId: 'ig-img-001',
+    contentItemId: 'ig-post-001',
+    promptText: 'A person sitting cross-legged on a bed in warm morning light, writing in a journal',
+    generator: 'flux',
+    style: 'photography',
+    aspectRatio: '4:5',
+    brandElements: ['sage green palette', 'clean sans-serif typography'],
+    visualConcept: 'Morning journaling lifestyle shot for habit-building campaign',
+    estimatedQuality: 'high',
+  }
+
+  it('validates correct structure', () => {
+    const result = imagePromptSchema.safeParse(validImagePrompt)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.promptId).toBe('ig-img-001')
+      expect(result.data.contentItemId).toBe('ig-post-001')
+      expect(result.data.generator).toBe('flux')
+      expect(result.data.style).toBe('photography')
+      expect(result.data.aspectRatio).toBe('4:5')
+      expect(result.data.brandElements).toHaveLength(2)
+      expect(result.data.visualConcept).toBe('Morning journaling lifestyle shot for habit-building campaign')
+      expect(result.data.estimatedQuality).toBe('high')
+    }
+  })
+
+  it('validates all generator enum values (flux, ideogram, gpt-image)', () => {
+    for (const generator of ['flux', 'ideogram', 'gpt-image']) {
+      const result = imagePromptSchema.safeParse({...validImagePrompt, generator})
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects invalid generator value', () => {
+    const result = imagePromptSchema.safeParse({...validImagePrompt, generator: 'dalle'})
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid generator value (midjourney)', () => {
+    const result = imagePromptSchema.safeParse({...validImagePrompt, generator: 'midjourney'})
+    expect(result.success).toBe(false)
+  })
+
+  it('validates all style enum values', () => {
+    for (const style of ['photography', 'illustration', '3d-render', 'graphic-design']) {
+      const result = imagePromptSchema.safeParse({...validImagePrompt, style})
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects invalid style value', () => {
+    const result = imagePromptSchema.safeParse({...validImagePrompt, style: 'abstract'})
+    expect(result.success).toBe(false)
+  })
+
+  it('validates all estimatedQuality enum values', () => {
+    for (const estimatedQuality of ['high', 'medium', 'low']) {
+      const result = imagePromptSchema.safeParse({...validImagePrompt, estimatedQuality})
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects invalid estimatedQuality value', () => {
+    const result = imagePromptSchema.safeParse({...validImagePrompt, estimatedQuality: 'excellent'})
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects prompt text shorter than 20 characters', () => {
+    const result = imagePromptSchema.safeParse({...validImagePrompt, promptText: 'Too short'})
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing required fields', () => {
+    const {promptId, ...withoutPromptId} = validImagePrompt
+    expect(imagePromptSchema.safeParse(withoutPromptId).success).toBe(false)
+
+    const {contentItemId, ...withoutContentItemId} = validImagePrompt
+    expect(imagePromptSchema.safeParse(withoutContentItemId).success).toBe(false)
+
+    const {generator, ...withoutGenerator} = validImagePrompt
+    expect(imagePromptSchema.safeParse(withoutGenerator).success).toBe(false)
+
+    const {visualConcept, ...withoutVisualConcept} = validImagePrompt
+    expect(imagePromptSchema.safeParse(withoutVisualConcept).success).toBe(false)
+  })
+
+  it('allows empty brandElements array', () => {
+    const result = imagePromptSchema.safeParse({...validImagePrompt, brandElements: []})
+    expect(result.success).toBe(true)
+  })
+})
+
+describe('videoPromptSchema', () => {
+  const validVideoPrompt = {
+    promptId: 'tt-vid-001',
+    contentItemId: 'script-001',
+    promptText: 'A young professional sits on a bed in a bright modern bedroom with warm morning light',
+    generator: 'veo3',
+    sceneDescription: 'Bright modern bedroom, natural morning sunlight, warm amber tones',
+    cameraMovement: 'tracking',
+    transitions: ['cut', 'smooth zoom', 'text pop-in'],
+    duration: '30s',
+    audioMusic: 'Lo-fi hip hop background at low volume, subtle ambient sounds',
+    visualStyle: 'lo-fi',
+    brandElements: ['warm earth tones', 'clean typography'],
+  }
+
+  it('validates correct structure', () => {
+    const result = videoPromptSchema.safeParse(validVideoPrompt)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.promptId).toBe('tt-vid-001')
+      expect(result.data.contentItemId).toBe('script-001')
+      expect(result.data.generator).toBe('veo3')
+      expect(result.data.sceneDescription).toContain('bedroom')
+      expect(result.data.cameraMovement).toBe('tracking')
+      expect(result.data.transitions).toHaveLength(3)
+      expect(result.data.duration).toBe('30s')
+      expect(result.data.audioMusic).toContain('Lo-fi')
+      expect(result.data.visualStyle).toBe('lo-fi')
+      expect(result.data.brandElements).toHaveLength(2)
+    }
+  })
+
+  it('validates veo3 as the only generator', () => {
+    const result = videoPromptSchema.safeParse({...validVideoPrompt, generator: 'veo3'})
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects invalid generator value', () => {
+    const result = videoPromptSchema.safeParse({...validVideoPrompt, generator: 'sora'})
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid generator value (runway)', () => {
+    const result = videoPromptSchema.safeParse({...validVideoPrompt, generator: 'runway'})
+    expect(result.success).toBe(false)
+  })
+
+  it('validates all visualStyle enum values', () => {
+    for (const visualStyle of ['cinematic', 'lo-fi', 'clean', 'vibrant', 'raw', 'editorial']) {
+      const result = videoPromptSchema.safeParse({...validVideoPrompt, visualStyle})
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects invalid visualStyle value', () => {
+    const result = videoPromptSchema.safeParse({...validVideoPrompt, visualStyle: 'abstract'})
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing required fields', () => {
+    const {sceneDescription, ...withoutScene} = validVideoPrompt
+    expect(videoPromptSchema.safeParse(withoutScene).success).toBe(false)
+
+    const {cameraMovement, ...withoutCamera} = validVideoPrompt
+    expect(videoPromptSchema.safeParse(withoutCamera).success).toBe(false)
+
+    const {audioMusic, ...withoutAudio} = validVideoPrompt
+    expect(videoPromptSchema.safeParse(withoutAudio).success).toBe(false)
+
+    const {duration, ...withoutDuration} = validVideoPrompt
+    expect(videoPromptSchema.safeParse(withoutDuration).success).toBe(false)
+  })
+
+  it('rejects prompt text shorter than 20 characters', () => {
+    const result = videoPromptSchema.safeParse({...validVideoPrompt, promptText: 'Too short'})
+    expect(result.success).toBe(false)
+  })
+
+  it('allows empty transitions array', () => {
+    const result = videoPromptSchema.safeParse({...validVideoPrompt, transitions: []})
+    expect(result.success).toBe(true)
+  })
+
+  it('allows empty brandElements array', () => {
+    const result = videoPromptSchema.safeParse({...validVideoPrompt, brandElements: []})
+    expect(result.success).toBe(true)
+  })
+})
+
+describe('imageGeneratorEnum', () => {
+  it('accepts flux, ideogram, gpt-image', () => {
+    expect(imageGeneratorEnum.safeParse('flux').success).toBe(true)
+    expect(imageGeneratorEnum.safeParse('ideogram').success).toBe(true)
+    expect(imageGeneratorEnum.safeParse('gpt-image').success).toBe(true)
+  })
+
+  it('rejects invalid values', () => {
+    expect(imageGeneratorEnum.safeParse('dalle').success).toBe(false)
+    expect(imageGeneratorEnum.safeParse('midjourney').success).toBe(false)
+    expect(imageGeneratorEnum.safeParse('stable-diffusion').success).toBe(false)
+  })
+})
+
+describe('videoGeneratorEnum', () => {
+  it('accepts veo3', () => {
+    expect(videoGeneratorEnum.safeParse('veo3').success).toBe(true)
+  })
+
+  it('rejects invalid values', () => {
+    expect(videoGeneratorEnum.safeParse('sora').success).toBe(false)
+    expect(videoGeneratorEnum.safeParse('runway').success).toBe(false)
+    expect(videoGeneratorEnum.safeParse('pika').success).toBe(false)
+  })
+})
+
+describe('contentItemSchema with visual prompts', () => {
+  const baseItem = {
+    itemId: 'ig-post-001',
+    platform: 'instagram',
+    contentType: 'static',
+    title: 'Test post',
+    body: 'Test body content',
+    metadata: {},
+    status: 'draft',
+    generatedBy: 'instagram-creator',
+    agentName: 'instagram-creator',
+    campaignId: 'plan-2026-03-wellness-spring',
+    createdAt: '2026-03-01T10:00:00Z',
+  }
+
+  const sampleImagePrompt = {
+    promptId: 'ig-img-001',
+    contentItemId: 'ig-post-001',
+    promptText: 'A person sitting cross-legged on a bed in warm morning light, writing in a journal',
+    generator: 'flux',
+    style: 'photography',
+    aspectRatio: '4:5',
+    brandElements: ['sage green'],
+    visualConcept: 'Morning journaling lifestyle shot',
+    estimatedQuality: 'high',
+  }
+
+  const sampleVideoPrompt = {
+    promptId: 'ig-vid-001',
+    contentItemId: 'ig-reel-001',
+    promptText: 'A young professional sits on a bed in a bright modern bedroom with warm morning light',
+    generator: 'veo3',
+    sceneDescription: 'Bright modern bedroom, natural morning sunlight',
+    cameraMovement: 'tracking',
+    transitions: ['cut', 'smooth zoom'],
+    duration: '30s',
+    audioMusic: 'Lo-fi hip hop background at low volume',
+    visualStyle: 'lo-fi',
+    brandElements: ['warm earth tones'],
+  }
+
+  it('accepts contentItem without imagePrompts or videoPrompts (optional)', () => {
+    const result = contentItemSchema.safeParse(baseItem)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts contentItem with imagePrompts array', () => {
+    const item = {...baseItem, imagePrompts: [sampleImagePrompt]}
+    const result = contentItemSchema.safeParse(item)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.imagePrompts).toHaveLength(1)
+      expect(result.data.imagePrompts![0].generator).toBe('flux')
+    }
+  })
+
+  it('accepts contentItem with videoPrompts array', () => {
+    const item = {...baseItem, videoPrompts: [sampleVideoPrompt]}
+    const result = contentItemSchema.safeParse(item)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.videoPrompts).toHaveLength(1)
+      expect(result.data.videoPrompts![0].generator).toBe('veo3')
+    }
+  })
+
+  it('accepts contentItem with both imagePrompts and videoPrompts', () => {
+    const item = {...baseItem, imagePrompts: [sampleImagePrompt], videoPrompts: [sampleVideoPrompt]}
+    const result = contentItemSchema.safeParse(item)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.imagePrompts).toHaveLength(1)
+      expect(result.data.videoPrompts).toHaveLength(1)
+    }
+  })
+
+  it('accepts contentItem with empty imagePrompts and videoPrompts arrays', () => {
+    const item = {...baseItem, imagePrompts: [], videoPrompts: []}
+    const result = contentItemSchema.safeParse(item)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects contentItem with invalid imagePrompt in array', () => {
+    const invalidPrompt = {...sampleImagePrompt, generator: 'dalle'}
+    const item = {...baseItem, imagePrompts: [invalidPrompt]}
+    const result = contentItemSchema.safeParse(item)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects contentItem with invalid videoPrompt in array', () => {
+    const invalidPrompt = {...sampleVideoPrompt, generator: 'sora'}
+    const item = {...baseItem, videoPrompts: [invalidPrompt]}
+    const result = contentItemSchema.safeParse(item)
     expect(result.success).toBe(false)
   })
 })

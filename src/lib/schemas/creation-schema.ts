@@ -289,6 +289,42 @@ export const instagramContentPackageSchema = z.object({
 
 export type InstagramContentPackage = z.infer<typeof instagramContentPackageSchema>
 
+// ── Shared Visual Prompt Schemas (canonical, cross-platform) ─────────────────
+
+export const imageGeneratorEnum = z.enum(['flux', 'ideogram', 'gpt-image'])
+
+export const videoGeneratorEnum = z.enum(['veo3'])
+
+export const imagePromptSchema = z.object({
+  promptId: z.string().min(1),
+  contentItemId: z.string().min(1),
+  promptText: z.string().min(20),
+  generator: imageGeneratorEnum,
+  style: z.enum(['photography', 'illustration', '3d-render', 'graphic-design']),
+  aspectRatio: z.string().min(1),
+  brandElements: z.array(z.string()),
+  visualConcept: z.string().min(1),
+  estimatedQuality: z.enum(['high', 'medium', 'low']),
+})
+
+export type ImagePrompt = z.infer<typeof imagePromptSchema>
+
+export const videoPromptSchema = z.object({
+  promptId: z.string().min(1),
+  contentItemId: z.string().min(1),
+  promptText: z.string().min(20),
+  generator: videoGeneratorEnum,
+  sceneDescription: z.string().min(1),
+  cameraMovement: z.string().min(1),
+  transitions: z.array(z.string()),
+  duration: z.string().min(1),
+  audioMusic: z.string().min(1),
+  visualStyle: z.enum(['cinematic', 'lo-fi', 'clean', 'vibrant', 'raw', 'editorial']),
+  brandElements: z.array(z.string()),
+})
+
+export type VideoPrompt = z.infer<typeof videoPromptSchema>
+
 // ── ContentItem (canonical content unit for downstream pipeline stages) ──────
 
 export const contentItemSchema = z.object({
@@ -298,6 +334,8 @@ export const contentItemSchema = z.object({
   title: z.string(),
   body: z.string(),
   metadata: z.record(z.string(), z.unknown()),
+  imagePrompts: z.array(imagePromptSchema).optional(),
+  videoPrompts: z.array(videoPromptSchema).optional(),
   status: z.enum(['draft', 'review', 'approved', 'rejected', 'published']),
   generatedBy: z.string(),
   agentName: z.string(),

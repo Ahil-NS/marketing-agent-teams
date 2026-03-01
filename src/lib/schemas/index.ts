@@ -36,8 +36,12 @@ export {
   creationStageOutputSchema,
   hookWriterOutputSchema,
   hookWriterInputsSchema,
+  imagePromptSchema,
+  videoPromptSchema,
+  imageGeneratorEnum,
+  videoGeneratorEnum,
 } from './creation-schema.js'
-export type {RedditContentPackage, TikTokContentPackage, FacebookContentPackage, InstagramContentPackage, ContentItem, CreationInputs, CreationStageOutput, HookWriterOutput, HookWriterInputs} from './creation-schema.js'
+export type {RedditContentPackage, TikTokContentPackage, FacebookContentPackage, InstagramContentPackage, ContentItem, CreationInputs, CreationStageOutput, HookWriterOutput, HookWriterInputs, ImagePrompt, VideoPrompt} from './creation-schema.js'
 export {
   pipelineErrorSchema,
   pipelineRunSchema,
