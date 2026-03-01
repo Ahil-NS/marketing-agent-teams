@@ -163,6 +163,57 @@ describe('ReviewQueue', () => {
       const items = await queue.list()
       expect(items).toHaveLength(1)
     })
+
+    it('filters by qualityAbove', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const high = makeItem({id: 'item-001', qualityScore: 0.92})
+      const low = makeItem({id: 'item-002', qualityScore: 0.70})
+      const borderline = makeItem({id: 'item-003', qualityScore: 0.85})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(high))
+      await writeFile(join(queueDir, 'item-002.json'), JSON.stringify(low))
+      await writeFile(join(queueDir, 'item-003.json'), JSON.stringify(borderline))
+
+      const items = await queue.list({qualityAbove: 0.85})
+      expect(items).toHaveLength(1)
+      expect(items[0].id).toBe('item-001')
+    })
+
+    it('qualityAbove=0 returns all items', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', qualityScore: 0.1})))
+      await writeFile(join(queueDir, 'item-002.json'), JSON.stringify(makeItem({id: 'item-002', qualityScore: 0.99})))
+
+      const items = await queue.list({qualityAbove: 0})
+      expect(items).toHaveLength(2)
+    })
+
+    it('combines multiple filters with AND logic', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const match = makeItem({id: 'item-001', platform: 'reddit', qualityScore: 0.92, contentType: 'standard', status: 'pending'})
+      const wrongPlatform = makeItem({id: 'item-002', platform: 'tiktok', qualityScore: 0.95, contentType: 'standard', status: 'pending'})
+      const lowScore = makeItem({id: 'item-003', platform: 'reddit', qualityScore: 0.50, contentType: 'standard', status: 'pending'})
+      const wrongType = makeItem({id: 'item-004', platform: 'reddit', qualityScore: 0.95, contentType: 'compliance-flagged', status: 'pending'})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(match))
+      await writeFile(join(queueDir, 'item-002.json'), JSON.stringify(wrongPlatform))
+      await writeFile(join(queueDir, 'item-003.json'), JSON.stringify(lowScore))
+      await writeFile(join(queueDir, 'item-004.json'), JSON.stringify(wrongType))
+
+      const items = await queue.list({platform: 'reddit', qualityAbove: 0.85, contentType: 'standard'})
+      expect(items).toHaveLength(1)
+      expect(items[0].id).toBe('item-001')
+    })
+
+    it('qualityAbove uses strict greater-than comparison', async () => {
+      await mkdir(queueDir, {recursive: true})
+      // Exactly at threshold should NOT pass
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', qualityScore: 0.90})))
+      // Just above should pass
+      await writeFile(join(queueDir, 'item-002.json'), JSON.stringify(makeItem({id: 'item-002', qualityScore: 0.91})))
+
+      const items = await queue.list({qualityAbove: 0.90})
+      expect(items).toHaveLength(1)
+      expect(items[0].id).toBe('item-002')
+    })
   })
 
   describe('getById()', () => {
@@ -471,6 +522,93 @@ describe('ReviewQueue', () => {
       const result = await queue.edit('item-001', {customField: 'new value'})
       expect(result.editHistory).toHaveLength(1)
       expect(result.editHistory[0].originalValue).toBe('""')
+    })
+  })
+
+  describe('bulkApprove()', () => {
+    it('approves all pending items matching filter', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const p1 = makeItem({id: 'item-001', platform: 'reddit', status: 'pending'})
+      const p2 = makeItem({id: 'item-002', platform: 'reddit', status: 'pending'})
+      const t1 = makeItem({id: 'item-003', platform: 'tiktok', status: 'pending'})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(p1))
+      await writeFile(join(queueDir, 'item-002.json'), JSON.stringify(p2))
+      await writeFile(join(queueDir, 'item-003.json'), JSON.stringify(t1))
+
+      const approved = await queue.bulkApprove({platform: 'reddit'})
+      expect(approved).toHaveLength(2)
+      expect(approved.every((item) => item.status === 'approved')).toBe(true)
+      expect(approved.every((item) => item.platform === 'reddit')).toBe(true)
+    })
+
+    it('only approves pending items, skips non-pending', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const pending = makeItem({id: 'item-001', platform: 'reddit', status: 'pending'})
+      const already = makeItem({id: 'item-002', platform: 'reddit', status: 'approved'})
+      const rejected = makeItem({id: 'item-003', platform: 'reddit', status: 'rejected'})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(pending))
+      await writeFile(join(queueDir, 'item-002.json'), JSON.stringify(already))
+      await writeFile(join(queueDir, 'item-003.json'), JSON.stringify(rejected))
+
+      const approved = await queue.bulkApprove({platform: 'reddit'})
+      expect(approved).toHaveLength(1)
+      expect(approved[0].id).toBe('item-001')
+    })
+
+    it('returns empty array when no items match', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const item = makeItem({id: 'item-001', platform: 'tiktok', status: 'pending'})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(item))
+
+      const approved = await queue.bulkApprove({platform: 'reddit'})
+      expect(approved).toHaveLength(0)
+    })
+
+    it('persists all approved items to disk', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'pending'})))
+      await writeFile(join(queueDir, 'item-002.json'), JSON.stringify(makeItem({id: 'item-002', status: 'pending'})))
+
+      await queue.bulkApprove({})
+
+      const raw1 = JSON.parse(await readFile(join(queueDir, 'item-001.json'), 'utf-8')) as Record<string, unknown>
+      const raw2 = JSON.parse(await readFile(join(queueDir, 'item-002.json'), 'utf-8')) as Record<string, unknown>
+      expect(raw1.status).toBe('approved')
+      expect(raw2.status).toBe('approved')
+    })
+
+    it('applies qualityAbove filter in bulk approve', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const high = makeItem({id: 'item-001', qualityScore: 0.95, status: 'pending'})
+      const low = makeItem({id: 'item-002', qualityScore: 0.60, status: 'pending'})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(high))
+      await writeFile(join(queueDir, 'item-002.json'), JSON.stringify(low))
+
+      const approved = await queue.bulkApprove({qualityAbove: 0.90})
+      expect(approved).toHaveLength(1)
+      expect(approved[0].id).toBe('item-001')
+    })
+
+    it('sets userFeedback notes to "Bulk approved"', async () => {
+      await mkdir(queueDir, {recursive: true})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(makeItem({id: 'item-001', status: 'pending'})))
+
+      const approved = await queue.bulkApprove({})
+      expect(approved[0].userFeedback!.notes).toBe('Bulk approved')
+    })
+
+    it('combines platform and qualityAbove filters', async () => {
+      await mkdir(queueDir, {recursive: true})
+      const match = makeItem({id: 'item-001', platform: 'reddit', qualityScore: 0.95, status: 'pending'})
+      const wrongPlatform = makeItem({id: 'item-002', platform: 'tiktok', qualityScore: 0.95, status: 'pending'})
+      const lowScore = makeItem({id: 'item-003', platform: 'reddit', qualityScore: 0.50, status: 'pending'})
+      await writeFile(join(queueDir, 'item-001.json'), JSON.stringify(match))
+      await writeFile(join(queueDir, 'item-002.json'), JSON.stringify(wrongPlatform))
+      await writeFile(join(queueDir, 'item-003.json'), JSON.stringify(lowScore))
+
+      const approved = await queue.bulkApprove({platform: 'reddit', qualityAbove: 0.90})
+      expect(approved).toHaveLength(1)
+      expect(approved[0].id).toBe('item-001')
     })
   })
 })

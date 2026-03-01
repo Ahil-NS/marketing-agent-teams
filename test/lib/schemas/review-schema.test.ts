@@ -317,4 +317,30 @@ describe('reviewFilterSchema', () => {
   it('rejects filter with invalid contentType', () => {
     expect(reviewFilterSchema.safeParse({contentType: 'custom'}).success).toBe(false)
   })
+
+  it('accepts qualityAbove within 0-1 range', () => {
+    expect(reviewFilterSchema.safeParse({qualityAbove: 0.85}).success).toBe(true)
+  })
+
+  it('accepts qualityAbove at boundary values', () => {
+    expect(reviewFilterSchema.safeParse({qualityAbove: 0}).success).toBe(true)
+    expect(reviewFilterSchema.safeParse({qualityAbove: 1}).success).toBe(true)
+  })
+
+  it('rejects qualityAbove below 0', () => {
+    expect(reviewFilterSchema.safeParse({qualityAbove: -0.1}).success).toBe(false)
+  })
+
+  it('rejects qualityAbove above 1', () => {
+    expect(reviewFilterSchema.safeParse({qualityAbove: 1.1}).success).toBe(false)
+  })
+
+  it('accepts filter with qualityAbove and other fields', () => {
+    const result = reviewFilterSchema.safeParse({
+      platform: 'reddit',
+      qualityAbove: 0.90,
+      contentType: 'standard',
+    })
+    expect(result.success).toBe(true)
+  })
 })

@@ -70,6 +70,10 @@ export class ReviewQueue {
       if (filter.runId) {
         filtered = filtered.filter((item) => item.runId === filter.runId)
       }
+
+      if (filter.qualityAbove !== undefined) {
+        filtered = filtered.filter((item) => item.qualityScore > filter.qualityAbove!)
+      }
     }
 
     // Sort by platform (alphabetical), then by status
@@ -225,6 +229,22 @@ export class ReviewQueue {
     item.updatedAt = now
     await this.saveItem(item)
     return item
+  }
+
+  /**
+   * Bulk approve all pending items matching the given filter.
+   * Only items with status 'pending' are eligible for bulk approval.
+   * Returns the list of approved items.
+   */
+  async bulkApprove(filter: ReviewFilter): Promise<ReviewItem[]> {
+    const items = await this.list({...filter, status: 'pending'})
+    const approved: ReviewItem[] = []
+    for (const item of items) {
+      const result = await this.approve(item.id, 'Bulk approved')
+      approved.push(result)
+    }
+
+    return approved
   }
 
   /**

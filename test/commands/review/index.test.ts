@@ -75,7 +75,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, json: false},
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false},
       args: {},
       argv: [],
       raw: [],
@@ -94,7 +94,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, json: false},
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false},
       args: {},
       argv: [],
       raw: [],
@@ -114,7 +114,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': undefined, json: true},
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: true},
       args: {},
       argv: [],
       raw: [],
@@ -135,7 +135,7 @@ describe('mat review command', () => {
 
     const cmd = createCommandInstance()
     cmd.parse = vi.fn().mockResolvedValue({
-      flags: {'run-id': targetRunId, json: false},
+      flags: {'run-id': targetRunId, platform: undefined, 'quality-above': undefined, type: undefined, status: undefined, json: false},
       args: {},
       argv: [],
       raw: [],
@@ -146,5 +146,120 @@ describe('mat review command', () => {
     await cmd.run()
 
     expect(mockList).toHaveBeenCalledWith({runId: targetRunId})
+  })
+
+  it('filters by --platform flag', async () => {
+    mockList.mockResolvedValue([makeItem({platform: 'reddit'})])
+
+    const cmd = createCommandInstance()
+    cmd.parse = vi.fn().mockResolvedValue({
+      flags: {'run-id': undefined, platform: 'reddit', 'quality-above': undefined, type: undefined, status: undefined, json: false},
+      args: {},
+      argv: [],
+      raw: [],
+      metadata: {},
+      nonExistentFlags: {},
+    })
+
+    await cmd.run()
+
+    expect(mockList).toHaveBeenCalledWith({platform: 'reddit'})
+  })
+
+  it('filters by --quality-above flag converting 0-100 to 0-1', async () => {
+    mockList.mockResolvedValue([makeItem({qualityScore: 0.92})])
+
+    const cmd = createCommandInstance()
+    cmd.parse = vi.fn().mockResolvedValue({
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': 85, type: undefined, status: undefined, json: false},
+      args: {},
+      argv: [],
+      raw: [],
+      metadata: {},
+      nonExistentFlags: {},
+    })
+
+    await cmd.run()
+
+    expect(mockList).toHaveBeenCalledWith({qualityAbove: 0.85})
+  })
+
+  it('filters by --type flag', async () => {
+    mockList.mockResolvedValue([makeItem({contentType: 'trending-derivative'})])
+
+    const cmd = createCommandInstance()
+    cmd.parse = vi.fn().mockResolvedValue({
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: 'trending-derivative', status: undefined, json: false},
+      args: {},
+      argv: [],
+      raw: [],
+      metadata: {},
+      nonExistentFlags: {},
+    })
+
+    await cmd.run()
+
+    expect(mockList).toHaveBeenCalledWith({contentType: 'trending-derivative'})
+  })
+
+  it('filters by --status flag', async () => {
+    mockList.mockResolvedValue([makeItem({status: 'approved'})])
+
+    const cmd = createCommandInstance()
+    cmd.parse = vi.fn().mockResolvedValue({
+      flags: {'run-id': undefined, platform: undefined, 'quality-above': undefined, type: undefined, status: 'approved', json: false},
+      args: {},
+      argv: [],
+      raw: [],
+      metadata: {},
+      nonExistentFlags: {},
+    })
+
+    await cmd.run()
+
+    expect(mockList).toHaveBeenCalledWith({status: 'approved'})
+  })
+
+  it('combines multiple filter flags', async () => {
+    mockList.mockResolvedValue([makeItem({platform: 'reddit', qualityScore: 0.95})])
+
+    const cmd = createCommandInstance()
+    cmd.parse = vi.fn().mockResolvedValue({
+      flags: {'run-id': undefined, platform: 'reddit', 'quality-above': 90, type: undefined, status: 'pending', json: false},
+      args: {},
+      argv: [],
+      raw: [],
+      metadata: {},
+      nonExistentFlags: {},
+    })
+
+    await cmd.run()
+
+    expect(mockList).toHaveBeenCalledWith({platform: 'reddit', qualityAbove: 0.90, status: 'pending'})
+  })
+
+  it('shows filtered count when filters are active', async () => {
+    const filteredItems = [makeItem({id: 'item-001', platform: 'reddit'})]
+    const allItems = [
+      makeItem({id: 'item-001', platform: 'reddit'}),
+      makeItem({id: 'item-002', platform: 'tiktok'}),
+      makeItem({id: 'item-003', platform: 'facebook'}),
+    ]
+    // First call returns filtered, second call returns all
+    mockList.mockResolvedValueOnce(filteredItems).mockResolvedValueOnce(allItems)
+
+    const cmd = createCommandInstance()
+    cmd.parse = vi.fn().mockResolvedValue({
+      flags: {'run-id': undefined, platform: 'reddit', 'quality-above': undefined, type: undefined, status: undefined, json: false},
+      args: {},
+      argv: [],
+      raw: [],
+      metadata: {},
+      nonExistentFlags: {},
+    })
+
+    await cmd.run()
+
+    expect(logOutput.some((line) => line.includes('Showing 1 of 3 items (filtered)'))).toBe(true)
   })
 })

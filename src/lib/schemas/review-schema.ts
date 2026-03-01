@@ -89,6 +89,7 @@ export const reviewFilterSchema = z.object({
   status: reviewStatusSchema.optional(),
   contentType: contentTypeSchema.optional(),
   runId: z.string().optional(),
+  qualityAbove: z.number().min(0).max(1).optional(),
 })
 
 export type ReviewFilterData = z.infer<typeof reviewFilterSchema>

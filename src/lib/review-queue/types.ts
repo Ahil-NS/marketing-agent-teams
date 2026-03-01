@@ -55,6 +55,7 @@ export interface ReviewFilter {
   status?: ReviewStatus
   contentType?: ContentType
   runId?: string
+  qualityAbove?: number
 }
 
 export interface ReviewQueueStats {
