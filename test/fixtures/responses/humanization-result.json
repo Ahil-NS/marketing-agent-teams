@@ -1,0 +1,110 @@
+{
+  "items": [
+    {
+      "contentId": "reddit-wellness-1",
+      "platform": "reddit",
+      "originalText": "In today's digital landscape, meditation has emerged as a groundbreaking solution for improving mental well-being. It's important to note that incorporating a daily practice can significantly enhance your focus and productivity. Furthermore, many professionals have found that mindfulness techniques seamlessly integrate into their morning routines. Whether you're a beginner or an expert, the benefits are undeniable.",
+      "humanizedText": "So I've been meditating for about 3 months now and honestly? Game changer. My focus at work went from barely surviving afternoon meetings to actually being productive. I was super skeptical at first — like who has time to just sit there and breathe, right? But even 10 minutes before work made a noticeable difference. A bunch of my coworkers started doing it too after they noticed I wasn't falling asleep in standups anymore lol.",
+      "aiMarkersRemoved": [
+        {
+          "marker": "In today's digital landscape",
+          "location": "opening sentence",
+          "replacement": "Direct personal anecdote opener"
+        },
+        {
+          "marker": "It's important to note",
+          "location": "second sentence",
+          "replacement": "Removed — stated directly"
+        },
+        {
+          "marker": "Furthermore",
+          "location": "third sentence",
+          "replacement": "No transition — natural flow"
+        },
+        {
+          "marker": "groundbreaking",
+          "location": "first sentence",
+          "replacement": "Game changer"
+        },
+        {
+          "marker": "seamlessly integrate",
+          "location": "third sentence",
+          "replacement": "Natural description of routine"
+        },
+        {
+          "marker": "Whether you're a beginner or an expert",
+          "location": "fourth sentence",
+          "replacement": "Removed entirely"
+        }
+      ],
+      "techniquesApplied": [
+        "sentence-length-variation",
+        "banned-phrase-removal",
+        "personal-anecdote-framing",
+        "rhetorical-question",
+        "platform-native-slang",
+        "deliberate-imperfection",
+        "asymmetric-paragraph-structure"
+      ],
+      "estimatedAiScore": 12,
+      "brandVoiceConsistency": 85,
+      "meaningPreserved": true
+    },
+    {
+      "contentId": "tiktok-meditation-1",
+      "platform": "tiktok",
+      "originalText": "Unlock the power of meditation! In the realm of wellness, this pivotal practice can foster groundbreaking improvements in your daily life. Dive into the world of mindfulness and embark on a journey of self-discovery. Moreover, it is worth mentioning that even 5 minutes a day can make a bustling difference. In conclusion, harness the power of meditation today.",
+      "humanizedText": "okay but why did nobody tell me meditating for 5 min would literally fix my whole vibe?? 🧘‍♀️\n\nlike I went from waking up stressed to actually feeling human before 9am\n\nno fancy app needed, just sat on my floor with a timer\n\ntry it for a week and thank me later 😤",
+      "aiMarkersRemoved": [
+        {
+          "marker": "Unlock the power",
+          "location": "opening",
+          "replacement": "Casual TikTok hook"
+        },
+        {
+          "marker": "In the realm of",
+          "location": "second sentence",
+          "replacement": "Removed"
+        },
+        {
+          "marker": "pivotal",
+          "location": "second sentence",
+          "replacement": "Removed"
+        },
+        {
+          "marker": "Dive into",
+          "location": "third sentence",
+          "replacement": "Removed"
+        },
+        {
+          "marker": "embark on a journey",
+          "location": "third sentence",
+          "replacement": "Removed"
+        },
+        {
+          "marker": "In conclusion",
+          "location": "last sentence",
+          "replacement": "Natural ending"
+        }
+      ],
+      "techniquesApplied": [
+        "banned-phrase-removal",
+        "platform-native-formatting",
+        "gen-z-vernacular",
+        "emoji-insertion",
+        "short-line-breaks",
+        "hook-first-structure"
+      ],
+      "estimatedAiScore": 8,
+      "brandVoiceConsistency": 78,
+      "meaningPreserved": true
+    }
+  ],
+  "summary": {
+    "totalItems": 2,
+    "averageAiScore": 10,
+    "averageBrandVoiceScore": 81.5,
+    "itemsBelowThreshold": 2,
+    "itemsAboveThreshold": 0
+  }
+}

@@ -5,7 +5,7 @@ const CLUSTERS: Record<string, string[]> = {
   intelligence: ['trend-scout', 'audience-researcher', 'competitor-analyst', 'viral-pattern-decoder', 'platform-algorithm'],
   strategy: ['content-strategist', 'campaign-planner', 'channel-optimizer'],
   creation: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'hook-writer'],
-  optimization: ['seo-optimizer', 'ab-test-designer', 'timing-optimizer', 'hashtag-strategist'],
+  optimization: ['seo-optimizer', 'ab-test-designer', 'timing-optimizer', 'hashtag-strategist', 'content-humanizer'],
   quality: ['brand-guardian', 'fact-checker', 'platform-compliance', 'sensitivity-reviewer'],
   distribution: ['reddit-publisher', 'tiktok-publisher', 'facebook-publisher', 'instagram-publisher'],
   coordination: ['campaign-coordinator', 'performance-analyst', 'report-generator'],

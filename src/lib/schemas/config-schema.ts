@@ -1,5 +1,7 @@
 import {z} from 'zod'
 
+import {humanizationConfigSchema} from './humanization-schema.js'
+
 const platformSchema = z.enum(['reddit', 'tiktok', 'facebook', 'instagram'])
 
 export const brandVoiceSchema = z.object({
@@ -56,6 +58,18 @@ export const viralThresholdSchema = z.object({
 
 export type ViralThreshold = z.infer<typeof viralThresholdSchema>
 
+const optimizationSchema = z.object({
+  humanization: humanizationConfigSchema.default({
+    aiDetectionThreshold: 20,
+    preserveKeywords: true,
+  }),
+}).default({
+  humanization: {
+    aiDetectionThreshold: 20,
+    preserveKeywords: true,
+  },
+})
+
 export const configSchema = z.object({
   productName: z.string().min(1),
   platforms: z.array(platformSchema).min(1),
@@ -63,6 +77,7 @@ export const configSchema = z.object({
   brandVoice: brandVoiceSchema,
   agents: agentsSchema,
   viralThreshold: viralThresholdSchema,
+  optimization: optimizationSchema,
   vertical: z.string().min(1).optional(),
 })
 

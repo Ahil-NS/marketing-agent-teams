@@ -3,6 +3,7 @@ import {describe, it, expect, vi, beforeEach} from 'vitest'
 import {createSuccessMessage, createErrorMessage, createMockQuery} from '../../helpers/mock-agent-sdk.js'
 import type {SeoContentItem} from '../../../src/lib/schemas/seo-schema.js'
 import type {SeoOptimizationInputs} from '../../../src/lib/agents/optimization.js'
+import type {HumanizationInputs} from '../../../src/lib/agents/optimization.js'
 
 // --- Valid mock data ---
 
@@ -258,5 +259,250 @@ describe('runSeoOptimizer', () => {
     const {AgentValidationError} = await import('../../../src/lib/agents/errors.js')
 
     await expect(runSeoOptimizer(testInputs)).rejects.toThrow(AgentValidationError)
+  })
+})
+
+// --- Content Humanization Tests ---
+
+const validHumanizationOutput = {
+  items: [
+    {
+      contentId: 'reddit-wellness-1',
+      platform: 'reddit',
+      originalText: "In today's digital landscape, meditation has emerged as a groundbreaking solution.",
+      humanizedText: "So I've been meditating for about 3 months now and honestly? Game changer.",
+      aiMarkersRemoved: [
+        {marker: "In today's digital landscape", location: 'opening sentence', replacement: 'Personal anecdote opener'},
+        {marker: 'groundbreaking', location: 'first sentence', replacement: 'Game changer'},
+      ],
+      techniquesApplied: ['sentence-length-variation', 'banned-phrase-removal', 'personal-anecdote-framing'],
+      estimatedAiScore: 12,
+      brandVoiceConsistency: 85,
+      meaningPreserved: true,
+    },
+  ],
+  summary: {
+    totalItems: 1,
+    averageAiScore: 12,
+    averageBrandVoiceScore: 85,
+    itemsBelowThreshold: 1,
+    itemsAboveThreshold: 0,
+  },
+}
+
+const humanizationInputs: HumanizationInputs = {
+  contentItems: [
+    {
+      contentId: 'reddit-wellness-1',
+      platform: 'reddit',
+      text: "In today's digital landscape, meditation has emerged as a groundbreaking solution.",
+    },
+  ],
+  aiDetectionThreshold: 20,
+}
+
+describe('runContentHumanizer', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.resetModules()
+  })
+
+  it('returns valid HumanizationOutput on success', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHumanizationOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    const result = await runContentHumanizer(humanizationInputs)
+
+    expect(result.agentName).toBe('content-humanizer')
+    expect(result.status).toBe('success')
+    expect(result.outputs.items).toHaveLength(1)
+    expect(result.outputs.items[0].contentId).toBe('reddit-wellness-1')
+    expect(result.outputs.items[0].estimatedAiScore).toBe(12)
+    expect(result.outputs.summary.totalItems).toBe(1)
+  })
+
+  it('uses model: sonnet for creative rewriting', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHumanizationOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    await runContentHumanizer(humanizationInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {model: string}}
+    expect(callArgs.options.model).toBe('sonnet')
+  })
+
+  it('passes correct allowedTools [Read] to executeAgent', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHumanizationOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    await runContentHumanizer(humanizationInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {allowedTools: string[]}}
+    expect(callArgs.options.allowedTools).toEqual(['Read'])
+  })
+
+  it('includes AI-detection threshold in prompt', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHumanizationOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    await runContentHumanizer({...humanizationInputs, aiDetectionThreshold: 15})
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('15%')
+  })
+
+  it('includes default banned phrases in prompt', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHumanizationOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    await runContentHumanizer(humanizationInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain("In today's digital landscape")
+    expect(callArgs.prompt).toContain('Dive into')
+    expect(callArgs.prompt).toContain('Unlock the power')
+    expect(callArgs.prompt).toContain('Delve into')
+    expect(callArgs.prompt).toContain('Utilize')
+  })
+
+  it('includes brand voice config in prompt when provided', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHumanizationOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    await runContentHumanizer({
+      ...humanizationInputs,
+      brandVoiceConfig: {
+        tone: 'friendly',
+        style: 'conversational',
+        principles: ['authenticity', 'warmth'],
+      },
+    })
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).toContain('Brand Voice Configuration')
+    expect(callArgs.prompt).toContain('friendly')
+    expect(callArgs.prompt).toContain('conversational')
+    expect(callArgs.prompt).toContain('authenticity')
+    expect(callArgs.prompt).toContain('warmth')
+  })
+
+  it('omits brand voice section when brandVoiceConfig is not provided', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHumanizationOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    await runContentHumanizer(humanizationInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    expect(callArgs.prompt).not.toContain('Brand Voice Configuration')
+  })
+
+  it('merges custom banned phrases with defaults', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHumanizationOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    await runContentHumanizer({
+      ...humanizationInputs,
+      bannedPhrases: ['Custom banned phrase'],
+    })
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    // Default phrases still present
+    expect(callArgs.prompt).toContain("In today's digital landscape")
+    // Custom phrase also present
+    expect(callArgs.prompt).toContain('Custom banned phrase')
+  })
+
+  it('deduplicates banned phrases', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHumanizationOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    await runContentHumanizer({
+      ...humanizationInputs,
+      bannedPhrases: ['Dive into'], // Already in defaults
+    })
+
+    const callArgs = mockQuery.mock.calls[0][0] as {prompt: string}
+    // count occurrences of "Dive into" — should appear exactly once in the banned phrases list
+    const matches = callArgs.prompt.match(/"Dive into"/g) ?? []
+    expect(matches).toHaveLength(1)
+  })
+
+  it('throws error on agent failure', async () => {
+    const mockQuery = createMockQuery([createErrorMessage('error_during_execution')])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    const {AgentExecutionError} = await import('../../../src/lib/agent-executor/errors.js')
+
+    await expect(runContentHumanizer(humanizationInputs)).rejects.toThrow(AgentExecutionError)
+  })
+
+  it('handles multi-platform content batch', async () => {
+    const multiPlatformOutput = {
+      items: [
+        {...validHumanizationOutput.items[0]},
+        {
+          ...validHumanizationOutput.items[0],
+          contentId: 'tiktok-1',
+          platform: 'tiktok',
+          estimatedAiScore: 8,
+        },
+      ],
+      summary: {
+        totalItems: 2,
+        averageAiScore: 10,
+        averageBrandVoiceScore: 85,
+        itemsBelowThreshold: 2,
+        itemsAboveThreshold: 0,
+      },
+    }
+    const mockQuery = createMockQuery([createSuccessMessage(multiPlatformOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    const result = await runContentHumanizer({
+      contentItems: [
+        {contentId: 'reddit-1', platform: 'reddit', text: 'Test reddit content'},
+        {contentId: 'tiktok-1', platform: 'tiktok', text: 'Test tiktok content'},
+      ],
+      aiDetectionThreshold: 20,
+    })
+
+    expect(result.outputs.items).toHaveLength(2)
+    const platforms = result.outputs.items.map(i => i.platform)
+    expect(platforms).toContain('reddit')
+    expect(platforms).toContain('tiktok')
+    expect(result.outputs.summary.totalItems).toBe(2)
+  })
+
+  it('throws AgentValidationError when output shape is invalid', async () => {
+    const invalidOutput = {items: 'not an array'}
+    const mockQuery = createMockQuery([createSuccessMessage(invalidOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    const {AgentValidationError} = await import('../../../src/lib/agents/errors.js')
+
+    await expect(runContentHumanizer(humanizationInputs)).rejects.toThrow(AgentValidationError)
+  })
+
+  it('includes knowledgeContext in systemPrompt', async () => {
+    const mockQuery = createMockQuery([createSuccessMessage(validHumanizationOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {runContentHumanizer} = await import('../../../src/lib/agents/optimization.js')
+    await runContentHumanizer(humanizationInputs)
+
+    const callArgs = mockQuery.mock.calls[0][0] as {options: {systemPrompt: string}}
+    expect(callArgs.options.systemPrompt).toContain('Knowledge Base')
   })
 })

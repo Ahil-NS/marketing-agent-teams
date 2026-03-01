@@ -2,6 +2,8 @@ import {join} from 'node:path'
 
 import {seoOptimizationOutputSchema} from '../schemas/seo-schema.js'
 import type {SeoOptimizationOutput, SeoContentItem, PlatformSeoConfig} from '../schemas/seo-schema.js'
+import {humanizationOutputSchema} from '../schemas/humanization-schema.js'
+import type {HumanizationOutput} from '../schemas/humanization-schema.js'
 
 import {executeAgent} from './agent-executor.js'
 import {agentsRoot} from './paths.js'
@@ -64,5 +66,120 @@ Output a JSON object with "items" (array of optimization results) and "summary" 
     model: skill.model,
     outputSchema: seoOptimizationOutputSchema,
     maxTurns: 20,
+  })
+}
+
+// --- Content Humanization ---
+
+export interface HumanizationInputs {
+  contentItems: Array<{
+    contentId: string
+    platform: string
+    text: string
+    brandVoice?: {
+      tone: string
+      style: string
+      principles: string[]
+    }
+  }>
+  aiDetectionThreshold: number
+  bannedPhrases?: string[]
+  brandVoiceConfig?: {
+    tone: string
+    style: string
+    principles: string[]
+    bannedPhrases?: string[]
+  }
+}
+
+const DEFAULT_BANNED_PHRASES = [
+  "In today's digital landscape",
+  "It's important to note",
+  "Whether you're a",
+  'Dive into',
+  'Unlock the power',
+  'In conclusion',
+  'Furthermore',
+  'Moreover',
+  'It is worth mentioning',
+  'At the end of the day',
+  'In the realm of',
+  'Navigating the',
+  'Delve into',
+  'Embark on',
+  'Harness the power',
+  'Leverage the',
+  'Tapestry of',
+  'Bustling',
+  'Pivotal',
+  'Groundbreaking',
+  'Fostering',
+  'Seamlessly',
+  'Utilize',
+  'Facilitate',
+]
+
+/**
+ * Run the Content Humanization agent.
+ * Rewrites AI-generated text to pass AI-detection checks while preserving
+ * meaning, brand voice, and platform-native formatting. Applies anti-detection
+ * techniques including structure variation, deliberate imperfection, banned
+ * phrase removal, and platform-specific writing conventions.
+ *
+ * Uses model: sonnet — creative rewriting requires stronger language model.
+ */
+export async function runContentHumanizer(
+  inputs: HumanizationInputs,
+): Promise<AgentResult<HumanizationOutput>> {
+  const skill = await loadSkill(join(agentsRoot(), 'optimization', 'content-humanizer'))
+
+  // Merge default banned phrases with user-supplied ones
+  const allBannedPhrases = [
+    ...DEFAULT_BANNED_PHRASES,
+    ...(inputs.bannedPhrases ?? []),
+    ...(inputs.brandVoiceConfig?.bannedPhrases ?? []),
+  ]
+  // Deduplicate
+  const uniqueBannedPhrases = [...new Set(allBannedPhrases)]
+
+  const prompt = `Humanize the following AI-generated content items to pass AI-detection checks.
+
+## AI-Detection Threshold Target
+Score BELOW ${inputs.aiDetectionThreshold}% AI-detected for each item.
+
+## Banned Phrases (MUST be removed or replaced)
+${uniqueBannedPhrases.map(p => `- "${p}"`).join('\n')}
+
+${inputs.brandVoiceConfig ? `## Brand Voice Configuration
+- Tone: ${inputs.brandVoiceConfig.tone}
+- Style: ${inputs.brandVoiceConfig.style}
+- Principles: ${inputs.brandVoiceConfig.principles.join(', ')}` : ''}
+
+## Content Items to Humanize
+${JSON.stringify(inputs.contentItems, null, 2)}
+
+For each item:
+1. Identify and remove AI-generated markers
+2. Apply platform-specific writing conventions for the target platform
+3. Vary sentence structure, length, and rhythm
+4. Insert deliberate imperfections (contractions, fragments, rhetorical questions)
+5. Preserve original meaning, keywords, and brand voice
+6. Self-assess AI-detection score (target: below ${inputs.aiDetectionThreshold}%)
+
+Output a JSON object with "items" (array of humanization results) and "summary" (aggregate stats).`
+
+  const knowledgeSection = skill.knowledgeContext
+    ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  const systemPrompt = `${skill.systemPrompt}${knowledgeSection}`
+
+  return executeAgent<HumanizationOutput>('content-humanizer', {
+    prompt,
+    systemPrompt,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: humanizationOutputSchema,
+    maxTurns: 25,
   })
 }

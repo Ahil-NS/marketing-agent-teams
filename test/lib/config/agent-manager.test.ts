@@ -11,6 +11,8 @@ function makeConfig(toggles: Record<string, {enabled: boolean}> = {}): Config {
     skillLevel: 'intermediate',
     brandVoice: {tone: 'professional', communicationStyle: 'clear', brandPrinciples: [], bannedPhrases: []},
     agents: {defaultModel: 'sonnet', budgetLimit: 10, toggles},
+    viralThreshold: {default: 0.75, perPlatform: {}, enabled: true},
+    optimization: {humanization: {aiDetectionThreshold: 20, preserveKeywords: true}},
   }
 }
 
@@ -20,8 +22,8 @@ describe('agent-manager', () => {
       expect(Object.keys(CLUSTERS)).toHaveLength(7)
     })
 
-    it('has 28 built-in agents', () => {
-      expect(ALL_AGENTS).toHaveLength(28)
+    it('has 29 built-in agents', () => {
+      expect(ALL_AGENTS).toHaveLength(29)
     })
 
     it('contains known agents', () => {

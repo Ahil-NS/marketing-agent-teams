@@ -85,6 +85,18 @@ export type {
   SeoOptimizationOutput,
 } from './seo-schema.js'
 export {
+  humanizationConfigSchema,
+  aiMarkerRemovalSchema,
+  humanizationResultSchema,
+  humanizationOutputSchema,
+} from './humanization-schema.js'
+export type {
+  HumanizationConfig,
+  AiMarkerRemoval,
+  HumanizationResult,
+  HumanizationOutput,
+} from './humanization-schema.js'
+export {
   pipelineErrorSchema,
   pipelineRunSchema,
   pipelineRunStatusSchema,
