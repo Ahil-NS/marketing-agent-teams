@@ -11,6 +11,9 @@
   "files": [
     "bin",
     "dist",
+    "src/agents",
+    "src/verticals",
+    "src/templates",
     "oclif.manifest.json"
   ],
   "scripts": {
@@ -18,9 +21,9 @@
     "dev": "bin/dev",
     "test": "vitest run",
     "lint": "eslint .",
-    "manifest": "oclif manifest",
+    "manifest": "npx oclif manifest",
     "postpack": "rm -f oclif.manifest.json",
-    "prepack": "tsup && oclif manifest"
+    "prepack": "tsup && npx oclif manifest"
   },
   "oclif": {
     "bin": "mat",
@@ -53,6 +56,15 @@
     "automation",
     "cli"
   ],
+  "author": "Ahil Ahilendran (https://www.npmjs.com/~ahilendran)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ahil-NS/marketing-agent-teams.git"
+  },
+  "homepage": "https://github.com/Ahil-NS/marketing-agent-teams#readme",
+  "bugs": {
+    "url": "https://github.com/Ahil-NS/marketing-agent-teams/issues"
+  },
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "0.2.63",

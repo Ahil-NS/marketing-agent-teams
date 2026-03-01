@@ -1,0 +1,32 @@
+# Source & config (dist/ is shipped instead)
+src/lib/
+src/commands/
+src/hooks/
+src/index.ts
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+CONTRIBUTING.md
+
+# Tests
+test/
+
+# BMAD framework
+_bmad/
+_bmad-output/
+
+# CI/CD
+.github/
+
+# Editor & tool config
+.claude/
+.vscode/
+.eslintrc*
+.prettierrc*
+.editorconfig
+
+# Runtime data
+.mat/
+
+# Dev scripts
+bin/dev
