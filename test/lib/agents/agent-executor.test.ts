@@ -179,4 +179,53 @@ describe('executeAgent (backward-compatible wrapper)', () => {
     expect(result.outputs.answer).toBe('test')
     expect(result.outputs.confidence).toBe(0.8)
   })
+
+  // ── Story 4.6: AI Model Attribution Tracking (FR28) ──────────────────────
+
+  it('includes modelName from SDK response model field', async () => {
+    const validOutput = {answer: 'hello', confidence: 0.95}
+    const mockQuery = createMockQuery([createSuccessMessage(validOutput, 'claude-haiku-4-2025-04-14')])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
+    const result = await executeAgent<TestOutput>('test-agent', baseOptions)
+
+    expect(result.usage.modelName).toBe('claude-haiku-4-2025-04-14')
+  })
+
+  it('falls back to options.model when SDK response lacks model field', async () => {
+    const validOutput = {answer: 'hello', confidence: 0.95}
+    const mockQuery = createMockQuery([createSuccessMessage(validOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
+    const result = await executeAgent<TestOutput>('test-agent', baseOptions)
+
+    expect(result.usage.modelName).toBe('haiku')
+  })
+
+  it('sets provider to anthropic', async () => {
+    const validOutput = {answer: 'hello', confidence: 0.95}
+    const mockQuery = createMockQuery([createSuccessMessage(validOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
+    const result = await executeAgent<TestOutput>('test-agent', baseOptions)
+
+    expect(result.usage.provider).toBe('anthropic')
+  })
+
+  it('sets timestamp as a valid ISO 8601 string', async () => {
+    const validOutput = {answer: 'hello', confidence: 0.95}
+    const mockQuery = createMockQuery([createSuccessMessage(validOutput)])
+    vi.doMock('@anthropic-ai/claude-agent-sdk', () => ({query: mockQuery}))
+
+    const {executeAgent} = await import('../../../src/lib/agents/agent-executor.js')
+    const result = await executeAgent<TestOutput>('test-agent', baseOptions)
+
+    expect(result.usage.timestamp).toBeDefined()
+    // Validate ISO 8601 format
+    const parsed = new Date(result.usage.timestamp)
+    expect(parsed.toISOString()).toBe(result.usage.timestamp)
+  })
 })

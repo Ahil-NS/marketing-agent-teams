@@ -52,6 +52,7 @@ export class ClaudeAgentExecutor implements AgentExecutor {
                     outputTokens: message.usage.output_tokens ?? 0,
                   }
                 : undefined,
+              model: (message as Record<string, unknown>).model as string | undefined,
               numTurns: message.num_turns,
               durationMs: message.duration_ms,
             }

@@ -1,6 +1,7 @@
 import {z} from 'zod'
 
 import {campaignPlanSchema, contentCalendarSchema, channelOptimizationPlanSchema} from './strategy-schema.js'
+import {contentItemAttributionSchema} from './content-item-schema.js'
 
 // ── Sub-schemas for Reddit Content Package ────────────────────────────────────
 
@@ -341,6 +342,8 @@ export const contentItemSchema = z.object({
   agentName: z.string(),
   campaignId: z.string(),
   createdAt: z.string(),
+  /** AI model attribution chain tracking all contributing model calls (FR28) */
+  attribution: contentItemAttributionSchema.optional(),
 })
 
 export type ContentItem = z.infer<typeof contentItemSchema>

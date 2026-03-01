@@ -9,18 +9,20 @@ export interface MockResultMessage {
     input_tokens: number
     output_tokens: number
   }
+  model?: string
   num_turns?: number
   duration_ms?: number
   errors?: string[]
 }
 
-export function createSuccessMessage(jsonOutput: unknown): MockResultMessage {
+export function createSuccessMessage(jsonOutput: unknown, model?: string): MockResultMessage {
   return {
     type: 'result',
     subtype: 'success',
     result: JSON.stringify(jsonOutput),
     total_cost_usd: 0.0025,
     usage: {input_tokens: 450, output_tokens: 380},
+    model,
     num_turns: 3,
     duration_ms: 4500,
   }

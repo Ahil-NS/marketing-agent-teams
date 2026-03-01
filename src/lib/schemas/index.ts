@@ -159,3 +159,19 @@ export type {
   ComplianceRewrite,
   ComplianceReport,
 } from './compliance-schema.js'
+export {
+  modelAttributionSchema,
+  attributionEntrySchema,
+  attributionChainSchema,
+} from './attribution-schema.js'
+export type {
+  ModelAttribution,
+  AttributionEntry,
+  AttributionChain,
+} from './attribution-schema.js'
+export {
+  contentItemAttributionSchema,
+} from './content-item-schema.js'
+export type {
+  ContentItemAttribution,
+} from './content-item-schema.js'

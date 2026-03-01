@@ -31,6 +31,26 @@ export class StageRunner {
    * Agents within a stage run in parallel via Promise.allSettled() (FR63).
    * If some agents fail, the stage completes in degraded mode (FR3, NFR14).
    * If ALL agents fail, the stage is marked as failed.
+   *
+   * ## Attribution Contract (FR28 — Story 4.6)
+   *
+   * After each agent completes, the stage-runner should build an attribution
+   * entry from the AgentResult and append it to the relevant content item's
+   * attribution chain:
+   *
+   * ```typescript
+   * import { buildAttributionEntry, appendToAttributionChain } from '../agents/index.js'
+   *
+   * // After agent execution:
+   * const entry = buildAttributionEntry(agentResult, stage, runId)
+   * contentItem.attribution.attributionChain = appendToAttributionChain(
+   *   contentItem.attribution.attributionChain,
+   *   entry,
+   * )
+   * ```
+   *
+   * This wiring will be implemented when ContentItem is fully integrated
+   * into the pipeline state. The utility functions are available now.
    */
   async runStage(
     stage: PipelineStage,

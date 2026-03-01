@@ -17,6 +17,12 @@ export interface AgentResult<T = unknown> {
     inputTokens: number
     outputTokens: number
     cost: number
+    /** Full model identifier from SDK response (e.g., 'claude-haiku-4-2025-04-14') */
+    modelName: string
+    /** AI provider (e.g., 'anthropic') */
+    provider: string
+    /** ISO 8601 timestamp of when the generation completed */
+    timestamp: string
   }
   duration: number
   errors: MATError[]

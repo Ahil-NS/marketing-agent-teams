@@ -40,6 +40,8 @@ export interface AgentMessage {
     inputTokens: number
     outputTokens: number
   }
+  /** Full model identifier from SDK response (e.g., 'claude-haiku-4-2025-04-14') */
+  model?: string
   /** Number of conversation turns */
   numTurns?: number
   /** Wall time in milliseconds */

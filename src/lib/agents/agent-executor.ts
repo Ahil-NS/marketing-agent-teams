@@ -65,6 +65,10 @@ export async function executeAgent<T>(
           inputTokens: message.usage?.inputTokens ?? 0,
           outputTokens: message.usage?.outputTokens ?? 0,
           cost: message.totalCostUsd ?? 0,
+          // FR28: AI model attribution fields
+          modelName: message.model ?? options.model,
+          provider: 'anthropic',
+          timestamp: new Date().toISOString(),
         },
         duration: Date.now() - startTime,
         errors: [],
