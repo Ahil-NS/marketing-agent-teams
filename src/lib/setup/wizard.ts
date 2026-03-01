@@ -37,7 +37,7 @@ export async function verifyClaude(): Promise<void> {
     )
   }
 
-  if (!stdout.includes('claude')) {
+  if (!stdout.toLowerCase().includes('claude')) {
     throw new ClaudeAuthError(
       'Claude Code CLI verification failed',
       SETUP_CLAUDE_AUTH_FAILED,
