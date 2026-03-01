@@ -230,3 +230,29 @@ export type {
   ReviewItemData,
   ReviewFilterData,
 } from './review-schema.js'
+export {
+  platformNameSchema,
+  authResultSchema,
+  mediaAttachmentSchema,
+  platformContentSchema,
+  platformPublishErrorSchema,
+  publishResultSchema,
+  contentValidationErrorSchema,
+  contentValidationWarningSchema,
+  contentValidationResultSchema,
+  rateLimitStatusSchema,
+  platformMetricsSchema,
+} from './platform-adapter-schema.js'
+export type {
+  PlatformNameData,
+  AuthResultData,
+  MediaAttachmentData,
+  PlatformContentData,
+  PlatformPublishErrorData,
+  PublishResultData,
+  ContentValidationErrorData,
+  ContentValidationWarningData,
+  ContentValidationResultData,
+  RateLimitStatusData,
+  PlatformMetricsData,
+} from './platform-adapter-schema.js'
