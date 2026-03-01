@@ -2,12 +2,15 @@ import {join} from 'node:path'
 
 import {brandGuardianOutputSchema} from '../schemas/quality-schema.js'
 import type {BrandGuardianOutput} from '../schemas/quality-schema.js'
+import {complianceReportSchema} from '../schemas/compliance-schema.js'
+import type {ComplianceReport} from '../schemas/compliance-schema.js'
 import type {BrandVoiceConfig} from '../schemas/config-schema.js'
 
 import {executeAgent} from './agent-executor.js'
 import {AgentMemoryStore} from './memory-store.js'
 import {agentsRoot} from './paths.js'
 import {loadSkill} from './skill-loader.js'
+import type {AgentInputs} from './types.js'
 
 export interface BrandGuardianInputs {
   contentItems: Array<{id: string; platform: string; content: string}>
@@ -131,4 +134,90 @@ export async function persistLearnedPatterns(
       confidence: pattern.confidence,
     })
   }
+}
+
+export interface ComplianceInputs extends AgentInputs {
+  /** The content text to evaluate for compliance */
+  contentText: string
+  /** Target platform (e.g., 'reddit', 'tiktok', 'facebook', 'instagram') */
+  platform: string
+  /** Type of content (e.g., 'post', 'ad', 'story', 'video-caption') */
+  contentType: string
+  /** Target SEO/marketing keywords the content should preserve */
+  targetKeywords: string[]
+  /** Call-to-action intent that rewrites must preserve */
+  callToAction: string
+  /** Whether this content is for the wellness vertical (enables health claim checks) */
+  isWellnessVertical: boolean
+  /** Optional content ID override (defaults to 'content-001') */
+  contentId?: string
+}
+
+const WELLNESS_VERTICAL_PROMPT = `
+
+## Wellness Vertical: Health Claim Detection
+
+This content is for the wellness vertical. Apply additional FDA health claim scrutiny:
+
+### Prohibited Claims (flag as health-claims violation)
+- Unverified therapeutic claims ("cures", "treats", "heals", "prevents disease")
+- Medical diagnosis claims ("if you have X condition, this will help")
+- Claims that a product replaces medical treatment
+- Specific health outcome guarantees
+
+### Requires Disclaimers (flag as warning)
+- Structure-function claims ("supports immune health") — allowed with disclaimer
+- General wellness claims ("promotes relaxation") — allowed with appropriate context
+- Meditation/mindfulness benefits that imply medical outcomes
+
+### FDA Boundary Rules
+- Structure-function claims are NOT health claims if properly disclaimed
+- "This statement has not been evaluated by the FDA" disclaimer required for supplements
+- Wellness content may describe subjective experiences without medical claims
+- Always flag therapeutic language for human review`
+
+/**
+ * Run the Compliance Shield (platform-compliance) agent.
+ * Evaluates content for platform policy violations and produces compliant rewrites.
+ * Loads SKILL.md definition, constructs prompt from inputs, executes via Agent SDK,
+ * and validates output against complianceReportSchema.
+ *
+ * Uses model: haiku — fast evaluation for policy compliance checks.
+ */
+export async function runComplianceShield(inputs: ComplianceInputs): Promise<ComplianceReport> {
+  const skill = await loadSkill(join(agentsRoot(), 'quality', 'platform-compliance'))
+
+  const knowledgeSection = skill.knowledgeContext
+    ? `\n\n## Knowledge Base\n\n${skill.knowledgeContext}`
+    : ''
+
+  let systemPrompt = `${skill.systemPrompt}${knowledgeSection}`
+  if (inputs.isWellnessVertical) {
+    systemPrompt += WELLNESS_VERTICAL_PROMPT
+  }
+
+  const result = await executeAgent<ComplianceReport>('platform-compliance', {
+    prompt: `Evaluate the following content for platform policy compliance.
+
+Content ID: ${inputs.contentId ?? 'content-001'}
+Platform: ${inputs.platform}
+Content Type: ${inputs.contentType}
+Brand: ${inputs.brandName}
+Product Domain: ${inputs.productDomain}
+Target Keywords: ${inputs.targetKeywords.join(', ')}
+Call-to-Action: ${inputs.callToAction}
+Wellness Vertical: ${inputs.isWellnessVertical ? 'YES — apply FDA health claim rules' : 'No'}
+
+--- CONTENT START ---
+${inputs.contentText}
+--- CONTENT END ---
+
+Produce a compliance report as JSON.`,
+    systemPrompt,
+    allowedTools: skill.tools,
+    model: skill.model,
+    outputSchema: complianceReportSchema,
+  })
+
+  return result.outputs
 }

@@ -1,0 +1,46 @@
+{
+  "contentId": "content-ftc-001",
+  "platform": "instagram",
+  "overallStatus": "violations-found",
+  "complianceScore": 35,
+  "violations": [
+    {
+      "id": "v1",
+      "type": "ftc-disclosure",
+      "severity": "critical",
+      "flaggedSection": "I've been loving this new serum from GlowSkin! My skin has never looked better.",
+      "policyReference": "FTC 16 CFR Part 255 — Endorsement Guides",
+      "platform": "instagram",
+      "explanation": "Content appears to be sponsored/gifted product promotion but contains no FTC disclosure (#ad, #sponsored, or Paid Partnership tag). Material connection between creator and brand must be disclosed."
+    },
+    {
+      "id": "v2",
+      "type": "ftc-disclosure",
+      "severity": "warning",
+      "flaggedSection": "Link in bio to shop — use code GLOW20 for 20% off!",
+      "policyReference": "FTC Endorsement Guides — Affiliate Disclosure",
+      "platform": "instagram",
+      "explanation": "Discount code suggests affiliate/commission relationship. This material connection requires clear disclosure."
+    }
+  ],
+  "rewrites": [
+    {
+      "violationId": "v1",
+      "originalSection": "I've been loving this new serum from GlowSkin! My skin has never looked better.",
+      "rewrittenSection": "#ad I've been loving this new serum from GlowSkin! My skin has never looked better.",
+      "preservedKeywords": ["serum", "GlowSkin", "skincare"],
+      "preservedCta": true,
+      "explanation": "Added #ad disclosure at the beginning of the post as required by FTC guidelines. All original keywords and messaging preserved."
+    },
+    {
+      "violationId": "v2",
+      "originalSection": "Link in bio to shop — use code GLOW20 for 20% off!",
+      "rewrittenSection": "Link in bio to shop — use code GLOW20 for 20% off! #sponsored",
+      "preservedKeywords": ["GLOW20"],
+      "preservedCta": true,
+      "explanation": "Added #sponsored tag to reinforce disclosure near the affiliate discount code. Call-to-action preserved."
+    }
+  ],
+  "wellnessFlags": [],
+  "summary": "Found 2 FTC disclosure violations: missing #ad disclosure for sponsored content and undisclosed affiliate relationship via discount code. Compliant rewrites provided that preserve all keywords and CTAs."
+}

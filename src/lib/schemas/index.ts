@@ -147,3 +147,15 @@ export type {
   BrandGuardianOutput,
   BrandGuardianInputs,
 } from './quality-schema.js'
+export {
+  complianceViolationTypeSchema,
+  complianceViolationSchema,
+  complianceRewriteSchema,
+  complianceReportSchema,
+} from './compliance-schema.js'
+export type {
+  ComplianceViolationType,
+  ComplianceViolation,
+  ComplianceRewrite,
+  ComplianceReport,
+} from './compliance-schema.js'
