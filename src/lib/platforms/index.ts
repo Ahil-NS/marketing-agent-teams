@@ -41,3 +41,5 @@ export type {
 } from './types.js'
 export {RetryQueue, RetryQueueError, RetryItemNotFoundError} from './retry-queue/index.js'
 export type {RetryQueueOptions, RetryQueueItem, RetryQueueStatus, RetryProcessResult, RetryErrorDetail} from './retry-queue/index.js'
+export {ContentScheduler, getScheduleStatus, TimingAnalyzer, MIN_DATA_POINTS, DEFAULT_PLATFORM_SCHEDULE, scheduleSlotSchema, platformScheduleConfigSchema, scheduleOptionsSchema} from './scheduler/index.js'
+export type {ScheduleSlot, PlatformScheduleConfig, ScheduleOptions, ScheduleResult, ScheduledItem, SkippedItem, ScheduleStatus, ScheduledItemSummary} from './scheduler/index.js'
