@@ -6,6 +6,10 @@ export { OAuthFlowHandler } from './oauth-server.js'
 export type { OAuthPlatformConfig } from './oauth-server.js'
 export { getPlatformOAuthConfig, PLATFORM_OAUTH_DEFAULTS } from './platform-oauth-config.js'
 export { scrubCredentials } from './credential-scrubber.js'
+export { TRUST_TIER_CONFIGS, getEffectiveTrustTier, canPublish, canAccessCredentials } from './trust-tiers.js'
+export type { TrustTierConfig, TrustOverrides } from './trust-tiers.js'
+export { TrustOverrideStore, trustOverrideSchema, trustOverridesFileSchema, TrustOverrideError } from './trust-overrides.js'
+export type { TrustOverride, TrustOverridesFile } from './trust-overrides.js'
 export type {
   CredentialContext,
   CredentialEntry,

@@ -4,6 +4,9 @@ import {Command, Flags} from '@oclif/core'
 
 import {loadAllSkills} from '../../lib/agents/skill-loader.js'
 import {InstalledAgentsRegistry} from '../../lib/agents/installed-agents.js'
+import {TrustOverrideStore} from '../../lib/credentials/trust-overrides.js'
+import {getEffectiveTrustTier} from '../../lib/credentials/trust-tiers.js'
+import type {TrustOverrides} from '../../lib/credentials/trust-tiers.js'
 
 export interface AgentListEntry {
   name: string
@@ -36,6 +39,15 @@ export default class AgentsList extends Command {
 
     const entries: AgentListEntry[] = []
 
+    // Load trust overrides for effective tier resolution
+    const overrideStore = new TrustOverrideStore()
+    let overridesMap: TrustOverrides = {}
+    try {
+      overridesMap = await overrideStore.getOverridesMap()
+    } catch {
+      // Override file may not exist — continue with defaults
+    }
+
     // Load built-in agents from src/agents/
     const agentsRoot = join(process.cwd(), 'src', 'agents')
     try {
@@ -59,10 +71,12 @@ export default class AgentsList extends Command {
       const installed = await registry.listAll()
       for (const [, agent] of Object.entries(installed)) {
         for (const agentName of agent.agents) {
+          const effectiveTier = getEffectiveTrustTier(agentName, 'community', overridesMap)
+          const isOverridden = agentName in overridesMap
           entries.push({
             name: agentName,
             cluster: '-',
-            trustTier: agent.trustTier,
+            trustTier: isOverridden ? `${effectiveTier}*` : effectiveTier,
             source: 'community',
             enabled: agent.enabled,
           })

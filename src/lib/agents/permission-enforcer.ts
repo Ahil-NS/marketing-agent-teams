@@ -2,31 +2,7 @@ import type {TrustTier} from '../credentials/types.js'
 import type {SkillDefinition, PermissionEnforcementResult} from './types.js'
 import {TrustViolationError} from '../credentials/errors.js'
 import {PermissionDeniedError} from './errors.js'
-import {VALID_SDK_TOOLS} from '../schemas/agent-schema.js'
-
-/**
- * Trust tier tool restrictions.
- * - builtin: all SDK tools (full access for core agents)
- * - verified: all except Bash (reviewed community agents — no shell execution)
- * - community: read-only tools only (unreviewed agents — no write/execute)
- */
-const TRUST_TIER_ALLOWED_TOOLS: Record<TrustTier, readonly string[]> = {
-  builtin: VALID_SDK_TOOLS,
-  verified: VALID_SDK_TOOLS.filter((t) => t !== 'Bash'),
-  community: ['WebSearch', 'WebFetch', 'Read', 'Glob', 'Grep'],
-} as const
-
-/**
- * Trust tier credential restrictions.
- * - builtin: full credential access
- * - verified: standard credential access (declared credentials only)
- * - community: no credential access at all
- */
-const TRUST_TIER_ALLOWS_CREDENTIALS: Record<TrustTier, boolean> = {
-  builtin: true,
-  verified: true,
-  community: false,
-} as const
+import {TRUST_TIER_CONFIGS} from '../credentials/trust-tiers.js'
 
 /**
  * Enforces agent permission boundaries at execution time.
@@ -61,7 +37,7 @@ export class PermissionEnforcer {
     // Check credential access against trust tier
     if (
       permissions.credentials.length > 0 &&
-      !TRUST_TIER_ALLOWS_CREDENTIALS[trustTier]
+      !TRUST_TIER_CONFIGS[trustTier].allowsCredentials
     ) {
       violations.push(
         `Trust tier '${trustTier}' does not allow credential access. ` +
@@ -71,7 +47,7 @@ export class PermissionEnforcer {
     }
 
     // Check tool declarations against trust tier
-    const tierAllowed = TRUST_TIER_ALLOWED_TOOLS[trustTier]
+    const tierAllowed = TRUST_TIER_CONFIGS[trustTier].allowedTools
     const declaredTools = skillDefinition.tools ?? []
     const blockedTools = declaredTools.filter(
       (tool) => !tierAllowed.includes(tool),
@@ -118,7 +94,7 @@ export class PermissionEnforcer {
     trustTier: TrustTier,
   ): string[] {
     const declaredTools = skillDefinition.tools ?? []
-    const tierAllowed = TRUST_TIER_ALLOWED_TOOLS[trustTier]
+    const tierAllowed = TRUST_TIER_CONFIGS[trustTier].allowedTools
     return declaredTools.filter((tool) => tierAllowed.includes(tool))
   }
 
