@@ -14,6 +14,8 @@ import {
   videoPromptSchema,
   imageGeneratorEnum,
   videoGeneratorEnum,
+  viralContentItemSchema,
+  derivativeContentItemSchema,
 } from '../../../src/lib/schemas/creation-schema.js'
 
 import validRedditContent from '../../fixtures/responses/claude-reddit-content.json'
@@ -1007,3 +1009,139 @@ describe('contentItemSchema with visual prompts', () => {
     expect(result.success).toBe(false)
   })
 })
+
+describe('viralContentItemSchema', () => {
+  const validViralItem = {
+    originalItemId: 'item-001',
+    platform: 'reddit',
+    engagementMetrics: {
+      itemId: 'item-001',
+      platform: 'reddit',
+      likes: 500,
+      shares: 100,
+      comments: 200,
+      views: 10_000,
+      engagementRate: 0.08,
+    },
+    thresholdExceeded: true,
+    detectedAt: '2026-03-01T12:00:00Z',
+  }
+
+  it('validates correct structure', () => {
+    const result = viralContentItemSchema.safeParse(validViralItem)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.originalItemId).toBe('item-001')
+      expect(result.data.platform).toBe('reddit')
+      expect(result.data.thresholdExceeded).toBe(true)
+    }
+  })
+
+  it('rejects missing originalItemId', () => {
+    const {originalItemId: _, ...invalid} = validViralItem
+    const result = viralContentItemSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid platform', () => {
+    const invalid = {...validViralItem, platform: 'myspace'}
+    const result = viralContentItemSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('validates all four platforms', () => {
+    for (const platform of ['reddit', 'tiktok', 'facebook', 'instagram']) {
+      const item = {...validViralItem, platform}
+      const result = viralContentItemSchema.safeParse(item)
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects missing engagementMetrics', () => {
+    const {engagementMetrics: _, ...invalid} = validViralItem
+    const result = viralContentItemSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing detectedAt', () => {
+    const {detectedAt: _, ...invalid} = validViralItem
+    const result = viralContentItemSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('derivativeContentItemSchema', () => {
+  const validDerivative = {
+    itemId: 'deriv-001',
+    platform: 'tiktok',
+    contentType: 'video-script',
+    title: 'Derivative hook',
+    body: 'Derivative body content',
+    metadata: {
+      derivativeOf: 'item-001',
+      sourcePlatform: 'reddit',
+      tags: ['trending-derivative'],
+      sourceEngagement: {engagementRate: 0.08},
+    },
+    status: 'draft',
+    generatedBy: 'tiktok-creator',
+    agentName: 'tiktok-creator',
+    campaignId: 'campaign-001',
+    createdAt: '2026-03-01T12:00:00Z',
+    sourceItemId: 'item-001',
+    derivativeType: 'cross-platform',
+    variationStrategy: 'Different platform with adapted format',
+  }
+
+  it('validates correct derivative structure', () => {
+    const result = derivativeContentItemSchema.safeParse(validDerivative)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.sourceItemId).toBe('item-001')
+      expect(result.data.derivativeType).toBe('cross-platform')
+      expect(result.data.variationStrategy).toBe('Different platform with adapted format')
+    }
+  })
+
+  it('extends ContentItem with derivative fields', () => {
+    const result = derivativeContentItemSchema.safeParse(validDerivative)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      // ContentItem fields
+      expect(result.data.itemId).toBe('deriv-001')
+      expect(result.data.platform).toBe('tiktok')
+      expect(result.data.status).toBe('draft')
+      // Derivative-specific fields
+      expect(result.data.sourceItemId).toBe('item-001')
+      expect(result.data.derivativeType).toBe('cross-platform')
+    }
+  })
+
+  it('validates all derivativeType values', () => {
+    const types = ['hook-variation', 'cross-platform', 'format-change', 'audience-segment'] as const
+    for (const type of types) {
+      const item = {...validDerivative, derivativeType: type}
+      const result = derivativeContentItemSchema.safeParse(item)
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it('rejects invalid derivativeType', () => {
+    const invalid = {...validDerivative, derivativeType: 'unknown'}
+    const result = derivativeContentItemSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing sourceItemId', () => {
+    const {sourceItemId: _, ...invalid} = validDerivative
+    const result = derivativeContentItemSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing variationStrategy', () => {
+    const {variationStrategy: _, ...invalid} = validDerivative
+    const result = derivativeContentItemSchema.safeParse(invalid)
+    expect(result.success).toBe(false)
+  })
+})
+

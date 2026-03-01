@@ -31,6 +31,18 @@ export const PIPELINE_STAGES = Object.freeze([
 export const REVIEW_STAGE: PipelineStage = 'review'
 
 /**
+ * Pipeline stages for derivative content runs.
+ * Derivatives skip research and strategy (context comes from original).
+ * They stop at review (no auto-distribution for derivatives).
+ */
+export const DERIVATIVE_PIPELINE_STAGES = Object.freeze([
+  'creation',
+  'optimization',
+  'quality',
+  'review',
+] as const)
+
+/**
  * Maps each pipeline stage to the agent names that execute within it.
  * Agents within a stage run in parallel (FR63).
  * The 'review' stage is a pause point — no agents, human review only.
@@ -188,6 +200,7 @@ export interface OrchestratorEvents {
   onStageComplete?: (stage: PipelineStage, result: StageExecutionResult) => void
   onAgentFailed?: (agentName: string, error: Error) => void
   onPipelinePaused?: (stage: PipelineStage) => void
+  onViralDetected?: (itemId: string, platform: string) => void
 }
 
 // ============================================================

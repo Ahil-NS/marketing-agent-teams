@@ -263,6 +263,144 @@ describe('agentTogglesSchema', () => {
   })
 })
 
+describe('viralThresholdSchema', () => {
+  const baseConfig = {
+    productName: 'TestProduct',
+    platforms: ['reddit'],
+    skillLevel: 'intermediate',
+  }
+
+  it('defaults viralThreshold.default to 0.75 when omitted', () => {
+    const result = configSchema.safeParse(baseConfig)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viralThreshold.default).toBe(0.75)
+    }
+  })
+
+  it('defaults viralThreshold.enabled to true when omitted', () => {
+    const result = configSchema.safeParse(baseConfig)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viralThreshold.enabled).toBe(true)
+    }
+  })
+
+  it('defaults viralThreshold.perPlatform to empty object when omitted', () => {
+    const result = configSchema.safeParse(baseConfig)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viralThreshold.perPlatform).toEqual({})
+    }
+  })
+
+  it('accepts custom default threshold', () => {
+    const config = {
+      ...baseConfig,
+      viralThreshold: {default: 0.9},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viralThreshold.default).toBe(0.9)
+    }
+  })
+
+  it('accepts per-platform thresholds', () => {
+    const config = {
+      ...baseConfig,
+      viralThreshold: {
+        default: 0.75,
+        perPlatform: {
+          reddit: 0.8,
+          tiktok: 0.6,
+        },
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viralThreshold.perPlatform.reddit).toBe(0.8)
+      expect(result.data.viralThreshold.perPlatform.tiktok).toBe(0.6)
+    }
+  })
+
+  it('accepts all four platforms in perPlatform', () => {
+    const config = {
+      ...baseConfig,
+      viralThreshold: {
+        perPlatform: {
+          reddit: 0.8,
+          tiktok: 0.6,
+          facebook: 0.7,
+          instagram: 0.85,
+        },
+      },
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viralThreshold.perPlatform.reddit).toBe(0.8)
+      expect(result.data.viralThreshold.perPlatform.tiktok).toBe(0.6)
+      expect(result.data.viralThreshold.perPlatform.facebook).toBe(0.7)
+      expect(result.data.viralThreshold.perPlatform.instagram).toBe(0.85)
+    }
+  })
+
+  it('rejects default threshold below 0', () => {
+    const config = {
+      ...baseConfig,
+      viralThreshold: {default: -0.1},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects default threshold above 1', () => {
+    const config = {
+      ...baseConfig,
+      viralThreshold: {default: 1.5},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects per-platform threshold below 0', () => {
+    const config = {
+      ...baseConfig,
+      viralThreshold: {perPlatform: {reddit: -0.1}},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects per-platform threshold above 1', () => {
+    const config = {
+      ...baseConfig,
+      viralThreshold: {perPlatform: {tiktok: 2.0}},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(false)
+  })
+
+  it('allows disabling viral threshold', () => {
+    const config = {
+      ...baseConfig,
+      viralThreshold: {enabled: false},
+    }
+    const result = configSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.viralThreshold.enabled).toBe(false)
+    }
+  })
+
+  it('exports viralThresholdSchema from schemas/index.ts', async () => {
+    const mod = await import('../../../src/lib/schemas/index.js')
+    expect(mod.viralThresholdSchema).toBeDefined()
+  })
+})
+
 describe('schemas/index.ts re-export', () => {
   it('re-exports configSchema from index', async () => {
     const {configSchema: schema} = await import('../../../src/lib/schemas/index.js')

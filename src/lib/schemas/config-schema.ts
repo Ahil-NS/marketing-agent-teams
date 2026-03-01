@@ -37,12 +37,32 @@ const agentsSchema = z.object({
   toggles: {},
 })
 
+const perPlatformThresholdSchema = z.object({
+  reddit: z.number().min(0).max(1).optional(),
+  tiktok: z.number().min(0).max(1).optional(),
+  facebook: z.number().min(0).max(1).optional(),
+  instagram: z.number().min(0).max(1).optional(),
+}).default({})
+
+export const viralThresholdSchema = z.object({
+  default: z.number().min(0).max(1).default(0.75),
+  perPlatform: perPlatformThresholdSchema,
+  enabled: z.boolean().default(true),
+}).default({
+  default: 0.75,
+  perPlatform: {},
+  enabled: true,
+})
+
+export type ViralThreshold = z.infer<typeof viralThresholdSchema>
+
 export const configSchema = z.object({
   productName: z.string().min(1),
   platforms: z.array(platformSchema).min(1),
   skillLevel: z.enum(['beginner', 'intermediate', 'advanced']),
   brandVoice: brandVoiceSchema,
   agents: agentsSchema,
+  viralThreshold: viralThresholdSchema,
 })
 
 export type Config = z.infer<typeof configSchema>

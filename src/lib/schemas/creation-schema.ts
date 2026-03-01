@@ -452,3 +452,37 @@ export const creationStageOutputSchema = z.object({
 })
 
 export type CreationStageOutput = z.infer<typeof creationStageOutputSchema>
+
+// ── ViralContentItem (detected viral content for derivative spawning) ────────
+
+export const engagementMetricsSchema = z.object({
+  itemId: z.string().min(1),
+  platform: z.enum(['reddit', 'tiktok', 'facebook', 'instagram']),
+  likes: z.number().nonnegative(),
+  shares: z.number().nonnegative(),
+  comments: z.number().nonnegative(),
+  views: z.number().nonnegative(),
+  engagementRate: z.number().min(0).max(1),
+})
+
+export type EngagementMetrics = z.infer<typeof engagementMetricsSchema>
+
+export const viralContentItemSchema = z.object({
+  originalItemId: z.string().min(1),
+  platform: z.enum(['reddit', 'tiktok', 'facebook', 'instagram']),
+  engagementMetrics: engagementMetricsSchema,
+  thresholdExceeded: z.boolean(),
+  detectedAt: z.string().min(1),
+})
+
+export type ViralContentItem = z.infer<typeof viralContentItemSchema>
+
+// ── DerivativeContentItem (content derived from a viral source) ──────────────
+
+export const derivativeContentItemSchema = contentItemSchema.extend({
+  sourceItemId: z.string().min(1),
+  derivativeType: z.enum(['hook-variation', 'cross-platform', 'format-change', 'audience-segment']),
+  variationStrategy: z.string().min(1),
+})
+
+export type DerivativeContentItem = z.infer<typeof derivativeContentItemSchema>
