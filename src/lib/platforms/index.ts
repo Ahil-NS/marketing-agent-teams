@@ -39,3 +39,5 @@ export type {
   PublishResult,
   RateLimitStatus,
 } from './types.js'
+export {RetryQueue, RetryQueueError, RetryItemNotFoundError} from './retry-queue/index.js'
+export type {RetryQueueOptions, RetryQueueItem, RetryQueueStatus, RetryProcessResult, RetryErrorDetail} from './retry-queue/index.js'
