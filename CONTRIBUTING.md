@@ -83,28 +83,33 @@ src/agents/<cluster>/<agent-name>/
 
 ### 3. Write the SKILL.md
 
-The SKILL.md file uses YAML front matter for structured metadata and a markdown body for the system prompt. See [docs/agent-skill-schema.md](docs/agent-skill-schema.md) for the full schema reference.
+The SKILL.md file uses YAML front matter for structured metadata and a markdown body for the system prompt.
 
 Key front matter fields:
 
 ```yaml
 ---
-schemaVersion: '1.0.0'
-agentName: my-agent
+name: my-agent
+description: >
+  Descriptive text with trigger phrases explaining what this agent does,
+  its specialization, and when to use it.
 cluster: intelligence
+model: haiku
+tools:
+  - WebSearch
+  - WebFetch
+  - Read
 trustTier: builtin
-modelRequirement: sonnet
-toolScopes: [WebSearch, WebFetch]
-dataScopes: [brandVoice, competitorProfiles]
-inputs:
-  - name: topic
-    type: string
-    required: true
-outputs:
-  - name: report
-    type: object
 ---
 ```
+
+### SKILL.md Conventions
+
+- **Trigger phrases**: Description must contain actionable phrases (5+ words)
+- **Related agents**: Add a `## Related Agents` section listing agents this one works with
+- **Line limit**: Keep SKILL.md under 500 lines. Move detailed knowledge to `knowledge/` files
+- **JSON output**: Include an `## Output Format` section with the expected JSON schema
+- **Brand context**: Add instruction to read `.mat/context/product-marketing-context.md` if it exists
 
 ### 4. Validate
 

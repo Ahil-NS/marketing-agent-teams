@@ -8,11 +8,13 @@ oclif.manifest.json
 
 # Project data directory
 .mat/
-.github/
 
+# BMAD artifacts
 _bmad/
 _bmad-output/
 .claude/commands/bmad-*
 
 # Claude Code local settings
 .claude/settings.local.json
+
+.github/

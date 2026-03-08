@@ -10,7 +10,7 @@ Built on 11 battle-tested [Champ](https://github.com/ahilahilendran/champ) marke
 
 ## Overview
 
-MAT orchestrates **23 specialized AI agents** organized into **7 functional clusters** through a **6-stage pipeline**. Each agent is defined as a SKILL.md file (YAML front matter + markdown system prompt) and executed via the Claude Agent SDK through an `AgentExecutor` adapter interface.
+MAT orchestrates **30+ specialized AI agents** organized into **7 functional clusters** through a **7-stage pipeline**. Each agent is defined as a SKILL.md file (YAML front matter + markdown system prompt) and executed via `claude -p` (native mode) or the Claude Agent SDK through an `AgentExecutor` adapter interface.
 
 **Key design decisions:**
 
@@ -34,7 +34,7 @@ The market has expensive AI marketing suites and free open-source schedulers wit
 | Hootsuite | $199/mo | Low | Scheduling only |
 | CrewAI (44K ⭐) | Free | Framework only | Zero marketing agents |
 | LangChain (80K ⭐) | Free | Framework only | Zero marketing agents |
-| **MAT** | **$5-50/mo** | **High (23 agents)** | **Research → Publish** |
+| **MAT** | **$5-50/mo** | **High (30+ agents)** | **Research → Publish** |
 
 No open-source project has claimed multi-agent marketing automation. First-mover window: **6-12 months**.
 
@@ -84,15 +84,15 @@ The **review stage pauses** the pipeline for human approval — nothing publishe
 
 | Cluster | Count | Agents | Pipeline Stage |
 |---|---|---|---|
-| **Intelligence** | 3 | trend-scout, audience-researcher, competitor-analyst | research |
+| **Intelligence** | 6 | trend-scout, audience-researcher, competitor-analyst, viral-pattern-decoder, platform-algorithm, product-marketing-context | research |
 | **Strategy** | 3 | content-strategist, campaign-planner, channel-optimizer | strategy |
-| **Creation** | 5 | reddit-creator, tiktok-creator, facebook-creator, instagram-creator, hook-writer | creation |
-| **Optimization** | 4 | seo-optimizer, ab-test-designer, timing-optimizer, hashtag-strategist | optimization |
+| **Creation** | 6 | reddit-creator, tiktok-creator, facebook-creator, instagram-creator, hook-writer, content-atomizer | creation |
+| **Optimization** | 5 | seo-optimizer, ab-test-designer, timing-optimizer, content-humanizer, hashtag-strategist | optimization |
 | **Quality** | 4 | brand-guardian, fact-checker, platform-compliance, sensitivity-reviewer | quality |
 | **Distribution** | 4 | reddit-publisher, tiktok-publisher, facebook-publisher, instagram-publisher | distribution |
-| **Coordination** | 3 | campaign-coordinator, performance-analyst, report-generator | cross-stage |
+| **Coordination** | 4 | campaign-coordinator, performance-analyst, report-generator, pipeline-coordinator | cross-stage |
 
-> **MVP ships 23 agents.** The 3 Coordination agents activate in Wave 2 when cross-run analytics are available (total project scope: 26 agents).
+> **32 agents total** across 7 clusters and 7 pipeline stages.
 
 ---
 
@@ -365,10 +365,47 @@ mat install
 | `mat config` | Manage brand voice, platforms, agents, budgets |
 | `mat config platforms add` | Connect a social platform via OAuth |
 | `mat config agents` | Enable/disable/configure individual agents |
+| `mat create --brief <file>` | Create content from a brief (skip research/strategy) |
+| `mat create --idea <topic>` | Create content from an idea (targeted research) |
+| `mat create --agent <name>` | Run a single agent in isolation |
+| `mat context --init` | Run product marketing context discovery |
+| `mat context --show` | Display current brand context |
+| `mat dashboard` | Start the localhost web dashboard |
+| `mat history` | View campaign history and content records |
 | `mat agents` | List, add, remove, trust community agents |
 | `mat agents add <pkg>` | Install a community agent via oclif plugin |
 | `mat status` | Show pipeline run history and current state |
 | `mat logs <run-id>` | View pipeline logs for a specific run |
+
+---
+
+## Sample Output
+
+See the `demo/` directory for example outputs:
+
+| File | Description |
+|---|---|
+| `demo/pipeline-run.log` | NDJSON log from a full pipeline run |
+| `demo/intelligence-stage-output.json` | Research stage agent results |
+| `demo/report-generator-output.md` | Campaign performance report |
+| `demo/reddit-post-example.md` | Reddit post with hooks and CTA |
+
+---
+
+## Web Dashboard
+
+Start the visual dashboard with `mat dashboard`:
+
+```bash
+mat dashboard              # Opens http://localhost:3847
+mat dashboard --port 8080  # Custom port
+```
+
+The dashboard provides:
+- **Pipeline View** — Real-time 7-stage pipeline visualization with SSE updates
+- **Review View** — Content cards with platform-specific previews, approve/reject/edit
+- **History View** — Campaign history table with content drill-down
+- **Context View** — Brand context viewer and inline editor
 
 ---
 

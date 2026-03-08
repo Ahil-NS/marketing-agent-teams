@@ -1,7 +1,7 @@
 {
   "name": "marketing-agent-teams",
   "version": "0.1.4",
-  "description": "AI-powered marketing automation platform with 23 agents across 7 clusters",
+  "description": "AI-powered marketing automation platform with 30 agents across 7 clusters",
   "type": "module",
   "bin": {
     "mat": "bin/mat"
@@ -14,6 +14,7 @@
     "src/agents",
     "src/verticals",
     "src/templates",
+    "src/dashboard",
     "oclif.manifest.json"
   ],
   "scripts": {
@@ -78,6 +79,7 @@
   },
   "devDependencies": {
     "@oclif/test": "^4.1.16",
+    "@playwright/test": "^1.58.2",
     "@types/node": "^25.3.2",
     "eslint": "^10.0.2",
     "prettier": "^3.8.1",
