@@ -1,6 +1,8 @@
 import {Command, Flags} from '@oclif/core'
 import {z} from 'zod'
 
+import {createExecutor} from '../lib/agent-executor/executor-factory.js'
+import type {ExecutionMode} from '../lib/agent-executor/executor-factory.js'
 import {Orchestrator, StageRunner} from '../lib/orchestrator/index.js'
 import type {OrchestratorConfig} from '../lib/orchestrator/index.js'
 import {TmuxSessionManager, TmuxNotFoundError} from '../lib/tmux/index.js'
@@ -40,6 +42,15 @@ export default class Run extends Command {
     kill: Flags.string({
       description: 'Kill a tmux session for the given run-id',
     }),
+    posts: Flags.integer({
+      description: 'Number of content items per platform (1 = focused/fast, 3+ = full agent set)',
+      default: 1,
+    }),
+    mode: Flags.string({
+      description: 'Execution mode: native (claude -p), sdk (Agent SDK query), auto (detect)',
+      options: ['native', 'sdk', 'auto'],
+      default: 'auto',
+    }),
   }
 
   async run(): Promise<void> {
@@ -63,20 +74,50 @@ export default class Run extends Command {
     }
 
     const projectRoot = process.cwd()
-    const config: OrchestratorConfig = orchestratorConfigSchema.parse({
-      platforms: flags.platforms ?? ['reddit'],
-      dryRun: flags['dry-run'],
-      budgetLimit: flags.budget ?? 10,
-      disabledAgents: [],
-      projectRoot,
-    })
+    const config: OrchestratorConfig = {
+      ...orchestratorConfigSchema.parse({
+        platforms: flags.platforms ?? ['reddit'],
+        dryRun: flags['dry-run'],
+        budgetLimit: flags.budget ?? 10,
+        disabledAgents: [],
+        projectRoot,
+      }),
+      postsPerPlatform: flags.posts,
+    }
 
-    const stageRunner = new StageRunner()
+    const executionMode = flags.mode as ExecutionMode
+    const executor = createExecutor(executionMode)
+    const stageRunner = new StageRunner({executor})
 
     try {
+      const events = {
+        onStageStart: (stage: string) => this.log(`\n▶ Stage: ${stage}`),
+        onStageComplete: (stage: string, result: {status: string; agentResults: Record<string, {status: string; result?: {outputs?: unknown; usage?: {cost?: number; inputTokens?: number; outputTokens?: number}} | null}>}) => {
+          const agents = Object.entries(result.agentResults)
+          const succeeded = agents.filter(([, r]) => r.status === 'success').length
+          for (const [name, r] of agents) {
+            if (r.status === 'success' && r.result?.outputs) {
+              const cost = r.result.usage?.cost ? ` ($${r.result.usage.cost.toFixed(4)})` : ''
+              const tokens = r.result.usage ? ` [${r.result.usage.inputTokens}→${r.result.usage.outputTokens} tokens]` : ''
+              const output = JSON.stringify(r.result.outputs, null, 2)
+              const preview = output.length > 500 ? output.slice(0, 500) + '\n    ...(truncated)' : output
+              this.log(`  ✓ ${name}${cost}${tokens}`)
+              this.log(`    ${preview.split('\n').join('\n    ')}`)
+            }
+          }
+          this.log(`  ${stage}: ${succeeded}/${agents.length} agents succeeded`)
+        },
+        onAgentFailed: (agentName: string, error: Error) => {
+          this.warn(`  ✗ ${agentName}: ${error.message}`)
+        },
+        onPipelinePaused: (stage: string) => {
+          this.log(`\n⏸ Pipeline paused at ${stage}`)
+        },
+      }
+
       const orchestrator = flags.resume
-        ? await Orchestrator.resume(flags.resume, config, stageRunner)
-        : await Orchestrator.create(config, stageRunner)
+        ? await Orchestrator.resume(flags.resume, config, stageRunner, events)
+        : await Orchestrator.create(config, stageRunner, events)
 
       // Create tmux session before pipeline execution if --tmux flag is set
       let tmuxSession: string | undefined

@@ -1,8 +1,7 @@
-import {join} from 'node:path'
-
 import {Command, Flags} from '@oclif/core'
 
 import {loadAllSkills} from '../../lib/agents/skill-loader.js'
+import {agentsRoot} from '../../lib/agents/paths.js'
 import {InstalledAgentsRegistry} from '../../lib/agents/installed-agents.js'
 import {TrustOverrideStore} from '../../lib/credentials/trust-overrides.js'
 import {getEffectiveTrustTier} from '../../lib/credentials/trust-tiers.js'
@@ -49,9 +48,8 @@ export default class AgentsList extends Command {
     }
 
     // Load built-in agents from src/agents/
-    const agentsRoot = join(process.cwd(), 'src', 'agents')
     try {
-      const skills = await loadAllSkills(agentsRoot)
+      const skills = await loadAllSkills(agentsRoot())
       for (const [, skill] of skills) {
         entries.push({
           name: skill.name,

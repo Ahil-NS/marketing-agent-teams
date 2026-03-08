@@ -1,7 +1,7 @@
 import {join} from 'node:path'
 import {readFile, readdir, access} from 'node:fs/promises'
 
-import {Args, Command} from '@oclif/core'
+import {Args, Command, Flags} from '@oclif/core'
 
 import {InstalledAgentsRegistry} from '../../lib/agents/installed-agents.js'
 import type {InstalledAgent} from '../../lib/agents/installed-agents.js'
@@ -21,14 +21,27 @@ export default class AgentsAdd extends Command {
 
   static override description = 'Install a community agent from an npm package'
 
+  static override flags = {
+    'as-skill': Flags.boolean({
+      description: 'Copy agent SKILL.md to .claude/skills/ for standalone use',
+      default: false,
+    }),
+  }
+
   static override examples = [
     '<%= config.bin %> agents add @community/linkedin-agent',
-    '<%= config.bin %> agents add @community/sentiment-analyzer',
+    '<%= config.bin %> agents add trend-scout --as-skill',
   ]
 
   async run(): Promise<void> {
-    const {args} = await this.parse(AgentsAdd)
+    const {args, flags} = await this.parse(AgentsAdd)
     const packageName = args.package
+
+    // Single SKILL.md install to .claude/skills/
+    if (flags['as-skill']) {
+      await this.installAsSkill(packageName)
+      return
+    }
 
     this.log(`Installing community agent: ${packageName}...`)
 
@@ -176,6 +189,27 @@ export default class AgentsAdd extends Command {
     this.log(`  Trust tier: community`)
     this.log(`  Enabled: true`)
     this.log(`\nNote: Community agents always run at "community" trust tier. Use "mat agents trust" to promote.`)
+  }
+
+  /**
+   * Install a builtin agent as a standalone Claude Code skill.
+   * Copies SKILL.md + knowledge/ to ~/.claude/skills/<agent-name>/
+   */
+  private async installAsSkill(agentName: string): Promise<void> {
+    const {resolveAgentDir} = await import('../../lib/agents/skill-loader.js')
+    const {cpSync, mkdirSync} = await import('node:fs')
+    const {homedir} = await import('node:os')
+
+    try {
+      const agentDir = await resolveAgentDir(agentName)
+      const targetDir = join(homedir(), '.claude', 'skills', agentName)
+      mkdirSync(targetDir, {recursive: true})
+      cpSync(agentDir, targetDir, {recursive: true})
+      this.log(`Installed ${agentName} as Claude Code skill at ${targetDir}`)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
+      this.error(`Failed to install skill: ${msg}`)
+    }
   }
 
   /**

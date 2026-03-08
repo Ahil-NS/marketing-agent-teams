@@ -6,6 +6,7 @@ import {Command, Flags} from '@oclif/core'
 import {agentDefinitionSchema} from '../../lib/schemas/agent-schema.js'
 import {parseSkillMd} from '../../lib/agents/skill-loader.js'
 import {validateSkillMdSafety} from '../../lib/agents/sandbox-validator.js'
+import {agentsRoot} from '../../lib/agents/paths.js'
 
 export interface ValidateResult {
   agent: string
@@ -85,19 +86,19 @@ export default class AgentsValidate extends Command {
    * Discover all agent directories under src/agents/<cluster>/<agent-name>/
    */
   private async discoverAgentDirs(): Promise<string[]> {
-    const agentsRoot = join(process.cwd(), 'src', 'agents')
+    const agentsRootDir = agentsRoot()
     const dirs: string[] = []
 
     let clusterEntries: string[]
     try {
-      const entries = await readdir(agentsRoot)
+      const entries = await readdir(agentsRootDir)
       clusterEntries = entries.filter((name) => !name.startsWith('.'))
     } catch {
-      this.error('Could not read src/agents/ directory. Are you in the project root?', {exit: 1})
+      this.error(`Could not read agents directory at "${agentsRootDir}". Ensure the package is installed correctly.`, {exit: 1})
     }
 
     for (const clusterName of clusterEntries) {
-      const clusterPath = join(agentsRoot, clusterName)
+      const clusterPath = join(agentsRootDir, clusterName)
       let agentEntries: string[]
       try {
         agentEntries = await readdir(clusterPath)
@@ -161,6 +162,21 @@ export default class AgentsValidate extends Command {
     if (!result.success) {
       for (const issue of result.error.issues) {
         errors.push(`${issue.path.join('.')}: ${issue.message}`)
+      }
+    }
+
+    // 5. Line count check (< 500 lines)
+    const lineCount = content.split('\n').length
+    if (lineCount >= 500) {
+      errors.push(`SKILL.md has ${lineCount} lines (limit: 500). Consider splitting into knowledge/ files.`)
+    }
+
+    // 6. Trigger phrase check — description should contain actionable phrases
+    if (result.success) {
+      const desc = result.data.description ?? ''
+      const words = desc.trim().split(/\s+/)
+      if (words.length < 5) {
+        errors.push(`Description too short (${words.length} words). Add trigger phrases describing what this agent does.`)
       }
     }
 
