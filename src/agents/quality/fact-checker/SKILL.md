@@ -85,3 +85,12 @@ Produce output as a JSON array with one `FactCheckReport` per content item:
 - "Technically true but misleading" framing must be flagged
 - Corrections must maintain content effectiveness and marketing intent
 - Marketing content often uses hyperbole — distinguish factual claims from opinion/marketing language
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **brand-guardian**: Coordinates quality gate decisions on content accuracy
+- **platform-compliance**: Shares compliance context for claim verification

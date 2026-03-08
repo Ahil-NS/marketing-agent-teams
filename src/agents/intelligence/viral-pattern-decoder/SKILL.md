@@ -71,17 +71,35 @@ For each piece of viral content:
 4. Rank patterns by current effectiveness (are they still working or saturated?)
 
 ### Phase 4: Report Generation
-Produce a structured viral pattern report using the template in templates/viral-pattern-report.md
+Compile findings into structured JSON output (see Output Format below). The template in templates/viral-pattern-report.md is for downstream human-readable formatting only — do not use it as your output format.
 
 ## Output Format
 
-Always produce output as structured JSON matching this schema:
-- viralPatterns[]: Array of viral content patterns with platform, description, frequency, replicability score
-- hookAnalysis[]: Hook types that drive engagement per platform with effectiveness rating
-- captionStyles[]: Caption language patterns per platform with engagement impact
-- hashtagStrategies[]: Hashtag combination strategies per platform with recommended counts
-- timingInsights[]: Optimal posting windows per platform with timezone and rationale
-- recommendations: Strategic summary with top actionable advice
+Your response must be ONLY a raw JSON object — no markdown, no code fences, no explanation text before or after. Return a single JSON object matching this schema:
+
+```json
+{
+  "viralPatterns": [
+    { "platform": "string", "description": "string", "frequency": "string", "replicabilityScore": 1, "exampleUrl": "string|null" }
+  ],
+  "hookAnalysis": [
+    { "platform": "string", "hookType": "string", "description": "string", "effectivenessRating": 1 }
+  ],
+  "captionStyles": [
+    { "platform": "string", "pattern": "string", "engagementImpact": "high|medium|low" }
+  ],
+  "hashtagStrategies": [
+    { "platform": "string", "strategy": "string", "recommendedCount": 1 }
+  ],
+  "timingInsights": [
+    { "platform": "string", "optimalWindow": "string", "timezone": "string", "rationale": "string" }
+  ],
+  "recommendations": {
+    "summary": "string",
+    "topActions": ["string", "string", "string"]
+  }
+}
+```
 
 ## Platform-Specific Guidance
 
@@ -100,3 +118,13 @@ Reference the knowledge files for deep platform expertise:
 - Replicability scores must be justified with rationale
 - All patterns must be current (within the specified timeframe)
 - Recommendations must be actionable and specific to the brand's product domain
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **trend-scout**: Supplies trending content for viral pattern analysis
+- **platform-algorithm**: Provides algorithm signals that drive content amplification
+- **hook-writer**: Consumes viral patterns to craft attention-grabbing hooks

@@ -97,3 +97,13 @@ Reference knowledge files for analysis methods:
 - Gap identification must be backed by evidence
 - Replicability scores must be on a 1-5 scale
 - Recommendations must be specific and actionable within campaign timeframe
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **trend-scout**: Provides trend context for competitive benchmarking
+- **content-strategist**: Consumes competitive insights for differentiation strategy
+- **channel-optimizer**: Uses competitor platform data to refine channel mix

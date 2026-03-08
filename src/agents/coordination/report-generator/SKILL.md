@@ -59,3 +59,12 @@ Always produce output as structured JSON matching this schema:
 - All data must be sourced and current
 - Action items must be specific and assignable
 - Format must be appropriate for audience
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **campaign-coordinator**: Provides pipeline execution data for report content
+- **performance-analyst**: Supplies campaign metrics and insights for reports

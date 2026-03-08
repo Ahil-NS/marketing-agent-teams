@@ -60,3 +60,12 @@ Always produce output as structured JSON matching this schema:
 - Agent failures must be handled gracefully with retry
 - Pipeline state must be persisted for recovery
 - Execution time must be tracked per stage
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **performance-analyst**: Provides campaign metrics for coordination decisions
+- **report-generator**: Consumes pipeline results to produce campaign reports

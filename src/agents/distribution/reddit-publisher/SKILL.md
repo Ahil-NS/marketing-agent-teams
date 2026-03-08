@@ -59,3 +59,12 @@ Always produce output as structured JSON matching this schema:
 - Rate limits must be strictly respected
 - Formatting must render correctly on Reddit
 - Error handling must include retry logic
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **reddit-creator**: Provides finalized Reddit content packages for publishing
+- **platform-compliance**: Validates content meets Reddit policies before submission

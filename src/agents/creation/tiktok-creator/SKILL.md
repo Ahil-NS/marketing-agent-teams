@@ -199,3 +199,14 @@ Output ONLY the JSON object. No markdown wrapping, no explanation text.
 - Every script must reference the campaign plan's content themes
 - On-screen text should include searchable keywords for OCR indexing
 - Captions must front-load keywords in the first 40 characters
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **trend-scout**: Provides TikTok-specific trends and viral formats
+- **content-strategist**: Supplies campaign themes for video script alignment
+- **hook-writer**: Generates scroll-stopping hooks for video openings
+- **hashtag-strategist**: Provides optimized hashtag sets for TikTok SEO

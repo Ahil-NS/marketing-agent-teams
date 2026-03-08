@@ -132,3 +132,13 @@ You MUST produce output as a single valid JSON object matching this exact schema
 - Seasonal events MUST be relevant to the campaign's domain
 - Posting frequency per platform MUST respect capacity guidelines
 - ALL output must be valid JSON — no markdown, no commentary outside the JSON object
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **content-strategist**: Provides campaign plans that drive calendar generation
+- **channel-optimizer**: Refines calendar with platform-specific optimizations
+- **timing-optimizer**: Supplies optimal posting windows for schedule design

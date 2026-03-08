@@ -177,3 +177,13 @@ The JSON structure:
 - Content should encourage meaningful interactions: comments and shares over reactions
 - Image prompts must be generated for every post with visual content (format: image, video, carousel)
 - Image prompts must include style, aspect ratio, generator specification, brand elements, and visual concept rationale
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **audience-researcher**: Provides audience demographics for community targeting
+- **content-strategist**: Supplies campaign themes and content direction
+- **hook-writer**: Generates engagement-driving hooks for post openings

@@ -163,3 +163,14 @@ Output ONLY the JSON object. No markdown wrapping, no explanation text.
 - Cross-post strategy must stagger timing to avoid spam detection
 - Every post must reference the campaign plan's content themes
 - Image prompts are OPTIONAL — include only when content strategy warrants visual assets (infographics, data visualizations, before/after images)
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **trend-scout**: Provides Reddit-specific trends for timely content creation
+- **content-strategist**: Supplies campaign themes and content strategy direction
+- **hook-writer**: Generates optimized post titles and opening hooks
+- **seo-optimizer**: Optimizes content for Reddit search and Google indexing

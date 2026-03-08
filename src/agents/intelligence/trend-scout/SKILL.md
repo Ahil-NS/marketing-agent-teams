@@ -66,16 +66,32 @@ For each target platform:
 4. Map trend-to-audience alignment
 
 ### Phase 4: Brief Generation
-Produce a structured trend brief using the template in templates/trend-brief.md
+Compile findings into structured JSON output (see Output Format below). The template in templates/trend-brief.md is for downstream human-readable formatting only — do not use it as your output format.
 
 ## Output Format
 
-Always produce output as structured JSON matching this schema:
-- trends[]: Array of identified trends with platform, description, engagement metrics
-- viralPatterns[]: Content format patterns currently performing well
-- opportunities[]: Ranked list of actionable opportunities
-- risks[]: Potential timing or sensitivity risks
-- recommendations: Strategic summary with top 3 actions
+Your response must be ONLY a raw JSON object — no markdown, no code fences, no explanation text before or after. Return a single JSON object matching this schema:
+
+```json
+{
+  "trends": [
+    { "platform": "string", "name": "string", "description": "string", "engagement": { "metric": "string", "value": "number", "source": "string" }, "stage": "emerging|peaking|declining" }
+  ],
+  "viralPatterns": [
+    { "platform": "string", "format": "string", "description": "string", "exampleUrl": "string|null" }
+  ],
+  "opportunities": [
+    { "title": "string", "description": "string", "relevanceScore": 1, "timelinessScore": 1, "platform": "string" }
+  ],
+  "risks": [
+    { "description": "string", "severity": "low|medium|high" }
+  ],
+  "recommendations": {
+    "summary": "string",
+    "topActions": ["string", "string", "string"]
+  }
+}
+```
 
 ## Platform-Specific Guidance
 
@@ -90,3 +106,22 @@ Reference the knowledge files for platform-specific trend research methods:
 - Engagement metrics must include source and recency
 - Opportunities must be scored on a 1-5 scale for relevance and timeliness
 - All recommendations must be actionable within the campaign timeframe
+
+## ECT Mode (Existing Content Optimization)
+
+When input contains `optimizeContext`, focus research on:
+- Currently trending sounds/effects relevant to the video's topic
+- Trending formats that match the video's content type
+- Competitor content in the same niche
+- Relevant trending hashtags (pass to downstream optimization agents)
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **audience-researcher**: Provides audience segments and demographics for trend targeting
+- **competitor-analyst**: Surfaces competitor trends to benchmark against
+- **viral-pattern-decoder**: Consumes trend data to decode virality mechanics
+- **platform-algorithm**: Shares algorithm signals that affect trend visibility

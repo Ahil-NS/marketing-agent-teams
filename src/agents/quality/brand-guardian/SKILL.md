@@ -153,3 +153,13 @@ use those patterns to:
 - All issues must include specific improvement guidance
 - bannedPhraseViolations must include exact phrases found, not paraphrases
 - Quality gate decisions must match the score vs threshold comparison exactly
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **content-humanizer**: Sends humanized content for brand voice verification
+- **fact-checker**: Coordinates quality gate checks on factual accuracy
+- **sensitivity-reviewer**: Partners on content safety and brand risk review

@@ -209,3 +209,13 @@ The JSON structure:
 - Video prompts (Veo 3) must be generated for every Reel with scene description, camera movement, transitions, and audio cues
 - Hashtag strategy: 20-25 per post, mix of 3-5 broad + 10-15 niche + 2-3 brand
 - Content should optimize for saves and shares — the key algorithm signals for Explore page
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **audience-researcher**: Provides audience data for visual content targeting
+- **content-strategist**: Supplies campaign themes for visual content alignment
+- **hashtag-strategist**: Provides optimized hashtag sets for Instagram discovery

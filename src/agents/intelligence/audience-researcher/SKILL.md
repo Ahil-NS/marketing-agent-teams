@@ -152,3 +152,13 @@ You MUST produce output as a single valid JSON object matching the `audienceProf
 - Platform usage patterns must cite observable data or industry benchmarks
 - Content preferences must be tied to specific platforms and segments
 - ALL output must be valid JSON — no markdown, no commentary outside the JSON object
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **trend-scout**: Provides trending topics to validate audience interests
+- **content-strategist**: Consumes audience profiles to shape campaign themes
+- **campaign-planner**: Uses audience data to schedule platform-appropriate content

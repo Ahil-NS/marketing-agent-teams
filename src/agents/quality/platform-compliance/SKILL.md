@@ -153,3 +153,13 @@ When generating compliant rewrites:
 - Gray areas must be explicitly flagged for human review (overallStatus: requires-review)
 - Industry-specific regulations must be considered
 - Wellness content receives additional FDA health claim scrutiny when flagged
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **fact-checker**: Validates factual claims before compliance review
+- **reddit-publisher**: Consumes compliance results before Reddit publishing
+- **tiktok-publisher**: Consumes compliance results before TikTok publishing

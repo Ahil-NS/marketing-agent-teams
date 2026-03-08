@@ -86,3 +86,12 @@ Produce output as a JSON array with one `SensitivityReport` per content item:
 - Provide constructive alternatives, not just criticism
 - Consider the target audience and platform context
 - Stay current with cultural context and events
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **brand-guardian**: Partners on brand safety and quality gate decisions
+- **content-humanizer**: Sends humanized content for sensitivity screening

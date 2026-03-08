@@ -153,3 +153,13 @@ You MUST produce output as structured JSON matching the `hookWriterOutputSchema`
 - All hooks must respect platform-specific character limits and format rules
 - Confidence scores must be honest — don't inflate scores to look better
 - Generate at least 3 hooks per content item, at least 1 A/B pair per content item
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **viral-pattern-decoder**: Provides proven viral patterns for hook inspiration
+- **reddit-creator**: Consumes hooks for Reddit post title optimization
+- **tiktok-creator**: Consumes hooks for video opening scroll-stoppers

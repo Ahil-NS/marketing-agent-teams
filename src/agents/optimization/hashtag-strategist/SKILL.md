@@ -102,6 +102,12 @@ Return a JSON array with one entry per content item. Each entry must match:
 - Return empty hashtag set (empty `hashtags` array) for Reddit content
 - Note: Reddit SEO comes from title optimization and subreddit selection
 
+## ECT Mode (Existing Content Optimization)
+
+When input contains `optimizeContext`, produce hashtags optimized for the video's
+topic and niche. Use WebSearch to find currently trending TikTok hashtags in that space.
+Return the standard output format with a single content item.
+
 ## Quality Standards
 
 - All recommended tags must be relevant to the content topic
@@ -109,3 +115,13 @@ Return a JSON array with one entry per content item. Each entry must match:
 - Ensure category mix follows platform targets
 - Tags must NOT include the '#' prefix — formatting adds it later
 - Deduplicate tags across platform sets when the same tag serves multiple platforms
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **seo-optimizer**: Coordinates keyword and hashtag optimization strategy
+- **tiktok-creator**: Consumes hashtag sets for TikTok content SEO
+- **instagram-creator**: Consumes hashtag sets for Instagram discovery optimization

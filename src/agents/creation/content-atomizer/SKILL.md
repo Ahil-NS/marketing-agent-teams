@@ -115,3 +115,14 @@ The JSON structure:
 - Maintain brand voice consistency across all atomized pieces
 - Each micro-content must stand alone — readers should not need the original to understand it
 - Prioritize content elements with highest engagement potential per platform
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **reddit-creator**: Produces Reddit content that atomizer repurposes across platforms
+- **tiktok-creator**: Produces TikTok content for cross-platform atomization
+- **facebook-creator**: Produces Facebook content for multi-format repurposing
+- **instagram-creator**: Produces Instagram content for cross-platform adaptation

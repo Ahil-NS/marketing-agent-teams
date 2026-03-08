@@ -88,3 +88,13 @@ The summary object must include:
 - No factual claims may be added that were not in the original
 - Brand voice consistency score must be >= 70/100
 - Estimated AI-detection score must be below the configured threshold
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **brand-guardian**: Validates humanized content still matches brand voice
+- **hook-writer**: Provides hooks that need humanization for authenticity
+- **sensitivity-reviewer**: Reviews humanized content for sensitivity issues

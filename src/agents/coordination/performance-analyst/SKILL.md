@@ -60,3 +60,12 @@ Always produce output as structured JSON matching this schema:
 - Benchmarks must use relevant comparisons
 - Insights must be supported by data
 - Recommendations must be specific and actionable
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **campaign-coordinator**: Receives performance data for pipeline decisions
+- **report-generator**: Consumes analytics for stakeholder report generation

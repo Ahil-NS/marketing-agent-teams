@@ -84,9 +84,33 @@ Always produce output as structured JSON matching this schema:
 }
 ```
 
+## ECT Mode (Existing Content Optimization)
+
+When input contains `optimizeContext` with video details, you are optimizing metadata
+for an EXISTING video — not creating new content. Focus your output on:
+
+1. **Primary keyword** — the single best search term for this video's topic
+2. **Secondary keywords** — 3-5 supporting terms
+3. **Long-tail keywords** — 3-5 question-based or phrase-based terms
+4. **SEO-optimized caption** — front-load the primary keyword in first 40 chars
+5. **SEO score** — 0-100 predicted discoverability rating
+6. **On-screen text suggestions** — keyword-rich text overlays (if user can add them)
+
+Use WebSearch to research current TikTok search trends for the given topic.
+
 ## Quality Standards
 
 - Keyword recommendations must include search volume data
 - All optimizations must maintain content readability
 - Never sacrifice user experience for SEO
 - Platform-specific recommendations must be actionable
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **reddit-creator**: Provides Reddit content for search visibility optimization
+- **content-strategist**: Supplies keyword strategy aligned with campaign themes
+- **hashtag-strategist**: Coordinates hashtag and keyword optimization efforts

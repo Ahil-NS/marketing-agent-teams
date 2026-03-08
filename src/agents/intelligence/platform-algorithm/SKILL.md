@@ -71,16 +71,32 @@ For each platform:
 4. Provide platform-specific implementation guidance
 
 ### Phase 4: Report Generation
-Produce a structured algorithm report using the template in templates/algorithm-report.md
+Compile findings into structured JSON output (see Output Format below). The template in templates/algorithm-report.md is for downstream human-readable formatting only — do not use it as your output format.
 
 ## Output Format
 
-Always produce output as structured JSON matching this schema:
-- platforms[]: Overview of each analyzed platform with last-updated date and overall strategy
-- algorithmPriorities[]: Specific algorithm priorities per platform with weight and recent changes
-- rankingSignals[]: Individual ranking signals with impact level and actionability
-- optimizationStrategies[]: Concrete optimization strategies per platform with expected impact
-- recommendations: Strategic summary with prioritized action items
+Your response must be ONLY a raw JSON object — no markdown, no code fences, no explanation text before or after. Return a single JSON object matching this schema:
+
+```json
+{
+  "platforms": [
+    { "name": "string", "lastUpdated": "string", "overallStrategy": "string" }
+  ],
+  "algorithmPriorities": [
+    { "platform": "string", "priority": "string", "weight": "critical|high|medium|low", "recentChanges": "string|null" }
+  ],
+  "rankingSignals": [
+    { "platform": "string", "signal": "string", "impact": "critical|high|medium|low", "actionable": true }
+  ],
+  "optimizationStrategies": [
+    { "platform": "string", "strategy": "string", "expectedImpact": "high|medium|low", "effort": "high|medium|low" }
+  ],
+  "recommendations": {
+    "summary": "string",
+    "prioritizedActions": ["string", "string", "string"]
+  }
+}
+```
 
 ## Platform-Specific Guidance
 
@@ -100,3 +116,21 @@ Reference the knowledge files for deep platform algorithm expertise:
 - Recent changes (last 90 days) must be highlighted separately from established signals
 - Sources must be cited for algorithm change claims
 - Recommendations must be prioritized by impact and implementation effort
+
+## ECT Mode (Existing Content Optimization)
+
+When input contains `optimizeContext`, focus on:
+- Current TikTok FYP ranking signals relevant to the video's niche
+- Any recent algorithm changes affecting the content category
+- Anti-patterns to avoid in captions/hashtags
+- Optimal posting timing based on algorithm distribution patterns
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **trend-scout**: Shares trend data that algorithm changes may affect
+- **viral-pattern-decoder**: Uses algorithm signals to explain content amplification
+- **timing-optimizer**: Consumes algorithm timing data for optimal scheduling

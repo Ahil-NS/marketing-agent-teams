@@ -131,3 +131,12 @@ Always produce output as structured JSON matching this exact schema:
 - Sample sizes must be sufficient for statistical significance
 - Results must include confidence intervals
 - Maintain brand voice tone and style across all variations
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **hook-writer**: Provides hook variations for split testing experiments
+- **content-atomizer**: Supplies content variations for format testing

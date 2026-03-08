@@ -164,3 +164,13 @@ You MUST produce output as a single valid JSON object matching this exact schema
 - Seasonal opportunities MUST include lead time considerations
 - Cross-platform strategies MUST be actionable, not generic advice
 - ALL output must be valid JSON — no markdown, no commentary outside the JSON object
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **content-strategist**: Provides campaign plans to optimize channel strategy
+- **campaign-planner**: Supplies content calendars for platform-level refinement
+- **platform-algorithm**: Shares algorithm data for distribution optimization

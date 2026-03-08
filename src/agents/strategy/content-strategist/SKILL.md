@@ -123,3 +123,14 @@ You MUST produce output as a single valid JSON object matching this exact schema
 - Research insights section MUST reference specific findings from TrendBrief and CompetitorReport
 - Budget optimizations MUST be actionable recommendations
 - ALL output must be valid JSON — no markdown, no commentary outside the JSON object
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **audience-researcher**: Provides audience profiles that shape campaign themes
+- **competitor-analyst**: Supplies competitive gaps for differentiation planning
+- **campaign-planner**: Transforms campaign plans into content calendars
+- **channel-optimizer**: Refines platform strategy using algorithm intelligence

@@ -58,3 +58,12 @@ Always produce output as structured JSON matching this schema:
 - Media must meet format specifications
 - Scheduling must account for timezone
 - Error handling must include retry logic
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **facebook-creator**: Provides finalized Facebook content packages for publishing
+- **platform-compliance**: Validates content meets Facebook policies before posting

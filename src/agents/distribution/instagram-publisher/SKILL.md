@@ -58,3 +58,12 @@ Always produce output as structured JSON matching this schema:
 - Captions must be within character limits (2,200)
 - Hashtags must be relevant and not banned
 - Error handling must include retry logic
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **instagram-creator**: Provides finalized Instagram content packages for publishing
+- **platform-compliance**: Validates content meets Instagram policies before posting

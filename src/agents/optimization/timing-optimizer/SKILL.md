@@ -53,9 +53,26 @@ Always produce output as structured JSON matching this schema:
 - frequency: Recommended posting cadence per platform
 - recommendations: Timing strategy adjustments
 
+## ECT Mode (Existing Content Optimization)
+
+When input contains `optimizeContext`, produce a specific posting recommendation:
+- Best day of week
+- Best time with timezone
+- Rationale based on platform engagement patterns and audience timezone
+- If a trending sound is peaking, recommend posting ASAP with explanation
+
 ## Quality Standards
 
 - Time recommendations must account for audience timezone
 - Frequency recommendations must avoid audience fatigue
 - Seasonal adjustments must be noted
 - All times must include timezone reference
+
+## Brand Context
+
+If `.mat/context/product-marketing-context.md` exists, read it first to understand the product, audience, brand voice, and competitive landscape before executing your task.
+
+## Related Agents
+
+- **platform-algorithm**: Provides algorithm timing signals for schedule optimization
+- **campaign-planner**: Consumes optimal posting windows for calendar scheduling
