@@ -51,7 +51,7 @@ export const STAGE_AGENT_MAP: Record<PipelineStage, readonly string[]> = {
   research: ['trend-scout', 'audience-researcher', 'competitor-analyst', 'viral-pattern-decoder', 'platform-algorithm'],
   strategy: ['content-strategist', 'campaign-planner', 'channel-optimizer'],
   creation: ['reddit-creator', 'tiktok-creator', 'facebook-creator', 'instagram-creator', 'hook-writer', 'content-atomizer'],
-  optimization: ['seo-optimizer', 'ab-test-designer', 'timing-optimizer', 'hashtag-strategist'],
+  optimization: ['seo-optimizer', 'ab-test-designer', 'timing-optimizer', 'content-humanizer', 'hashtag-strategist'],
   quality: ['brand-guardian', 'fact-checker', 'platform-compliance', 'sensitivity-reviewer'],
   review: [], // Human review — pipeline pauses, no agent execution
   distribution: ['reddit-publisher', 'tiktok-publisher', 'facebook-publisher', 'instagram-publisher'],
@@ -87,8 +87,15 @@ export interface StageRunnerContext {
     platforms: string[]
     dryRun: boolean
     enabledAgents?: string[] // Subset of agents to run (FR49)
+    workflowMode?: WorkflowMode
+    /** Number of content items to produce per platform. 1 = focused agent set. */
+    postsPerPlatform?: number
   }
   stageResults: Partial<Record<PipelineStage, StageExecutionResult>>
+  /** Brand context content for prepending to agent prompts */
+  brandContext?: string
+  /** Video/content context for ECT (optimize) workflow */
+  optimizeContext?: OptimizeInput
 }
 
 // --- Agent Assignment Types ---
@@ -112,7 +119,7 @@ export interface StageRunnerOptions {
 
 export const DEFAULT_STAGE_RUNNER_OPTIONS: Required<StageRunnerOptions> = {
   concurrencyLimit: Infinity,
-  agentTimeoutMs: 300_000,
+  agentTimeoutMs: 600_000,
   continueOnFailure: true,
 }
 
@@ -187,13 +194,35 @@ export interface StageTransition {
 // Orchestrator Types (Story 2.5)
 // ============================================================
 
+export interface OptimizeInput {
+  videoPath: string
+  platform: 'tiktok' | 'instagram' | 'facebook'
+  topic: string
+  niche?: string
+  audience?: string
+  description?: string
+  duration?: string
+}
+
 export interface OrchestratorConfig {
   platforms: string[]
   dryRun: boolean
   budgetLimit: number
   disabledAgents: string[]
   projectRoot: string
+  /** Brand context content from .mat/context/product-marketing-context.md */
+  brandContext?: string
+  /** Active stages for flexible workflows (default: all 7 stages) */
+  activeStages?: PipelineStage[]
+  /** Workflow mode for agent selection (e.g., 'optimize' uses ECT agent set) */
+  workflowMode?: WorkflowMode
+  /** Video/content context for ECT (optimize) workflow */
+  optimizeContext?: OptimizeInput
+  /** Number of content items per platform. 1 = focused (fewer agents). Default: 1 */
+  postsPerPlatform?: number
 }
+
+export type WorkflowMode = 'full' | 'brief' | 'idea' | 'single' | 'optimize'
 
 export interface OrchestratorEvents {
   onStageStart?: (stage: PipelineStage) => void
@@ -201,6 +230,24 @@ export interface OrchestratorEvents {
   onAgentFailed?: (agentName: string, error: Error) => void
   onPipelinePaused?: (stage: PipelineStage) => void
   onViralDetected?: (itemId: string, platform: string) => void
+}
+
+export type OrchestratorEventType =
+  | 'stage:start'
+  | 'stage:complete'
+  | 'agent:failed'
+  | 'pipeline:paused'
+  | 'pipeline:completed'
+  | 'pipeline:failed'
+
+export interface OrchestratorEventData {
+  type: OrchestratorEventType
+  stage?: PipelineStage
+  result?: StageExecutionResult
+  agentName?: string
+  error?: string
+  runId?: string
+  timestamp: string
 }
 
 // ============================================================

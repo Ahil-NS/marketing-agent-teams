@@ -11,7 +11,7 @@ const STAGE_INPUT_DEPENDENCIES: Record<PipelineStage, readonly PipelineStage[]> 
   research: [],
   strategy: ['research'],
   creation: ['research', 'strategy'],
-  optimization: ['creation'],
+  optimization: ['creation', 'research'],
   quality: ['creation', 'optimization'],
   review: ['quality'],
   distribution: [],
@@ -45,6 +45,16 @@ export function resolveInputs(
     const depResult = stageResults[depStage]
 
     if (!depResult || depResult.status === 'pending') {
+      // In flexible workflows, upstream stages may be skipped.
+      // If the stage was marked completed with empty results (skipped),
+      // continue without throwing.
+      if (depResult?.status === 'skipped' || depResult?.status === 'completed') {
+        continue
+      }
+      // For truly missing stages, throw only if not skipped
+      if (!depResult) {
+        continue // Gracefully skip missing upstream in flexible workflows
+      }
       throw new StageInputResolutionError(
         `Stage "${stage}" depends on stage "${depStage}" which has not executed yet`,
         'STAGE_INPUT_MISSING',

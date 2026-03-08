@@ -20,11 +20,12 @@ import {
   REVIEW_STAGE,
 } from './types.js'
 
-function createInitialStages(): Record<PipelineStage, StageResult> {
+function createInitialStages(activeStages?: readonly PipelineStage[]): Record<PipelineStage, StageResult> {
   const stages = {} as Record<PipelineStage, StageResult>
+  const active = activeStages ?? PIPELINE_STAGES
   for (const stage of PIPELINE_STAGES) {
     stages[stage] = {
-      status: 'pending',
+      status: active.includes(stage) ? 'pending' : 'completed',
       agentResults: {},
     }
   }
@@ -51,16 +52,18 @@ export class PipelineStateMachine {
    * Creates a new pipeline run with all stages set to 'pending'.
    */
   static async create(
-    config: {platforms: string[]; dryRun: boolean},
+    config: {platforms: string[]; dryRun: boolean; activeStages?: PipelineStage[]},
     budget: {limit: number; dailyLimit?: number},
     projectDir: string = process.cwd(),
   ): Promise<PipelineStateMachine> {
     const now = new Date().toISOString()
+    const activeStages = config.activeStages ?? [...PIPELINE_STAGES]
+    const firstActive = activeStages[0] ?? PIPELINE_STAGES[0]
     const state: PipelineRun = {
       id: randomUUID(),
       status: 'running',
-      currentStage: PIPELINE_STAGES[0],
-      stages: createInitialStages(),
+      currentStage: firstActive,
+      stages: createInitialStages(activeStages),
       budget: {
         spent: 0,
         limit: budget.limit,
@@ -294,6 +297,39 @@ export class PipelineStateMachine {
     stageResult.completedAt = undefined
     stageResult.agentResults = {}
     this.state.status = 'running'
+    await this.persist()
+  }
+
+  /**
+   * Advances past a stage that is already 'completed' (pre-marked inactive).
+   * Used by flexible workflows where some stages are skipped.
+   */
+  async skipCompletedStage(): Promise<void> {
+    this.assertRunning()
+
+    const stage = this.state.currentStage
+    const stageResult = this.state.stages[stage]
+
+    if (stageResult.status !== 'completed') {
+      throw new PipelineStateError(
+        this.state.id,
+        `Cannot skip stage "${stage}": status is '${stageResult.status}', not 'completed'.`,
+      )
+    }
+
+    const nextStage = getNextStage(stage)
+    if (nextStage === null) {
+      this.state.status = 'completed'
+      this.state.completedAt = new Date().toISOString()
+    } else {
+      this.state.currentStage = nextStage
+      // Auto-pause at review stage
+      if (nextStage === REVIEW_STAGE && this.state.stages[nextStage].status !== 'completed') {
+        this.state.status = 'paused'
+        this.state.stages[nextStage].status = 'paused'
+      }
+    }
+
     await this.persist()
   }
 

@@ -1,5 +1,12 @@
+import {randomUUID} from 'node:crypto'
+
 import {createLogger} from '../logging/logger.js'
 import type {Logger} from '../logging/logger.js'
+import {ContextManager} from '../context/context-manager.js'
+import {sseEmitter} from '../dashboard/sse-emitter.js'
+import {CampaignStore} from '../history/campaign-store.js'
+import {ReviewQueue} from '../review-queue/review-queue.js'
+import type {ReviewItem} from '../review-queue/types.js'
 
 import {
   AllAgentsFailedError,
@@ -52,15 +59,23 @@ export class Orchestrator {
     events?: OrchestratorEvents,
   ): Promise<Orchestrator> {
     const sm = await PipelineStateMachine.create(
-      {platforms: config.platforms, dryRun: config.dryRun},
+      {platforms: config.platforms, dryRun: config.dryRun, activeStages: config.activeStages},
       {limit: config.budgetLimit},
       config.projectRoot,
     )
+    // Load brand context if available
+    const contextManager = new ContextManager(config.projectRoot)
+    const brandContext = await contextManager.getContext()
+    if (brandContext) {
+      config = {...config, brandContext}
+    }
+
     const orchestrator = new Orchestrator(config, stageRunner, sm, events)
     const matDir = `${config.projectRoot}/.mat`
     orchestrator.logger = await createLogger({matDir, runId: sm.getRunId()})
     await orchestrator.logger.info('orchestrator', `Pipeline created: ${sm.getRunId()}`, {
       platforms: config.platforms, dryRun: config.dryRun, budgetLimit: config.budgetLimit,
+      hasBrandContext: !!brandContext,
     })
     return orchestrator
   }
@@ -141,12 +156,20 @@ export class Orchestrator {
         continue
       }
 
+      // Skip stages pre-marked as completed (not in activeStages for this workflow)
+      if (stageState.status === 'completed') {
+        await this.logger?.info('orchestrator', `Skipping inactive stage: ${stage}`)
+        await this.stateMachine.skipCompletedStage()
+        continue
+      }
+
       // Start the stage (pending -> running)
       if (stageState.status === 'pending') {
         await this.stateMachine.startStage()
       }
 
       this.events?.onStageStart?.(stage)
+      sseEmitter.broadcast({type: 'stage:start', stage, runId: this.getRunId(), timestamp: new Date().toISOString()})
       await this.logger?.info('orchestrator', `Stage started: ${stage}`)
 
       // Build context for stage runner
@@ -162,6 +185,17 @@ export class Orchestrator {
         errors: executionResult.errors.length,
       })
 
+      // Log individual agent errors for diagnostics
+      for (const agentResult of Object.values(executionResult.agentResults)) {
+        if (agentResult.status === 'failed' && agentResult.error) {
+          await this.logger?.error('orchestrator', `Agent '${agentResult.agentName}' failed: ${agentResult.error.message}`, {
+            agent: agentResult.agentName,
+            duration: agentResult.duration,
+            error: agentResult.error.message,
+          })
+        }
+      }
+
       // All agents failed: pipeline cannot continue
       if (executionResult.status === 'failed') {
         await this.logger?.error('orchestrator', `All agents in stage '${stage}' failed`)
@@ -173,10 +207,13 @@ export class Orchestrator {
           resolution: `Check individual agent errors. Re-run with 'mat run --resume ${runId}' after resolving issues`,
           severity: 'permanent',
         })
+        const agentErrors = executionResult.errors
+          .map((e) => `  - ${e.message}`)
+          .join('\n')
         throw new AllAgentsFailedError(
           `All agents in stage '${stage}' failed`,
           'STAGE_ALL_AGENTS_FAILED',
-          `Every agent in the ${stage} stage failed, preventing downstream stages from receiving input`,
+          `Every agent in the ${stage} stage failed, preventing downstream stages from receiving input${agentErrors ? `:\n${agentErrors}` : ''}`,
           `Check individual agent errors. Re-run with 'mat run --resume ${runId}' after resolving issues`,
           'orchestrator',
           'permanent',
@@ -204,6 +241,7 @@ export class Orchestrator {
       await this.stateMachine.transition(executionResult.agentResults)
 
       this.events?.onStageComplete?.(stage, executionResult)
+      sseEmitter.broadcast({type: 'stage:complete', stage, result: executionResult, runId: this.getRunId(), timestamp: new Date().toISOString()})
 
       // Budget check placeholder (Story 2.6 integrates full BudgetTracker)
       const totalCost = this.calculateTotalCost()
@@ -232,6 +270,10 @@ export class Orchestrator {
         postState.status === 'completed' ||
         postState.status === 'paused'
       ) {
+        // Enqueue content for review when pausing at the review stage
+        if (postState.status === 'paused' && postState.currentStage === 'review') {
+          await this.enqueueForReview()
+        }
         if (postState.status === 'paused') {
           this.events?.onPipelinePaused?.(postState.currentStage)
         }
@@ -239,7 +281,32 @@ export class Orchestrator {
       }
     }
 
-    return this.stateMachine.getState()
+    const finalState = this.stateMachine.getState()
+
+    // Persist campaign record on completion
+    if (finalState.status === 'completed' || finalState.status === 'failed') {
+      try {
+        const campaignStore = new CampaignStore(this.config.projectRoot)
+        await campaignStore.save({
+          id: finalState.id,
+          name: `Campaign ${finalState.id.slice(0, 8)}`,
+          platforms: this.config.platforms,
+          status: finalState.status === 'completed' ? 'completed' : 'failed',
+          contentCount: this.countContentItems(finalState),
+          totalCost: this.calculateTotalCost(),
+          startedAt: finalState.startedAt,
+          completedAt: finalState.completedAt ?? new Date().toISOString(),
+          config: {
+            dryRun: this.config.dryRun,
+            budgetLimit: this.config.budgetLimit,
+          },
+        })
+      } catch {
+        // Non-fatal: campaign history is informational
+      }
+    }
+
+    return finalState
   }
 
   /** Returns the pipeline run ID. */
@@ -264,8 +331,12 @@ export class Orchestrator {
         platforms: this.config.platforms,
         dryRun: this.config.dryRun,
         enabledAgents: this.getEnabledAgents(),
+        workflowMode: this.config.workflowMode,
+        postsPerPlatform: this.config.postsPerPlatform,
       },
       stageResults: this.stageResults,
+      brandContext: this.config.brandContext,
+      optimizeContext: this.config.optimizeContext,
     }
   }
 
@@ -323,6 +394,121 @@ export class Orchestrator {
           completedAt: stageResult.completedAt ?? '',
           errors: [],
         }
+      }
+    }
+  }
+
+  /**
+   * Count content items from creation stage results.
+   */
+  private countContentItems(state: PipelineRun): number {
+    const creation = state.stages['creation']
+    if (!creation || creation.status !== 'completed') return 0
+    return Object.keys(creation.agentResults).length
+  }
+
+  /**
+   * Collect content from completed stages and enqueue as ReviewItems.
+   * For standard workflows: creation stage outputs are the content source.
+   * For ECT (optimize) workflows: optimization stage outputs are the content source.
+   * Quality/optimization scores are attached when available.
+   */
+  private async enqueueForReview(): Promise<void> {
+    const runId = this.stateMachine.getRunId()
+    const isECT = this.config.workflowMode === 'optimize'
+
+    // Determine which stage produced the primary content
+    const contentStage = isECT ? 'optimization' : 'creation'
+    const contentResults = this.stageResults[contentStage]
+    if (!contentResults) return
+
+    const qualityResults = this.stageResults['quality']
+    const optimizationResults = this.stageResults['optimization']
+    const now = new Date().toISOString()
+    const reviewItems: ReviewItem[] = []
+
+    for (const [agentName, agentResult] of Object.entries(contentResults.agentResults)) {
+      if (agentResult.status !== 'success' || !agentResult.result) continue
+
+      const outputs = agentResult.result.outputs as Record<string, unknown> | undefined
+      if (!outputs) continue
+
+      // Determine platform from agent name or optimize context
+      let platform: 'reddit' | 'tiktok' | 'facebook' | 'instagram' = 'tiktok'
+      const platformMatch = agentName.match(/^(reddit|tiktok|facebook|instagram)-/)
+      if (platformMatch) {
+        platform = platformMatch[1] as typeof platform
+      } else if (this.config.optimizeContext?.platform) {
+        platform = this.config.optimizeContext.platform
+      } else if (this.config.platforms.length > 0) {
+        platform = this.config.platforms[0] as typeof platform
+      }
+
+      // Extract content fields from agent output
+      const body = typeof outputs.body === 'string' ? outputs.body
+        : typeof outputs.caption === 'string' ? outputs.caption
+        : typeof outputs.content === 'string' ? outputs.content
+        : JSON.stringify(outputs)
+      const title = typeof outputs.title === 'string' ? outputs.title : undefined
+      const hashtags = Array.isArray(outputs.hashtags) ? outputs.hashtags.map(String) : undefined
+
+      // Get quality score from quality stage if available
+      let qualityScore = 0.5 // default
+      if (qualityResults) {
+        const qualityAgent = Object.values(qualityResults.agentResults).find(
+          (r) => r.status === 'success' && r.result?.outputs,
+        )
+        if (qualityAgent?.result?.outputs) {
+          const qOut = qualityAgent.result.outputs as Record<string, unknown>
+          const score = typeof qOut.score === 'number' ? qOut.score
+            : typeof qOut.qualityScore === 'number' ? qOut.qualityScore
+            : null
+          if (score !== null) {
+            qualityScore = score > 1 ? score / 100 : score // normalize to 0-1
+          }
+        }
+      }
+
+      // For ECT mode, merge optimization results into platformMeta
+      const platformMeta: Record<string, unknown> = {}
+      if (isECT && optimizationResults) {
+        for (const [optAgent, optResult] of Object.entries(optimizationResults.agentResults)) {
+          if (optResult.status === 'success' && optResult.result?.outputs) {
+            platformMeta[optAgent] = optResult.result.outputs
+          }
+        }
+      }
+
+      reviewItems.push({
+        id: `item-${randomUUID().slice(0, 12)}`,
+        runId,
+        platform,
+        status: 'pending',
+        content: {
+          body,
+          title,
+          hashtags,
+          platformMeta,
+        },
+        qualityScore,
+        complianceFlags: [],
+        contentType: 'standard',
+        generatedBy: agentName,
+        generatedAt: now,
+        editHistory: [],
+        createdAt: now,
+        updatedAt: now,
+      })
+    }
+
+    if (reviewItems.length > 0) {
+      try {
+        const reviewQueue = new ReviewQueue(this.config.projectRoot)
+        await reviewQueue.enqueue(reviewItems)
+        await this.logger?.info('orchestrator', `Enqueued ${reviewItems.length} item(s) for review`)
+        sseEmitter.broadcast({type: 'review:new', runId, timestamp: now} as never)
+      } catch (error) {
+        await this.logger?.error('orchestrator', `Failed to enqueue review items: ${error instanceof Error ? error.message : String(error)}`)
       }
     }
   }

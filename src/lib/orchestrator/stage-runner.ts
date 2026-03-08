@@ -4,11 +4,14 @@ import {executeAgent} from '../agents/agent-executor.js'
 import {AgentTimeoutError} from '../agents/errors.js'
 import {resolveAgentDir} from '../agents/skill-loader.js'
 import {loadSkill} from '../agents/skill-loader.js'
+import type {AgentExecutor} from '../agent-executor/index.js'
+import {createExecutor} from '../agent-executor/executor-factory.js'
 import type {MATError} from '../utils/errors.js'
 
 import {resolveInputs} from './input-resolver.js'
 import type {
   AgentAssignment,
+  OptimizeInput,
   PipelineStage,
   StageAgentResult,
   StageExecutionResult,
@@ -20,11 +23,36 @@ import {
   STAGE_AGENT_MAP,
 } from './types.js'
 
+/**
+ * Reduced agent set for ECT (optimize) workflow.
+ * Only runs agents relevant to optimizing existing content metadata.
+ */
+const ECT_STAGE_AGENTS: Partial<Record<PipelineStage, readonly string[]>> = {
+  research: ['trend-scout', 'platform-algorithm'],
+  optimization: ['seo-optimizer', 'hashtag-strategist', 'timing-optimizer'],
+  // distribution uses platform filtering from STAGE_AGENT_MAP
+}
+
+/**
+ * Focused agent set for single-post workflows (postsPerPlatform === 1).
+ * Cuts redundant agents that add time without value for a single content piece.
+ * Creation stage is handled dynamically (only platform-prefixed creators).
+ */
+const FOCUSED_STAGE_AGENTS: Partial<Record<PipelineStage, readonly string[]>> = {
+  research: ['trend-scout', 'platform-algorithm'],
+  strategy: ['content-strategist'],
+  optimization: ['seo-optimizer', 'hashtag-strategist', 'timing-optimizer'],
+  quality: ['brand-guardian', 'platform-compliance'],
+}
+
 export class StageRunner {
   private readonly options: Required<StageRunnerOptions>
+  private readonly executor: AgentExecutor
 
-  constructor(options?: StageRunnerOptions) {
-    this.options = {...DEFAULT_STAGE_RUNNER_OPTIONS, ...options}
+  constructor(options?: StageRunnerOptions & {executor?: AgentExecutor}) {
+    const {executor, ...runnerOptions} = options ?? {}
+    this.options = {...DEFAULT_STAGE_RUNNER_OPTIONS, ...runnerOptions}
+    this.executor = executor ?? createExecutor('auto')
   }
 
   /**
@@ -97,20 +125,47 @@ export class StageRunner {
 
   /**
    * Determine which agents to run for a stage.
-   * Respects enabledAgents config (FR49).
+   * Filters platform-specific agents by selected platforms,
+   * and respects enabledAgents config (FR49).
    */
   private getAgentsForStage(
     stage: PipelineStage,
     pipelineRun: StageRunnerContext,
   ): string[] {
-    const allAgents = [...STAGE_AGENT_MAP[stage]]
-    const enabledAgents = pipelineRun.config.enabledAgents
+    const mode = pipelineRun.config.workflowMode
+    const isFocused = (pipelineRun.config.postsPerPlatform ?? 1) <= 1
 
-    if (!enabledAgents || enabledAgents.length === 0) {
-      return allAgents
+    // Pick the right agent map: ECT > focused > full
+    let baseAgents: readonly string[] | undefined
+    if (mode === 'optimize') {
+      baseAgents = ECT_STAGE_AGENTS[stage]
+    } else if (isFocused) {
+      baseAgents = FOCUSED_STAGE_AGENTS[stage]
+    }
+    let agents = [...(baseAgents ?? STAGE_AGENT_MAP[stage])]
+    const platforms = pipelineRun.config.platforms
+
+    // Filter platform-specific agents (creator/publisher) to only selected platforms
+    if (platforms.length > 0) {
+      agents = agents.filter((agent) => {
+        const platformMatch = agent.match(/^(reddit|tiktok|facebook|instagram)-/)
+        if (!platformMatch) return true // non-platform agents always run
+        return platforms.includes(platformMatch[1])
+      })
     }
 
-    return allAgents.filter((agent) => enabledAgents.includes(agent))
+    // In focused mode, creation stage only runs platform-prefixed creators
+    // (skip hook-writer, content-atomizer which aren't platform-prefixed)
+    if (isFocused && stage === 'creation' && mode !== 'optimize') {
+      agents = agents.filter((agent) => agent.match(/^(reddit|tiktok|facebook|instagram)-/))
+    }
+
+    const enabledAgents = pipelineRun.config.enabledAgents
+    if (enabledAgents && enabledAgents.length > 0) {
+      agents = agents.filter((agent) => enabledAgents.includes(agent))
+    }
+
+    return agents
   }
 
   /**
@@ -122,6 +177,22 @@ export class StageRunner {
     pipelineRun: StageRunnerContext,
   ): AgentAssignment[] {
     const resolvedInputs = resolveInputs(stage, pipelineRun.stageResults)
+
+    // Research stage has no upstream — inject pipeline config as inputs
+    if (stage === 'research' && Object.keys(resolvedInputs).length === 0) {
+      resolvedInputs.platforms = pipelineRun.config.platforms
+      resolvedInputs.dryRun = pipelineRun.config.dryRun
+    }
+
+    // Inject brand context if available
+    if (pipelineRun.brandContext) {
+      resolvedInputs.brandContext = pipelineRun.brandContext
+    }
+
+    // Inject optimize context for ECT workflow
+    if (pipelineRun.optimizeContext) {
+      resolvedInputs.optimizeContext = pipelineRun.optimizeContext
+    }
 
     return agentNames.map((agentName) => ({
       agentName,
@@ -211,17 +282,25 @@ export class StageRunner {
       }
       allowedTools = skill.tools ?? []
       model = skill.model ?? 'haiku'
-    } catch {
-      // Skill load failure — run with empty prompt (agent will still attempt)
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error)
+      return {
+        agentName: assignment.agentName,
+        status: 'failed' as const,
+        result: null,
+        error: new Error(`Skill load failed for "${assignment.agentName}": ${reason}`) as MATError,
+        duration: Date.now() - startTime,
+      }
     }
 
     const agentPromise = executeAgent(assignment.agentName, {
-      prompt: JSON.stringify(assignment.inputs),
+      prompt: buildAgentPrompt(assignment.agentName, assignment.inputs),
       systemPrompt,
       allowedTools,
       model,
-      outputSchema: z.record(z.string(), z.unknown()), // Permissive — agent-specific schemas applied downstream
-    })
+      maxTurns: 10,
+      outputSchema: z.union([z.record(z.string(), z.unknown()), z.array(z.unknown())]),
+    }, this.executor)
 
     let timeoutId: ReturnType<typeof setTimeout>
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -280,4 +359,46 @@ export class StageRunner {
     }
     return record
   }
+}
+
+/**
+ * Build an explicit task prompt for an agent so it executes immediately
+ * rather than responding conversationally.
+ */
+function buildAgentPrompt(
+  _agentName: string,
+  inputs: Record<string, unknown>,
+): string {
+  const optimizeCtx = inputs.optimizeContext as OptimizeInput | undefined
+
+  if (optimizeCtx) {
+    const upstreamLines = Object.entries(inputs)
+      .filter(([k]) => k !== 'optimizeContext')
+      .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
+      .join('\n')
+
+    return `You are optimizing metadata for an EXISTING ${optimizeCtx.platform} video (not creating new content).
+
+Video details:
+- Platform: ${optimizeCtx.platform}
+- Topic: ${optimizeCtx.topic}
+${optimizeCtx.niche ? `- Niche: ${optimizeCtx.niche}` : ''}
+${optimizeCtx.audience ? `- Target audience: ${optimizeCtx.audience}` : ''}
+${optimizeCtx.description ? `- Description: ${optimizeCtx.description}` : ''}
+${optimizeCtx.duration ? `- Duration: ${optimizeCtx.duration}` : ''}
+
+Focus ONLY on: SEO keywords, caption text, hashtags, posting time, trending sounds to pair with.
+Do NOT generate video scripts, Veo 3 prompts, or new content.
+
+Upstream data:
+${upstreamLines}
+
+Respond with ONLY valid JSON.`
+  }
+
+  const inputLines = Object.entries(inputs)
+    .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+    .join('\n')
+
+  return `Execute your task now with the following inputs:\n\n${inputLines}\n\nRespond with ONLY valid JSON. Do not include markdown, explanations, or any text outside the JSON object.`
 }

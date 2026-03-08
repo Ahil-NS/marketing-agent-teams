@@ -3,6 +3,11 @@ export {PipelineStateMachine} from './pipeline-state.js'
 export {StageRunner} from './stage-runner.js'
 export {resolveInputs} from './input-resolver.js'
 export {getStageDefinition, getStagesAfter, getStagesFrom, getStageAgents} from './stage-registry.js'
+export {resolveWorkflow} from './workflow-resolver.js'
+export type {WorkflowInput, ResolvedWorkflow} from './workflow-resolver.js'
+export {tiktokMetadataBundleSchema} from './ect-output.js'
+export type {TikTokMetadataBundle} from './ect-output.js'
+export {getWorkflowStages, isStageActive} from './pipeline-presets.js'
 export {
   loadPipelineRun,
   listPipelineRuns,
@@ -49,7 +54,10 @@ export type {
   BudgetState,
   DailyBudgetEntry,
   DailyBudgetState,
+  OptimizeInput,
   OrchestratorConfig,
+  OrchestratorEventData,
+  OrchestratorEventType,
   OrchestratorEvents,
   PipelineError,
   PipelineRun,
@@ -64,6 +72,7 @@ export type {
   StageRunnerOptions,
   StageStatus,
   StageTransition,
+  WorkflowMode,
 } from './types.js'
 export {
   DEFAULT_STAGE_RUNNER_OPTIONS,
