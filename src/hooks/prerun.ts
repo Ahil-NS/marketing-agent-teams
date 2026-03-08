@@ -20,11 +20,12 @@ const SKIP_AUTH_COMMANDS = new Set([
   'config:platforms:add', 'config:platforms:remove', 'config:voice',
   'agents', 'agents:list', 'agents:validate', 'agents:lint', 'agents:trust',
   'agents:add', 'agents:remove',
-  'review', 'review:show', 'review:approve', 'review:reject', 'review:edit',
+  'review', 'review:list', 'review:show', 'review:approve', 'review:reject', 'review:edit',
   'status', 'logs', 'attach', 'help',
+  'context', 'history', 'dashboard',
 ])
 
-const BUDGET_CHECK_COMMANDS = new Set(['run', 'agents:test'])
+const BUDGET_CHECK_COMMANDS = new Set(['run', 'create', 'agents:test'])
 
 const hook: Hook.Prerun = async function (options) {
   const commandId = options.Command.id

@@ -95,15 +95,16 @@ export class TmuxSessionManager {
 
     try {
       // Create the session with the first stage pane
-      execSync(`tmux new-session -d -s ${sessionName}`, {stdio: 'pipe'})
+      // Use -x/-y to ensure enough space for all panes (default 80x24 is too small)
+      execSync(`tmux new-session -d -s ${sessionName} -x 220 -y 60`, {stdio: 'pipe'})
 
-      // Create additional panes for remaining stages (already have 1 from new-session)
+      // Create additional panes for remaining stages (already have 1 from new-session).
+      // Apply tiled layout after each split to redistribute space evenly —
+      // without this, each split halves the active pane until it's too small.
       for (let i = 1; i < PIPELINE_STAGES.length; i++) {
         execSync(`tmux split-window -t ${sessionName}`, {stdio: 'pipe'})
+        execSync(`tmux select-layout -t ${sessionName} tiled`, {stdio: 'pipe'})
       }
-
-      // Apply tiled layout for even distribution
-      execSync(`tmux select-layout -t ${sessionName} tiled`, {stdio: 'pipe'})
 
       // Name each pane by sending a title command
       for (let i = 0; i < PIPELINE_STAGES.length; i++) {

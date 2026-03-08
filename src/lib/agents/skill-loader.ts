@@ -4,6 +4,7 @@ import {parse as parseYaml} from 'yaml'
 
 import {agentDefinitionSchema, CURRENT_SCHEMA_VERSION} from '../schemas/agent-schema.js'
 import {SkillLoadError} from './errors.js'
+import {agentsRoot} from './paths.js'
 import type {SkillDefinition} from './types.js'
 
 /**
@@ -249,23 +250,23 @@ export async function loadSkill(agentDir: string): Promise<SkillDefinition> {
  * Returns the full path to the agent directory containing SKILL.md.
  */
 export async function resolveAgentDir(agentName: string): Promise<string> {
-  const agentsRoot = join(process.cwd(), 'src', 'agents')
+  const agentsRootDir = agentsRoot()
 
   let clusterEntries: import('node:fs').Dirent[]
   try {
-    clusterEntries = await readdir(agentsRoot, {withFileTypes: true})
+    clusterEntries = await readdir(agentsRootDir, {withFileTypes: true})
   } catch {
     throw new SkillLoadError(
-      agentsRoot,
+      agentsRootDir,
       'resolveAgentDir',
       'SKILL_NOT_FOUND',
-      `Agents root directory not found at "${agentsRoot}"`,
-      'Ensure you are running from the project root directory',
+      `Agents root directory not found at "${agentsRootDir}"`,
+      'Ensure the agents directory exists at src/agents/ relative to the package root',
     )
   }
 
   for (const clusterEntry of clusterEntries.filter((e) => e.isDirectory())) {
-    const candidatePath = join(agentsRoot, clusterEntry.name, agentName)
+    const candidatePath = join(agentsRootDir, clusterEntry.name, agentName)
     try {
       await access(join(candidatePath, 'SKILL.md'))
       return candidatePath
@@ -275,7 +276,7 @@ export async function resolveAgentDir(agentName: string): Promise<string> {
   }
 
   throw new SkillLoadError(
-    agentsRoot,
+    agentsRootDir,
     agentName,
     'SKILL_NOT_FOUND',
     `No SKILL.md definition exists for agent "${agentName}" in src/agents/`,

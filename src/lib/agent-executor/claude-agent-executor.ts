@@ -18,6 +18,14 @@ const CLAUDE_PRICING: Record<string, {input: number; output: number}> = {
 
 export class ClaudeAgentExecutor implements AgentExecutor {
   async *execute(options: AgentExecuteOptions): AsyncIterable<AgentMessage> {
+    if (process.env.CLAUDECODE !== undefined) {
+      console.warn(
+        `[WARN] Running agent '${options.agentName}' via SDK query() inside a Claude Code session. ` +
+        'This will likely fail due to nested session restriction. ' +
+        'Use --mode native to execute via `claude -p` instead.',
+      )
+    }
+
     const queryOptions: Record<string, unknown> = {
       systemPrompt: options.skillMd,
       allowedTools: options.allowedTools ?? [],

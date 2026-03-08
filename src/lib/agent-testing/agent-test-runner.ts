@@ -2,12 +2,13 @@ import {z} from 'zod'
 
 import {executeAgent} from '../agents/index.js'
 import type {SkillDefinition} from '../agents/index.js'
+import {SkillLoadError} from '../agents/errors.js'
 import {AgentNotFoundError, AgentTestError} from './errors.js'
 import {resolveTestInputs} from './input-resolver.js'
 import type {AgentTestOptions, AgentTestResult} from './types.js'
 
-// Permissive schema for isolated testing — agents may return any valid JSON
-const permissiveOutputSchema = z.record(z.string(), z.unknown())
+// Permissive schema for isolated testing — agents may return any valid JSON (object or array)
+const permissiveOutputSchema = z.union([z.record(z.string(), z.unknown()), z.array(z.unknown())])
 
 export async function runAgentTest(
   agentName: string,
@@ -22,7 +23,7 @@ export async function runAgentTest(
     const agentDir = await resolveAgentDir(agentName)
     skillDef = await loadSkill(agentDir)
   } catch (error) {
-    if (error instanceof AgentNotFoundError) {
+    if (error instanceof AgentNotFoundError || error instanceof SkillLoadError) {
       throw error
     }
 
@@ -90,5 +91,5 @@ function buildTestPrompt(
     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
     .join('\n')
 
-  return `Execute the ${agentName} agent with the following test inputs:\n\n${inputLines}\n\nProvide complete output in the expected format.`
+  return `Execute the ${agentName} agent with the following test inputs:\n\n${inputLines}\n\nRespond with ONLY valid JSON. Do not include markdown, explanations, or any text outside the JSON object.`
 }

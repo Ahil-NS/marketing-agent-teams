@@ -16,6 +16,9 @@ export interface AgentExecutor {
 }
 
 export {createAgentExecutor, ClaudeAgentExecutor} from './claude-agent-executor.js'
+export {ClaudeCliExecutor} from './claude-cli-executor.js'
+export {createExecutor} from './executor-factory.js'
+export type {ExecutionMode} from './executor-factory.js'
 export type {
   AgentExecuteOptions,
   AgentInput,

@@ -1,5 +1,6 @@
 import type {z} from 'zod'
 
+import type {AgentExecutor} from '../agent-executor/index.js'
 import {createAgentExecutor} from '../agent-executor/index.js'
 import {AgentNoResultError} from '../agent-executor/errors.js'
 
@@ -18,14 +19,15 @@ export interface AgentExecuteOptions<T> {
 
 /**
  * Backward-compatible wrapper around AgentExecutor.execute().
- * Story 2.1 callers (intelligence.ts, etc.) continue to use this function.
- * Internally delegates to ClaudeAgentExecutor via the adapter interface.
+ * Accepts an optional executor parameter to allow injecting the
+ * ClaudeCliExecutor for native mode execution.
  */
 export async function executeAgent<T>(
   agentName: string,
   options: AgentExecuteOptions<T>,
+  injectedExecutor?: AgentExecutor,
 ): Promise<AgentResult<T>> {
-  const executor = createAgentExecutor()
+  const executor = injectedExecutor ?? createAgentExecutor()
   const startTime = Date.now()
 
   for await (const message of executor.execute({
@@ -43,7 +45,7 @@ export async function executeAgent<T>(
       // Validate output with Zod
       let jsonData: unknown
       try {
-        jsonData = JSON.parse(message.result ?? '')
+        jsonData = JSON.parse(stripCodeFences(message.result ?? ''))
       } catch {
         throw new AgentValidationError(
           agentName,
@@ -85,4 +87,14 @@ export async function executeAgent<T>(
     `agents/${agentName}`,
     'transient',
   )
+}
+
+/**
+ * Strip markdown code fences from agent output.
+ * LLMs often wrap JSON in ```json ... ``` despite instructions not to.
+ */
+function stripCodeFences(text: string): string {
+  const trimmed = text.trim()
+  const match = /^```\w*\s*\n([\s\S]*?)\n\s*```\s*$/.exec(trimmed)
+  return match ? match[1].trim() : trimmed
 }
