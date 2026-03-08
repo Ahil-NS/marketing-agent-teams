@@ -32,6 +32,7 @@ function makeConfig(overrides?: Partial<import('../../../src/lib/orchestrator/ty
     budgetLimit: 10,
     disabledAgents: [] as string[],
     projectRoot: '', // Set in beforeEach
+    postsPerPlatform: 3, // Use full agent set by default in tests
     ...overrides,
   }
 }

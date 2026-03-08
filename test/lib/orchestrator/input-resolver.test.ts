@@ -114,10 +114,12 @@ describe('resolveInputs', () => {
     expect(result['competitor-analyst']).toBeNull()
   })
 
-  it('throws StageInputResolutionError when required upstream has not executed', () => {
+  it('gracefully skips missing upstream stages in flexible workflows', () => {
     const stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {}
 
-    expect(() => resolveInputs('strategy', stageResults)).toThrow(StageInputResolutionError)
+    // Missing upstream stages return empty inputs (flexible workflow support)
+    const result = resolveInputs('strategy', stageResults)
+    expect(result).toEqual({})
   })
 
   it('throws StageInputResolutionError when upstream stage is still pending', () => {
@@ -173,13 +175,76 @@ describe('resolveInputs', () => {
     expect(result['content-strategist']).toEqual({strategy: {theme: 'growth'}})
   })
 
-  it('includes the stage name in the error message', () => {
-    try {
-      resolveInputs('strategy', {})
-      expect.fail('Should have thrown')
-    } catch (error) {
-      expect((error as StageInputResolutionError).message).toContain('strategy')
-      expect((error as StageInputResolutionError).message).toContain('research')
+  it('resolves optimization inputs from both creation and research stages', () => {
+    const stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {
+      creation: makeStageResult('creation', {
+        agentResults: {
+          'tiktok-creator': {
+            agentName: 'tiktok-creator',
+            status: 'success',
+            result: {
+              agentName: 'tiktok-creator',
+              status: 'success',
+              outputs: {caption: 'test caption'},
+              usage: {inputTokens: 200, outputTokens: 100, cost: 0.001},
+              duration: 1500,
+              errors: [],
+            },
+            error: null,
+            duration: 1500,
+          },
+        },
+      }),
+      research: makeStageResult('research', {
+        agentResults: {
+          'trend-scout': {
+            agentName: 'trend-scout',
+            status: 'success',
+            result: {
+              agentName: 'trend-scout',
+              status: 'success',
+              outputs: {trends: ['ai']},
+              usage: {inputTokens: 300, outputTokens: 100, cost: 0.001},
+              duration: 2000,
+              errors: [],
+            },
+            error: null,
+            duration: 2000,
+          },
+        },
+      }),
     }
+
+    const result = resolveInputs('optimization', stageResults)
+    expect(result['tiktok-creator']).toEqual({caption: 'test caption'})
+    expect(result['trend-scout']).toEqual({trends: ['ai']})
+  })
+
+  it('optimization skips missing creation in ECT workflow', () => {
+    // In ECT (optimize) mode, creation stage is skipped — optimization depends only on research
+    const stageResults: Partial<Record<PipelineStage, StageExecutionResult>> = {
+      research: makeStageResult('research', {
+        agentResults: {
+          'trend-scout': {
+            agentName: 'trend-scout',
+            status: 'success',
+            result: {
+              agentName: 'trend-scout',
+              status: 'success',
+              outputs: {trends: ['ai']},
+              usage: {inputTokens: 300, outputTokens: 100, cost: 0.001},
+              duration: 2000,
+              errors: [],
+            },
+            error: null,
+            duration: 2000,
+          },
+        },
+      }),
+    }
+
+    // creation is missing — should gracefully skip it and use research results
+    const result = resolveInputs('optimization', stageResults)
+    expect(result['trend-scout']).toEqual({trends: ['ai']})
   })
 })

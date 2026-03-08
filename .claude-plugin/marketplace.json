@@ -1,0 +1,233 @@
+{
+  "name": "marketing-agent-teams",
+  "version": "0.1.4",
+  "description": "AI marketing automation with 30+ specialized agents",
+  "homepage": "https://github.com/marketing-agent-teams/marketing-agent-teams",
+  "license": "MIT",
+  "skills": [
+    {
+      "name": "trend-scout",
+      "cluster": "intelligence",
+      "version": "1.0.0",
+      "description": "Discovers trending topics and emerging conversations across platforms",
+      "path": "src/agents/intelligence/trend-scout/SKILL.md"
+    },
+    {
+      "name": "viral-pattern-decoder",
+      "cluster": "intelligence",
+      "version": "1.0.0",
+      "description": "Analyzes viral content patterns and identifies replicable success factors",
+      "path": "src/agents/intelligence/viral-pattern-decoder/SKILL.md"
+    },
+    {
+      "name": "platform-algorithm",
+      "cluster": "intelligence",
+      "version": "1.0.0",
+      "description": "Tracks platform algorithm changes and recommends content adjustments",
+      "path": "src/agents/intelligence/platform-algorithm/SKILL.md"
+    },
+    {
+      "name": "competitor-analyst",
+      "cluster": "intelligence",
+      "version": "1.0.0",
+      "description": "Monitors competitor activity and identifies strategic opportunities",
+      "path": "src/agents/intelligence/competitor-analyst/SKILL.md"
+    },
+    {
+      "name": "audience-researcher",
+      "cluster": "intelligence",
+      "version": "1.0.0",
+      "description": "Researches target audience demographics, behaviors, and preferences",
+      "path": "src/agents/intelligence/audience-researcher/SKILL.md"
+    },
+    {
+      "name": "product-marketing-context",
+      "cluster": "intelligence",
+      "version": "1.0.0",
+      "description": "Maintains product knowledge base and marketing context for content creation",
+      "path": "src/agents/intelligence/product-marketing-context/SKILL.md"
+    },
+    {
+      "name": "content-strategist",
+      "cluster": "strategy",
+      "version": "1.0.0",
+      "description": "Develops content strategies aligned with business goals and audience needs",
+      "path": "src/agents/strategy/content-strategist/SKILL.md"
+    },
+    {
+      "name": "campaign-planner",
+      "cluster": "strategy",
+      "version": "1.0.0",
+      "description": "Plans multi-channel marketing campaigns with timelines and deliverables",
+      "path": "src/agents/strategy/campaign-planner/SKILL.md"
+    },
+    {
+      "name": "channel-optimizer",
+      "cluster": "strategy",
+      "version": "1.0.0",
+      "description": "Optimizes channel selection and content distribution strategies",
+      "path": "src/agents/strategy/channel-optimizer/SKILL.md"
+    },
+    {
+      "name": "hook-writer",
+      "cluster": "creation",
+      "version": "1.0.0",
+      "description": "Crafts attention-grabbing hooks and opening lines for content",
+      "path": "src/agents/creation/hook-writer/SKILL.md"
+    },
+    {
+      "name": "content-atomizer",
+      "cluster": "creation",
+      "version": "1.0.0",
+      "description": "Breaks long-form content into platform-optimized atomic pieces",
+      "path": "src/agents/creation/content-atomizer/SKILL.md"
+    },
+    {
+      "name": "reddit-creator",
+      "cluster": "creation",
+      "version": "1.0.0",
+      "description": "Creates Reddit-optimized posts, comments, and community content",
+      "path": "src/agents/creation/reddit-creator/SKILL.md"
+    },
+    {
+      "name": "tiktok-creator",
+      "cluster": "creation",
+      "version": "1.0.0",
+      "description": "Creates TikTok-optimized video scripts and captions",
+      "path": "src/agents/creation/tiktok-creator/SKILL.md"
+    },
+    {
+      "name": "facebook-creator",
+      "cluster": "creation",
+      "version": "1.0.0",
+      "description": "Creates Facebook-optimized posts, stories, and ad copy",
+      "path": "src/agents/creation/facebook-creator/SKILL.md"
+    },
+    {
+      "name": "instagram-creator",
+      "cluster": "creation",
+      "version": "1.0.0",
+      "description": "Creates Instagram-optimized captions, stories, and reel scripts",
+      "path": "src/agents/creation/instagram-creator/SKILL.md"
+    },
+    {
+      "name": "brand-guardian",
+      "cluster": "quality",
+      "version": "1.0.0",
+      "description": "Enforces brand voice, tone, and style guidelines across all content",
+      "path": "src/agents/quality/brand-guardian/SKILL.md"
+    },
+    {
+      "name": "fact-checker",
+      "cluster": "quality",
+      "version": "1.0.0",
+      "description": "Verifies claims, statistics, and factual accuracy in content",
+      "path": "src/agents/quality/fact-checker/SKILL.md"
+    },
+    {
+      "name": "sensitivity-reviewer",
+      "cluster": "quality",
+      "version": "1.0.0",
+      "description": "Reviews content for cultural sensitivity, inclusivity, and appropriateness",
+      "path": "src/agents/quality/sensitivity-reviewer/SKILL.md"
+    },
+    {
+      "name": "platform-compliance",
+      "cluster": "quality",
+      "version": "1.0.0",
+      "description": "Validates content against platform-specific rules and policies",
+      "path": "src/agents/quality/platform-compliance/SKILL.md"
+    },
+    {
+      "name": "seo-optimizer",
+      "cluster": "optimization",
+      "version": "1.0.0",
+      "description": "Optimizes content for search engine visibility and ranking",
+      "path": "src/agents/optimization/seo-optimizer/SKILL.md"
+    },
+    {
+      "name": "hashtag-strategist",
+      "cluster": "optimization",
+      "version": "1.0.0",
+      "description": "Researches and recommends optimal hashtag strategies per platform",
+      "path": "src/agents/optimization/hashtag-strategist/SKILL.md"
+    },
+    {
+      "name": "timing-optimizer",
+      "cluster": "optimization",
+      "version": "1.0.0",
+      "description": "Determines optimal posting times based on audience activity patterns",
+      "path": "src/agents/optimization/timing-optimizer/SKILL.md"
+    },
+    {
+      "name": "content-humanizer",
+      "cluster": "optimization",
+      "version": "1.0.0",
+      "description": "Refines AI-generated content to sound more natural and human",
+      "path": "src/agents/optimization/content-humanizer/SKILL.md"
+    },
+    {
+      "name": "ab-test-designer",
+      "cluster": "optimization",
+      "version": "1.0.0",
+      "description": "Designs A/B test variants for content optimization experiments",
+      "path": "src/agents/optimization/ab-test-designer/SKILL.md"
+    },
+    {
+      "name": "reddit-publisher",
+      "cluster": "distribution",
+      "version": "1.0.0",
+      "description": "Publishes approved content to Reddit via API",
+      "path": "src/agents/distribution/reddit-publisher/SKILL.md"
+    },
+    {
+      "name": "tiktok-publisher",
+      "cluster": "distribution",
+      "version": "1.0.0",
+      "description": "Publishes approved content to TikTok via API",
+      "path": "src/agents/distribution/tiktok-publisher/SKILL.md"
+    },
+    {
+      "name": "facebook-publisher",
+      "cluster": "distribution",
+      "version": "1.0.0",
+      "description": "Publishes approved content to Facebook via Graph API",
+      "path": "src/agents/distribution/facebook-publisher/SKILL.md"
+    },
+    {
+      "name": "instagram-publisher",
+      "cluster": "distribution",
+      "version": "1.0.0",
+      "description": "Publishes approved content to Instagram via Graph API",
+      "path": "src/agents/distribution/instagram-publisher/SKILL.md"
+    },
+    {
+      "name": "campaign-coordinator",
+      "cluster": "coordination",
+      "version": "1.0.0",
+      "description": "Coordinates multi-agent campaign execution across clusters",
+      "path": "src/agents/coordination/campaign-coordinator/SKILL.md"
+    },
+    {
+      "name": "pipeline-coordinator",
+      "cluster": "coordination",
+      "version": "1.0.0",
+      "description": "Manages pipeline execution flow and agent handoffs",
+      "path": "src/agents/coordination/pipeline-coordinator/SKILL.md"
+    },
+    {
+      "name": "performance-analyst",
+      "cluster": "coordination",
+      "version": "1.0.0",
+      "description": "Analyzes campaign performance metrics and generates insights",
+      "path": "src/agents/coordination/performance-analyst/SKILL.md"
+    },
+    {
+      "name": "report-generator",
+      "cluster": "coordination",
+      "version": "1.0.0",
+      "description": "Generates formatted performance and campaign reports",
+      "path": "src/agents/coordination/report-generator/SKILL.md"
+    }
+  ]
+}

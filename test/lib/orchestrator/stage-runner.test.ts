@@ -36,6 +36,7 @@ function makePipelineRun(overrides?: Partial<StageRunnerContext>): StageRunnerCo
     config: {
       platforms: ['reddit', 'tiktok'],
       dryRun: false,
+      postsPerPlatform: 3, // Use full agent set by default in tests
     },
     stageResults: {},
     ...overrides,
@@ -283,8 +284,9 @@ describe('StageRunner', () => {
       expect(result.status).toBe('completed')
       expect(mockExecuteAgent).toHaveBeenCalled()
       const firstCall = mockExecuteAgent.mock.calls[0]
-      const prompt = JSON.parse(firstCall[1].prompt)
-      expect(prompt['trend-scout']).toEqual({trends: ['ai']})
+      const prompt = firstCall[1].prompt as string
+      expect(prompt).toContain('trend-scout')
+      expect(prompt).toContain('ai')
     })
   })
 

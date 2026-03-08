@@ -51,7 +51,7 @@ describe('orchestrator/types', () => {
     it('has sensible defaults', async () => {
       const {DEFAULT_STAGE_RUNNER_OPTIONS} = await import('../../../src/lib/orchestrator/types.js')
       expect(DEFAULT_STAGE_RUNNER_OPTIONS.concurrencyLimit).toBe(Infinity)
-      expect(DEFAULT_STAGE_RUNNER_OPTIONS.agentTimeoutMs).toBe(300_000)
+      expect(DEFAULT_STAGE_RUNNER_OPTIONS.agentTimeoutMs).toBe(600_000)
       expect(DEFAULT_STAGE_RUNNER_OPTIONS.continueOnFailure).toBe(true)
     })
   })

@@ -1,0 +1,90 @@
+{
+  "runId": "run_8f3a2b1c",
+  "stage": "intelligence",
+  "completedAt": "2026-03-07T14:00:18.105Z",
+  "durationMs": 16871,
+  "agents": {
+    "trend-scout": {
+      "status": "complete",
+      "durationMs": 10554,
+      "output": {
+        "trends": [
+          {
+            "topic": "morning cortisol management",
+            "platform": "reddit",
+            "momentum": "rising",
+            "volume": 12400,
+            "relevantSubreddits": ["r/Supplements", "r/Biohackers", "r/wellness"],
+            "peakTimeWindow": "06:00-09:00 EST",
+            "sentiment": "curiosity-driven",
+            "keyPhrases": ["cortisol awakening response", "morning routine optimization", "stress hormone management"]
+          },
+          {
+            "topic": "cold plunge recovery science",
+            "platform": "instagram",
+            "momentum": "stable-high",
+            "volume": 34200,
+            "relevantHashtags": ["#coldplunge", "#icebath", "#recovery", "#biohacking"],
+            "peakTimeWindow": "11:00-14:00 EST",
+            "sentiment": "enthusiastic",
+            "keyPhrases": ["vagus nerve activation", "dopamine boost", "inflammation reduction"]
+          }
+        ],
+        "recommendations": [
+          "Create educational content around cortisol management for Reddit (high curiosity, low saturation)",
+          "Leverage cold plunge trend on Instagram with visual transformation content"
+        ]
+      }
+    },
+    "audience-researcher": {
+      "status": "complete",
+      "durationMs": 16211,
+      "output": {
+        "segments": [
+          {
+            "name": "Optimization Seekers",
+            "demographics": {
+              "ageRange": "25-34",
+              "gender": "mixed",
+              "income": "above-average",
+              "education": "college-educated"
+            },
+            "psychographics": {
+              "values": ["self-improvement", "evidence-based approaches", "efficiency"],
+              "painPoints": ["information overload", "conflicting health advice", "time constraints"],
+              "motivations": ["peak performance", "longevity", "mental clarity"]
+            },
+            "platformPreferences": {
+              "primary": "reddit",
+              "secondary": "instagram",
+              "contentFormat": "long-form educational with actionable takeaways"
+            }
+          },
+          {
+            "name": "Wellness Newcomers",
+            "demographics": {
+              "ageRange": "18-28",
+              "gender": "skews-female",
+              "income": "moderate",
+              "education": "mixed"
+            },
+            "psychographics": {
+              "values": ["accessibility", "community", "authenticity"],
+              "painPoints": ["gatekeeping in wellness spaces", "expensive products", "intimidating jargon"],
+              "motivations": ["stress relief", "better sleep", "general wellbeing"]
+            },
+            "platformPreferences": {
+              "primary": "instagram",
+              "secondary": "tiktok",
+              "contentFormat": "short visual tips with relatable tone"
+            }
+          }
+        ],
+        "contentAngles": [
+          "Demystify cortisol science for the Newcomers segment using simple analogies",
+          "Provide data-backed cold plunge protocols for the Optimization Seekers segment"
+        ]
+      }
+    }
+  }
+}

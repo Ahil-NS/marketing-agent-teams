@@ -1,0 +1,16 @@
+{"ts":"2026-03-07T14:00:01.234Z","event":"pipeline_start","runId":"run_8f3a2b1c","pipeline":"full","platforms":["reddit","instagram"],"vertical":"wellness"}
+{"ts":"2026-03-07T14:00:01.891Z","event":"stage_start","runId":"run_8f3a2b1c","stage":"intelligence","agents":["trend-scout","audience-researcher"]}
+{"ts":"2026-03-07T14:00:12.445Z","event":"agent_complete","runId":"run_8f3a2b1c","stage":"intelligence","agent":"trend-scout","durationMs":10554,"tokensUsed":3842,"cost":0.0192}
+{"ts":"2026-03-07T14:00:18.102Z","event":"agent_complete","runId":"run_8f3a2b1c","stage":"intelligence","agent":"audience-researcher","durationMs":16211,"tokensUsed":4210,"cost":0.0211}
+{"ts":"2026-03-07T14:00:18.105Z","event":"stage_complete","runId":"run_8f3a2b1c","stage":"intelligence","durationMs":16871,"totalCost":0.0403}
+{"ts":"2026-03-07T14:00:18.320Z","event":"stage_start","runId":"run_8f3a2b1c","stage":"strategy","agents":["content-strategist"]}
+{"ts":"2026-03-07T14:00:31.678Z","event":"agent_complete","runId":"run_8f3a2b1c","stage":"strategy","agent":"content-strategist","durationMs":13358,"tokensUsed":5104,"cost":0.0255}
+{"ts":"2026-03-07T14:00:31.680Z","event":"stage_complete","runId":"run_8f3a2b1c","stage":"strategy","durationMs":13360,"totalCost":0.0255}
+{"ts":"2026-03-07T14:00:31.890Z","event":"stage_start","runId":"run_8f3a2b1c","stage":"creation","agents":["reddit-creator","instagram-creator"]}
+{"ts":"2026-03-07T14:00:45.221Z","event":"agent_complete","runId":"run_8f3a2b1c","stage":"creation","agent":"reddit-creator","durationMs":13331,"tokensUsed":6230,"cost":0.0312}
+{"ts":"2026-03-07T14:00:48.900Z","event":"agent_complete","runId":"run_8f3a2b1c","stage":"creation","agent":"instagram-creator","durationMs":17010,"tokensUsed":5890,"cost":0.0295}
+{"ts":"2026-03-07T14:00:48.902Z","event":"stage_complete","runId":"run_8f3a2b1c","stage":"creation","durationMs":17012,"totalCost":0.0607}
+{"ts":"2026-03-07T14:00:49.110Z","event":"stage_start","runId":"run_8f3a2b1c","stage":"quality","agents":["brand-guardian","fact-checker"]}
+{"ts":"2026-03-07T14:01:02.334Z","event":"agent_complete","runId":"run_8f3a2b1c","stage":"quality","agent":"brand-guardian","durationMs":13224,"tokensUsed":3100,"cost":0.0155,"verdict":"pass"}
+{"ts":"2026-03-07T14:01:05.891Z","event":"agent_complete","runId":"run_8f3a2b1c","stage":"quality","agent":"fact-checker","durationMs":16781,"tokensUsed":4520,"cost":0.0226,"verdict":"pass","claimsChecked":4}
+{"ts":"2026-03-07T14:01:05.893Z","event":"stage_complete","runId":"run_8f3a2b1c","stage":"quality","durationMs":16783,"totalCost":0.0381}
